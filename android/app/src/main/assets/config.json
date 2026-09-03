@@ -1,0 +1,1106 @@
+{
+  "_comment": "모든 튜닝값은 여기에만 둔다. 코드에 상수를 박지 않는다. 안드로이드 포팅 시 이 파일이 그대로 간다.",
+  "blur_threshold": 0.0,
+  "brightness_dark": 25.0,
+  "brightness_blown": 240.0,
+  "min_dimension": 200,
+  "dupe_similarity": 0.95,
+  "burst_gap_sec": 30,
+  "copy_markers": [
+    "복사본",
+    "사본",
+    "copy",
+    "복사",
+    "duplicate"
+  ],
+  "event_gap_hours": 3,
+  "classify_min_score": 0.16,
+  "attr_tag_threshold": 0.24,
+  "attr_tag_threshold_ko": 0.225,
+  "logit_scale": 100.0,
+  "batch_size": 32,
+  "infer_batch": 1,
+  "thumb_px": 320,
+  "decode_px": 320,
+  "analysis_px": 256,
+  "screen_ratios": [
+    1.6,
+    1.778,
+    2.0,
+    2.062,
+    2.167,
+    2.222,
+    2.333
+  ],
+  "screen_ratio_tolerance": 0.02,
+  "extensions": [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".heic",
+    ".webp",
+    ".bmp",
+    ".gif"
+  ],
+  "cloud": {
+    "enabled": false,
+    "max_reclassify_ratio": 0.15
+  },
+  "categories": {
+    "인물": [
+      "a photo of a person",
+      "a portrait photo of someone",
+      "a photo of people posing for a picture",
+      "a photo of a person's face"
+    ],
+    "음식": [
+      "a photo of food",
+      "a plate of food on a table",
+      "a close-up photo of a meal",
+      "a photo of a dish at a restaurant",
+      "a photo of a drink or a dessert"
+    ],
+    "풍경/여행": [
+      "a landscape photograph",
+      "a photo of scenery outdoors",
+      "a travel photo of a famous place",
+      "a photo of mountains or the sea"
+    ],
+    "반려동물": [
+      "a photo of a pet",
+      "a photo of a dog",
+      "a photo of a cat",
+      "a close-up photo of an animal"
+    ],
+    "문서/영수증": [
+      "a photo of a document",
+      "a scanned receipt",
+      "a photo of printed text on a sheet of paper",
+      "a photo of a business card",
+      "a photo of a handwritten note"
+    ],
+    "상품/쇼핑": [
+      "a product photo for an online store",
+      "a product photo on a plain white background",
+      "a photo of an item on a shop shelf",
+      "a photo of clothing or shoes"
+    ],
+    "실내일상": [
+      "a photo of a room interior",
+      "an everyday snapshot taken indoors",
+      "a photo of furniture inside a house",
+      "a casual photo at home"
+    ],
+    "화면캡처내용": [
+      "a screenshot of a mobile app",
+      "a screenshot of a chat conversation",
+      "a screenshot of a web page",
+      "a screenshot of a map"
+    ],
+    "자연/식물": [
+      "a close-up photo of a flower",
+      "a close-up photo of leaves and branches",
+      "a photo of a potted plant",
+      "a close-up photo of grass and moss"
+    ],
+    "탈것": [
+      "a photo of a car",
+      "a photo of a subway or train",
+      "a photo of an airplane",
+      "a photo of a bicycle or motorcycle"
+    ],
+    "행사/축제": [
+      "a photo of a wedding venue",
+      "a photo of a birthday cake with candles",
+      "a photo of a lit concert stage",
+      "a photo of festival decorations and booths"
+    ],
+    "예술/전시": [
+      "a photo of a painting",
+      "a photo of a sculpture or installation art",
+      "a photo of a museum gallery",
+      "a photo of a mural"
+    ],
+    "운동/스포츠": [
+      "a photo of a sports match in play",
+      "a photo of someone running or exercising",
+      "a photo of a hiking trail",
+      "a photo of a sports field or stadium"
+    ],
+    "건물/거리": [
+      "a photo of a building",
+      "a photo of a city street",
+      "a photo of a shop sign",
+      "a photo of a narrow alley"
+    ]
+  },
+  "attributes": {
+    "셀카": [
+      "a selfie taken at arm's length",
+      "a close-up selfie of someone's face"
+    ],
+    "단체사진": [
+      "a group photo of several people together",
+      "a photo of a crowd of people"
+    ],
+    "실외": [
+      "a photo taken outdoors",
+      "an outdoor scene in daylight"
+    ],
+    "텍스트많음": [
+      "an image densely filled with text",
+      "a page covered with writing"
+    ],
+    "저조도": [
+      "a dark photo taken at night",
+      "a photo taken in very low light"
+    ],
+    "클로즈업": [
+      "an extreme close-up photo of a subject",
+      "a macro photo filling the frame"
+    ],
+    "흑백": [
+      "a black and white photograph",
+      "a monochrome photo without color"
+    ],
+    "하늘": [
+      "a photo with a wide open sky",
+      "a photo of a sky full of clouds"
+    ],
+    "물/바다": [
+      "a photo showing the sea or water",
+      "a photo of a river or lake"
+    ],
+    "음료": [
+      "a photo of a cup of coffee or tea",
+      "a photo of a drink in a glass"
+    ],
+    "손글씨": [
+      "a photo of handwriting",
+      "a photo of a note written in a notebook"
+    ],
+    "QR/바코드": [
+      "a photo of a QR code",
+      "a photo containing a barcode"
+    ],
+    "지도화면": [
+      "a screenshot of a map application",
+      "a screenshot showing route directions"
+    ],
+    "대화화면": [
+      "a screenshot of a messenger conversation",
+      "a screenshot of a chat list"
+    ]
+  },
+  "ko_dict": {
+    "가게": "a shop interior",
+    "가구": "furniture",
+    "가방": "a bag",
+    "가을": "autumn foliage",
+    "가족": "a family",
+    "간판": "a shop sign",
+    "강": "a river",
+    "강아지": "a dog",
+    "거리": "a city street",
+    "거실": "a living room",
+    "건물": "a building",
+    "겨울": "a winter scene",
+    "결혼식": "a wedding ceremony",
+    "경기": "a sports game",
+    "계약서": "a contract document",
+    "고기": "grilled meat",
+    "고양이": "a cat",
+    "골목": "a narrow alley",
+    "공원": "a park",
+    "공항": "an airport",
+    "과일": "fruit",
+    "구름": "clouds in the sky",
+    "국수": "noodles",
+    "기차": "a train",
+    "꽃": "flowers",
+    "나무": "trees",
+    "남자": "a man",
+    "노을": "a sunset sky",
+    "노트북": "a laptop computer",
+    "눈": "snow scenery",
+    "다람쥐": "a squirrel",
+    "단체": "a group of people",
+    "대화": "a chat conversation screenshot",
+    "도시": "a city view",
+    "동물": "an animal",
+    "디저트": "a dessert",
+    "라면": "a bowl of ramen noodles",
+    "맥주": "a glass of beer",
+    "메뉴판": "a restaurant menu",
+    "메모": "a handwritten note",
+    "명함": "a business card",
+    "문서": "a document",
+    "물고기": "a fish",
+    "바다": "the sea and ocean beach",
+    "반려동물": "a pet animal",
+    "밥": "a bowl of rice",
+    "방": "a room interior",
+    "버스": "a bus",
+    "봄": "spring blossoms",
+    "비": "a rainy day",
+    "비행기": "an airplane",
+    "빵": "bread",
+    "사람": "a person",
+    "사무실": "an office",
+    "산": "a mountain landscape",
+    "샐러드": "a salad",
+    "생일": "a birthday party",
+    "서류": "printed paperwork",
+    "셀카": "a selfie",
+    "소주": "soju bottles on a table",
+    "손글씨": "handwriting on paper",
+    "숲": "a forest",
+    "스크린샷": "a screenshot",
+    "시계": "a watch",
+    "시장": "a market",
+    "식당": "a restaurant interior",
+    "식사": "a meal",
+    "신발": "shoes",
+    "아기": "a baby",
+    "아이": "a child",
+    "안개": "fog",
+    "안경": "eyeglasses",
+    "앱": "a mobile app screen",
+    "야경": "a city at night",
+    "어린이": "children",
+    "얼굴": "a close-up of a face",
+    "여름": "a summer day",
+    "여자": "a woman",
+    "여행": "a travel photo",
+    "영수증": "a receipt",
+    "오토바이": "a motorcycle",
+    "옷": "clothing",
+    "와인": "a glass of wine",
+    "운동": "sports or exercise",
+    "웃는": "a smiling person",
+    "웹페이지": "a web page screenshot",
+    "음료": "a drink",
+    "음식": "food on a plate",
+    "인물": "a portrait of a person",
+    "인테리어": "an interior of a room",
+    "일출": "a sunrise",
+    "자동차": "a car",
+    "자연": "nature scenery",
+    "자전거": "a bicycle",
+    "잔디": "a grass lawn",
+    "주방": "a kitchen",
+    "지도": "a map",
+    "지하철": "a subway train",
+    "책": "a book",
+    "책상": "a desk",
+    "초밥": "sushi",
+    "축제": "a festival",
+    "치킨": "fried chicken",
+    "친구": "friends together",
+    "침실": "a bedroom",
+    "카페": "a cafe interior",
+    "캡처": "a screen capture",
+    "커플": "a couple",
+    "커피": "a cup of coffee",
+    "컴퓨터": "a computer screen",
+    "케이크": "a cake",
+    "콘서트": "a concert stage",
+    "토끼": "a rabbit",
+    "티켓": "a ticket",
+    "파티": "a party",
+    "풍경": "a landscape view",
+    "피자": "a pizza",
+    "하늘": "the sky with clouds",
+    "학교": "a school",
+    "할머니": "an elderly woman",
+    "할아버지": "an elderly man",
+    "해변": "a sandy beach",
+    "핸드폰": "a smartphone",
+    "햄버거": "a hamburger",
+    "호수": "a lake",
+    "호텔": "a hotel room",
+    "화면": "a computer screen"
+  },
+  "_blur_note": "0이면 흐림 제안 없음. 정리 탭의 분포를 보고 슬라이더로 올릴 것.",
+  "_score_note": "classify_min_score는 softmax 확률이라 **카테고리 개수에 따라 달라진다**. 카테고리 8개일 때 0.25였고 14개로 늘리면서 0.16으로 내렸다 — 확률이 더 갈래로 쪼개지므로 같은 값을 쓰면 미분류만 늘어난다(400장 실측: 임계 0.25에서 미분류 7장 정확도 0.828, 0.16에서 미분류 1장 정확도 0.838). 카테고리를 또 늘리면 eval/score.py 로 다시 스윕할 것. attr_thresholds_ko는 속성별 임계값이다 — 원 코사인은 속성마다 분포가 달라 전역값 하나로는 어떤 속성이 p99, 어떤 속성이 p70이 된다.",
+  "_logit_scale_note": "CLIP 학습 온도. 원 코사인 0.15~0.35를 사진 간 비교가 되는 확률로 편다. 모델을 바꾸면 이 값도 확인할 것 — 표준 CLIP은 100.",
+  "_ko_note": "토큰의 앞부분과 일치하면 채택한다(조사 '에서/의/를'을 자연히 흡수). 긴 키를 먼저 본다 — '비행기'가 '비'보다 먼저 걸려야 한다.",
+  "_prompt_note": "시도했다가 되돌린 것: 문서 프롬프트를 '화면을 채운 평면 문서'로 좁히면 행사 사진이 빠지는 게 아니라 스크린샷이 들어온다(화면캡처 recall 0.96→0.76, 전체 0.86→0.83). 스크린샷도 글자로 꽉 찬 평면이라 같은 문장에 걸린다. 문서와 화면캡처는 '평면성'으로는 못 가른다 — 굳이 가르려면 규칙 태그(EXIF 카메라 유무)를 쓸 것.",
+  "model_variant": "ko",
+  "_variant_note": "\"en\"=CLIP ViT-B/32(영어, 검색어를 ko_dict로 번역), \"ko\"=Bingsu/clip-vit-base-patch32-ko(한국어 네이티브, 번역 불필요). variant에 따라 categories/attributes 뒤에 _ko가 붙은 세트를 쓴다.",
+  "categories_ko": {
+    "인물": [
+      "사람 사진",
+      "누군가의 인물 사진",
+      "사람들이 포즈를 취한 사진",
+      "사람 얼굴 사진"
+    ],
+    "음식": [
+      "음식 사진",
+      "접시에 담긴 음식",
+      "식사를 가까이서 찍은 사진",
+      "식당 요리 사진",
+      "음료나 디저트 사진"
+    ],
+    "풍경/여행": [
+      "풍경 사진",
+      "야외 경치 사진",
+      "여행지에서 찍은 사진",
+      "산이나 바다 사진"
+    ],
+    "반려동물": [
+      "반려동물 사진",
+      "개 사진",
+      "고양이 사진",
+      "동물을 가까이서 찍은 사진"
+    ],
+    "문서/영수증": [
+      "문서 사진",
+      "영수증 스캔",
+      "종이에 인쇄된 글자 사진",
+      "명함 사진",
+      "손으로 쓴 메모 사진"
+    ],
+    "상품/쇼핑": [
+      "온라인 쇼핑몰 상품 사진",
+      "흰 배경에 놓인 상품 사진",
+      "가게 진열대의 물건 사진",
+      "옷이나 신발 사진"
+    ],
+    "실내일상": [
+      "방 내부 사진",
+      "실내에서 찍은 일상 사진",
+      "집 안 가구 사진",
+      "집에서 찍은 스냅 사진"
+    ],
+    "화면캡처내용": [
+      "앱 스크린샷",
+      "대화 화면 캡처",
+      "웹페이지 스크린샷",
+      "지도 화면 캡처"
+    ],
+    "자연/식물": [
+      "꽃을 가까이서 찍은 사진",
+      "나뭇잎과 가지를 가까이서 찍은 사진",
+      "화분에 심은 식물 사진",
+      "풀과 이끼를 가까이서 찍은 사진"
+    ],
+    "탈것": [
+      "자동차 사진",
+      "지하철이나 기차 사진",
+      "비행기 사진",
+      "자전거나 오토바이 사진"
+    ],
+    "행사/축제": [
+      "결혼식 예식장 사진",
+      "생일 케이크에 촛불이 켜진 사진",
+      "무대 조명이 켜진 공연장 사진",
+      "축제 장식과 부스 사진"
+    ],
+    "예술/전시": [
+      "그림이나 회화 사진",
+      "조각과 설치미술 사진",
+      "미술관 전시장 사진",
+      "벽화 사진"
+    ],
+    "운동/스포츠": [
+      "운동 경기가 벌어지는 사진",
+      "달리거나 운동하는 사람 사진",
+      "등산로와 산행 사진",
+      "운동장과 경기장 사진"
+    ],
+    "건물/거리": [
+      "건축물 사진",
+      "도시 거리 사진",
+      "가게 간판 사진",
+      "골목과 좁은 길 사진"
+    ]
+  },
+  "attributes_ko": {
+    "셀카": [
+      "팔을 뻗어 찍은 셀카",
+      "얼굴을 가까이 찍은 셀카"
+    ],
+    "단체사진": [
+      "여러 사람이 함께 찍은 단체 사진",
+      "사람이 많이 모인 사진"
+    ],
+    "실외": [
+      "야외에서 찍은 사진",
+      "낮에 야외에서 찍은 장면"
+    ],
+    "텍스트많음": [
+      "글자로 가득한 이미지",
+      "글씨가 빽빽한 페이지"
+    ],
+    "저조도": [
+      "밤에 찍은 어두운 사진",
+      "빛이 아주 적은 곳에서 찍은 사진"
+    ],
+    "클로즈업": [
+      "피사체를 아주 가까이서 찍은 사진",
+      "화면을 꽉 채운 접사 사진"
+    ],
+    "흑백": [
+      "흑백 사진",
+      "색이 없는 모노톤 사진"
+    ],
+    "하늘": [
+      "하늘이 넓게 보이는 사진",
+      "구름이 가득한 하늘 사진"
+    ],
+    "물/바다": [
+      "바다나 물이 보이는 사진",
+      "강이나 호수 사진"
+    ],
+    "음료": [
+      "커피나 차 한 잔 사진",
+      "음료가 담긴 잔 사진"
+    ],
+    "손글씨": [
+      "손으로 쓴 글씨 사진",
+      "노트에 적은 메모 사진"
+    ],
+    "QR/바코드": [
+      "QR 코드 사진",
+      "바코드가 있는 사진"
+    ],
+    "지도화면": [
+      "지도 앱 화면 캡처",
+      "경로 안내가 표시된 화면 캡처"
+    ],
+    "대화화면": [
+      "메신저 대화 화면 캡처",
+      "채팅 목록 화면 사진"
+    ]
+  },
+  "secondary_min_score": 0.16,
+  "max_categories": 3,
+  "_multilabel_note": "사진 한 장은 여러 앨범에 들어갈 수 있다 — '창가 캣타워의 고양이'는 반려동물이면서 실내일상이다. 1순위는 항상 붙이고, secondary_min_score를 넘으면 추가로 붙인다. 단 primary_only 카테고리는 2순위로 붙이지 않는다: '약간 문서인 사진'은 말이 안 되고, 허용하면 문서 앨범이 잡동사니가 된다(정밀도 0.72→0.61). 끄려면 secondary_min_score를 1.01로 두면 단일 라벨로 돌아간다. 주의: eval/labels.csv는 사진당 정답이 하나뿐이라 멀티라벨을 제대로 채점하지 못한다 — 맞는 2순위 태그도 오답으로 세므로 이 설정은 숫자가 아니라 사용성으로 판단할 것.",
+  "primary_only": [
+    "문서/영수증",
+    "화면캡처내용"
+  ],
+  "_infer_batch_note": "ONNX 추론에 한 번에 넣는 장수. 1을 유지할 것. int8 동적 양자화는 활성값 스케일을 배치 전체에서 잡아, 배치에 같이 들어간 다른 사진이 내 임베딩을 바꾼다 — 스캔 순서만 섞어도 400장 중 11장의 1순위 라벨이 뒤집혔고 같은 사진의 코사인이 0.9435까지 내려갔다(dupe_similarity 0.95와 같은 크기). batch_size(32)는 DB 커밋 단위라 별개이고 그대로 둔다.",
+  "_perf_note": "장당 24.3ms → 17.3ms (1만장 4.0분 → 2.9분). 병목은 CLIP이 아니라 이미지 처리였다(65%). decode_px를 올리면 디코드가 그만큼 비싸지는데 정확도는 안 오른다 — 384/320/256으로 실측했을 때 0.853~0.863 사이 무작위 변동뿐이었다.",
+  "provenance_rules": [
+    {
+      "tag": "스크린샷",
+      "paths": [
+        "pictures/screenshots",
+        "dcim/screenshots",
+        "screenshots"
+      ],
+      "packages": [
+        "com.android.systemui",
+        "com.samsung.android.app.smartcapture"
+      ]
+    },
+    {
+      "tag": "메신저저장",
+      "paths": [
+        "pictures/kakaotalk",
+        "dcim/kakaotalk",
+        "pictures/line",
+        "pictures/telegram",
+        "pictures/instagram",
+        "download/kakaotalk"
+      ],
+      "packages": [
+        "com.kakao.talk",
+        "jp.naver.line",
+        "org.telegram",
+        "com.whatsapp",
+        "com.instagram.android",
+        "com.facebook.orca"
+      ]
+    },
+    {
+      "tag": "카메라촬영",
+      "paths": [
+        "dcim/camera",
+        "dcim/100andro",
+        "dcim/open camera"
+      ],
+      "packages": [
+        "com.android.camera",
+        "com.sec.android.app.camera",
+        "com.google.android.GoogleCamera"
+      ]
+    },
+    {
+      "tag": "다운로드",
+      "paths": [
+        "download"
+      ],
+      "packages": [
+        "com.android.chrome"
+      ]
+    }
+  ],
+  "_provenance_note": "순서가 우선순위다. 안드로이드는 MediaStore가 RELATIVE_PATH와 OWNER_PACKAGE_NAME을 주므로 '누가 이 파일을 넣었는지'를 알 수 있다 — EXIF 카메라 유무보다 훨씬 강한 신호다. 스크린샷 폴더에서 온 파일은 CLIP이 뭐라 하든 화면캡처이고, 이것이 README의 '되돌린 시도'(문서와 화면캡처를 문장으로는 못 가른다)를 푼다. 여기에 안 걸리면 EXIF 카메라 → 화면비 휴리스틱 순으로 떨어진다. USB로 복사한 파일은 OWNER_PACKAGE_NAME이 비어 오므로 폴백이 필요하다. 데스크톱은 경로만 보고 패키지는 무시한다.",
+  "location_split_km": 30.0,
+  "_location_note": "연속한 두 사진이 이만큼(km) 떨어져 있으면 같은 시간대라도 이벤트를 나눈다. 양쪽에 GPS가 있을 때만 적용된다. 데스크톱은 평가셋에 GPS가 2장뿐이라 쓰지 않는다.",
+  "axis_map": {
+    "인물": "인물",
+    "셀카": "인물",
+    "단체사진": "인물",
+    "풍경/여행": "여행",
+    "위치있음": "여행",
+    "문서/영수증": "문서",
+    "화면캡처내용": "문서",
+    "스크린샷": "문서",
+    "메신저저장": "문서",
+    "음식": "음식",
+    "실내일상": "순간",
+    "상품/쇼핑": "순간",
+    "반려동물": "순간",
+    "카메라촬영": "순간",
+    "저장/다운로드": "순간",
+    "다운로드": "순간",
+    "자연/식물": "여행",
+    "건물/거리": "여행",
+    "탈것": "여행",
+    "행사/축제": "인물",
+    "운동/스포츠": "순간",
+    "예술/전시": "순간",
+    "하늘": "여행",
+    "물/바다": "여행",
+    "실외": "여행",
+    "손글씨": "문서",
+    "대화화면": "문서",
+    "QR/바코드": "문서",
+    "지도화면": "문서",
+    "텍스트많음": "문서",
+    "음료": "음식",
+    "클로즈업": "순간",
+    "흑백": "순간",
+    "저조도": "순간"
+  },
+  "_axis_note": "앨범 화면 상단 필터(축) → 태그 매핑. 디자인의 axes(인물/여행/문서/음식/순간)에 실제 태그를 붙인 것이다. 여기 없는 태그는 '순간'으로 떨어진다.",
+  "_categories_note": "카테고리는 softmax라 제로섬이다 — 하나 늘리면 확률이 쪼개져 classify_min_score를 넘기 어려워지고 미분류가 늘어난다. 그래서 기존 카테고리의 '하위 종류'는 넣지 않는다(예: '카페'는 음식과 표를 나눠 둘 다 떨어뜨린다 → 속성 '음료'로 넣었다). 종류를 늘리고 싶으면 attributes를 늘리는 것이 안전하다: 원 코사인 + 임계값이라 서로 배타적이지 않고 표를 빼앗지 않는다. 카테고리를 늘린 뒤에는 반드시 python eval/score.py 로 기존 카테고리가 얼마나 나빠졌는지 재고, 미분류 비율과 1순위 정확도를 함께 볼 것.",
+  "attr_thresholds_ko": {
+    "셀카": 0.2263,
+    "단체사진": 0.2285,
+    "실외": 0.2252,
+    "텍스트많음": 0.2262,
+    "저조도": 0.2264,
+    "클로즈업": 0.2348,
+    "흑백": 0.2368,
+    "하늘": 0.2253,
+    "물/바다": 0.2265,
+    "음료": 0.2288,
+    "손글씨": 0.2385,
+    "QR/바코드": 0.2413,
+    "지도화면": 0.2428,
+    "대화화면": 0.2287
+  },
+  "_attr_thresholds_note": "속성별 원 코사인 임계값. Commons 평가셋 400장에서 각 속성이 상위 N% 비율로 붙도록 분위수로 잡았다(비율은 '그 속성이 갤러리에서 얼마나 흔한가'의 상식값). **본인 갤러리로 다시 재는 것이 맞다** — 아카이브 흑백 스캔본이 섞인 평가셋이라 '흑백' 같은 속성은 실제보다 후하게 잡혀 있다. 없는 속성은 attr_tag_threshold_ko로 떨어진다.",
+  "subcategories_ko": {
+    "음식": {
+      "한식": [
+        "한식 밥상 사진",
+        "찌개나 국이 있는 식탁 사진",
+        "반찬이 여러 개 놓인 한식 사진"
+      ],
+      "양식·일식·중식": [
+        "파스타나 스테이크 사진",
+        "초밥이나 라멘 사진",
+        "중국 요리 사진"
+      ],
+      "카페·디저트": [
+        "카페 케이크와 커피 사진",
+        "디저트 접시 사진",
+        "빙수나 아이스크림 사진"
+      ],
+      "술·안주": [
+        "맥주잔과 안주 사진",
+        "소주와 회 사진",
+        "와인과 치즈 사진"
+      ],
+      "배달·간편식": [
+        "배달 음식 포장 용기 사진",
+        "편의점 도시락 사진",
+        "치킨 상자 사진"
+      ]
+    },
+    "인물": {
+      "아기·어린이": [
+        "아기 사진",
+        "어린 아이가 노는 사진",
+        "유아가 웃는 사진"
+      ],
+      "커플·둘": [
+        "두 사람이 나란히 찍은 사진",
+        "커플 사진"
+      ],
+      "모임·여럿": [
+        "여러 사람이 모인 사진",
+        "가족이 함께 찍은 사진",
+        "친구들과 단체로 찍은 사진"
+      ],
+      "한 사람": [
+        "한 사람의 전신 사진",
+        "한 사람의 인물 사진"
+      ]
+    },
+    "풍경/여행": {
+      "바다·해변": [
+        "바다와 해변 사진",
+        "파도가 치는 해안 사진"
+      ],
+      "산·숲": [
+        "산과 능선 사진",
+        "숲길 사진",
+        "계곡 사진"
+      ],
+      "도시 야경": [
+        "밤에 불이 켜진 도시 사진",
+        "야경 사진"
+      ],
+      "유적·전통": [
+        "궁궐이나 한옥 사진",
+        "사원이나 성당 사진",
+        "오래된 유적 사진"
+      ],
+      "하늘·노을": [
+        "노을 사진",
+        "일출 사진",
+        "구름이 물든 하늘 사진"
+      ],
+      "공원·정원": [
+        "공원 잔디밭 사진",
+        "정원 산책로 사진"
+      ]
+    },
+    "반려동물": {
+      "강아지": [
+        "강아지 사진",
+        "개가 뛰노는 사진"
+      ],
+      "고양이": [
+        "고양이 사진",
+        "고양이가 자는 사진"
+      ],
+      "그 밖의 동물": [
+        "토끼나 햄스터 사진",
+        "새 사진",
+        "물고기 사진"
+      ]
+    },
+    "문서/영수증": {
+      "영수증": [
+        "영수증 사진",
+        "결제 내역이 인쇄된 종이 사진"
+      ],
+      "명함·카드": [
+        "명함 사진",
+        "회원 카드 사진",
+        "신분증 사진"
+      ],
+      "서류·계약서": [
+        "계약서 사진",
+        "공문서 사진",
+        "양식이 인쇄된 서류 사진"
+      ],
+      "책·인쇄물": [
+        "책 페이지 사진",
+        "잡지나 전단 사진",
+        "메뉴판 사진"
+      ],
+      "손글씨·메모": [
+        "손으로 쓴 메모 사진",
+        "노트에 적은 글 사진",
+        "화이트보드 사진"
+      ]
+    },
+    "화면캡처내용": {
+      "대화": [
+        "메신저 대화 화면 캡처",
+        "채팅 화면 캡처"
+      ],
+      "지도·길찾기": [
+        "지도 앱 화면 캡처",
+        "길찾기 화면 캡처"
+      ],
+      "쇼핑·결제": [
+        "쇼핑 앱 상품 화면 캡처",
+        "결제 완료 화면 캡처",
+        "주문 내역 화면 캡처"
+      ],
+      "웹·기사": [
+        "웹 브라우저 화면 캡처",
+        "뉴스 기사 화면 캡처"
+      ],
+      "SNS": [
+        "인스타그램 화면 캡처",
+        "SNS 피드 화면 캡처"
+      ],
+      "게임": [
+        "게임 화면 캡처",
+        "게임 결과 화면 캡처"
+      ],
+      "설정·시스템": [
+        "휴대폰 설정 화면 캡처",
+        "시스템 알림 화면 캡처",
+        "에러 메시지 화면 캡처"
+      ]
+    },
+    "상품/쇼핑": {
+      "의류·패션": [
+        "옷 사진",
+        "신발 사진",
+        "가방 사진"
+      ],
+      "화장품·뷰티": [
+        "화장품 사진",
+        "향수 사진"
+      ],
+      "전자제품": [
+        "휴대폰이나 노트북 사진",
+        "이어폰이나 가전제품 사진"
+      ],
+      "식료품·생활용품": [
+        "마트 진열대 식료품 사진",
+        "생활용품 사진"
+      ]
+    },
+    "실내일상": {
+      "집·방": [
+        "집 안 방 사진",
+        "침실이나 거실 사진"
+      ],
+      "카페·식당 안": [
+        "카페 내부 사진",
+        "식당 안 좌석 사진"
+      ],
+      "사무실·학교": [
+        "사무실 책상 사진",
+        "교실이나 강의실 사진"
+      ]
+    },
+    "자연/식물": {
+      "꽃": [
+        "꽃 사진",
+        "꽃다발 사진"
+      ],
+      "나무·잎": [
+        "나무와 잎 사진",
+        "숲의 나무 사진"
+      ],
+      "정원·화분": [
+        "화분에 심은 식물 사진",
+        "정원 식물 사진"
+      ]
+    },
+    "탈것": {
+      "자동차": [
+        "자동차 사진",
+        "주차된 차 사진"
+      ],
+      "대중교통": [
+        "지하철이나 기차 사진",
+        "버스 사진"
+      ],
+      "자전거·오토바이": [
+        "자전거 사진",
+        "오토바이 사진"
+      ],
+      "비행기·선박": [
+        "비행기 사진",
+        "배 사진"
+      ]
+    },
+    "행사/축제": {
+      "결혼식": [
+        "결혼식장 사진",
+        "웨딩 부케와 드레스 사진"
+      ],
+      "생일·파티": [
+        "생일 케이크 사진",
+        "파티 장식 사진"
+      ],
+      "공연·콘서트": [
+        "무대 조명 공연 사진",
+        "콘서트 장 사진"
+      ],
+      "축제·행사": [
+        "축제 부스 사진",
+        "행사장 현수막 사진"
+      ]
+    },
+    "예술/전시": {
+      "회화": [
+        "그림 사진",
+        "회화 작품 사진"
+      ],
+      "조각·설치": [
+        "조각 작품 사진",
+        "설치미술 사진"
+      ],
+      "전시장": [
+        "미술관 전시실 사진",
+        "갤러리 벽에 걸린 작품들 사진"
+      ]
+    },
+    "운동/스포츠": {
+      "구기": [
+        "축구나 야구 경기 사진",
+        "농구 경기 사진"
+      ],
+      "러닝·헬스": [
+        "달리는 사람 사진",
+        "헬스장 운동 사진"
+      ],
+      "등산·아웃도어": [
+        "등산로 사진",
+        "캠핑 사진"
+      ],
+      "수영·물놀이": [
+        "수영장 사진",
+        "물놀이 사진"
+      ]
+    },
+    "건물/거리": {
+      "현대 건축": [
+        "고층 건물 사진",
+        "현대 건축물 사진"
+      ],
+      "전통·역사 건축": [
+        "한옥 사진",
+        "오래된 건물 사진"
+      ],
+      "거리·간판": [
+        "가게 간판이 있는 거리 사진",
+        "상점가 사진"
+      ],
+      "골목": [
+        "좁은 골목 사진",
+        "주택가 골목 사진"
+      ]
+    }
+  },
+  "subcategories": {
+    "음식": {
+      "한식": [
+        "a photo of a Korean meal"
+      ],
+      "양식·일식·중식": [
+        "a photo of Western, Japanese or Chinese food"
+      ],
+      "카페·디저트": [
+        "a photo of cafe dessert and coffee"
+      ],
+      "술·안주": [
+        "a photo of drinks with snacks"
+      ],
+      "배달·간편식": [
+        "a photo of delivery food containers"
+      ]
+    },
+    "인물": {
+      "아기·어린이": [
+        "a photo of a baby or young child"
+      ],
+      "커플·둘": [
+        "a photo of a couple"
+      ],
+      "모임·여럿": [
+        "a photo of a group of people"
+      ],
+      "한 사람": [
+        "a portrait of one person"
+      ]
+    },
+    "풍경/여행": {
+      "바다·해변": [
+        "a photo of the sea and beach"
+      ],
+      "산·숲": [
+        "a photo of mountains and forest"
+      ],
+      "도시 야경": [
+        "a photo of a city at night"
+      ],
+      "유적·전통": [
+        "a photo of a palace or temple"
+      ],
+      "하늘·노을": [
+        "a photo of a sunset sky"
+      ],
+      "공원·정원": [
+        "a photo of a park lawn"
+      ]
+    },
+    "반려동물": {
+      "강아지": [
+        "a photo of a dog"
+      ],
+      "고양이": [
+        "a photo of a cat"
+      ],
+      "그 밖의 동물": [
+        "a photo of a small pet or bird"
+      ]
+    },
+    "문서/영수증": {
+      "영수증": [
+        "a photo of a receipt"
+      ],
+      "명함·카드": [
+        "a photo of a business card"
+      ],
+      "서류·계약서": [
+        "a photo of a contract document"
+      ],
+      "책·인쇄물": [
+        "a photo of a book page"
+      ],
+      "손글씨·메모": [
+        "a photo of a handwritten note"
+      ]
+    },
+    "화면캡처내용": {
+      "대화": [
+        "a screenshot of a chat"
+      ],
+      "지도·길찾기": [
+        "a screenshot of a map app"
+      ],
+      "쇼핑·결제": [
+        "a screenshot of a shopping app"
+      ],
+      "웹·기사": [
+        "a screenshot of a web article"
+      ],
+      "SNS": [
+        "a screenshot of a social media feed"
+      ],
+      "게임": [
+        "a screenshot of a game"
+      ],
+      "설정·시스템": [
+        "a screenshot of phone settings"
+      ]
+    },
+    "상품/쇼핑": {
+      "의류·패션": [
+        "a photo of clothes or shoes"
+      ],
+      "화장품·뷰티": [
+        "a photo of cosmetics"
+      ],
+      "전자제품": [
+        "a photo of electronics"
+      ],
+      "식료품·생활용품": [
+        "a photo of groceries"
+      ]
+    },
+    "실내일상": {
+      "집·방": [
+        "a photo of a room at home"
+      ],
+      "카페·식당 안": [
+        "a photo of a cafe interior"
+      ],
+      "사무실·학교": [
+        "a photo of an office desk"
+      ]
+    },
+    "자연/식물": {
+      "꽃": [
+        "a photo of flowers"
+      ],
+      "나무·잎": [
+        "a photo of trees and leaves"
+      ],
+      "정원·화분": [
+        "a photo of a potted plant"
+      ]
+    },
+    "탈것": {
+      "자동차": [
+        "a photo of a car"
+      ],
+      "대중교통": [
+        "a photo of a train or bus"
+      ],
+      "자전거·오토바이": [
+        "a photo of a bicycle or motorcycle"
+      ],
+      "비행기·선박": [
+        "a photo of an airplane or ship"
+      ]
+    },
+    "행사/축제": {
+      "결혼식": [
+        "a photo of a wedding"
+      ],
+      "생일·파티": [
+        "a photo of a birthday cake"
+      ],
+      "공연·콘서트": [
+        "a photo of a concert stage"
+      ],
+      "축제·행사": [
+        "a photo of a festival booth"
+      ]
+    },
+    "예술/전시": {
+      "회화": [
+        "a photo of a painting"
+      ],
+      "조각·설치": [
+        "a photo of a sculpture"
+      ],
+      "전시장": [
+        "a photo of a gallery room"
+      ]
+    },
+    "운동/스포츠": {
+      "구기": [
+        "a photo of a ball game"
+      ],
+      "러닝·헬스": [
+        "a photo of running or gym"
+      ],
+      "등산·아웃도어": [
+        "a photo of hiking or camping"
+      ],
+      "수영·물놀이": [
+        "a photo of a swimming pool"
+      ]
+    },
+    "건물/거리": {
+      "현대 건축": [
+        "a photo of a modern building"
+      ],
+      "전통·역사 건축": [
+        "a photo of a historic building"
+      ],
+      "거리·간판": [
+        "a photo of a shopping street with signs"
+      ],
+      "골목": [
+        "a photo of a narrow alley"
+      ]
+    }
+  },
+  "sub_min_score": 0.4,
+  "_subcategories_note": "계층 분류 2단계. 부모 1순위가 정해진 뒤 **그 부모의 형제끼리만** softmax를 돈다. 평면으로 늘리면 제로섬(8→14개에서 0.86→0.84 실측)인데 계층은 다른 부모의 표를 빼앗지 않아 부모 정확도가 구조적으로 그대로다. sub_min_score(0.40)는 형제 3~7개 중 하나가 확실할 때만 붙인다는 뜻 — 못 넘으면 부모 태그만 남고, 그건 실패가 아니라 정직한 결과다. 세부 종류의 정답이 평가셋에 없어 정확도는 못 재고 분포만 본다.",
+  "prompt_templates_ko": [
+    "{}",
+    "휴대폰으로 찍은 {}",
+    "갤러리에 있는 {}"
+  ],
+  "prompt_templates": [
+    "{}",
+    "a phone photo of {}",
+    "{} from a photo gallery"
+  ],
+  "_templates_note": "카테고리·세부종류 프롬프트에 씌우는 틀. 각 문장을 틀마다 임베딩해 평균낸다(CLIP 표준 앙상블). 400장 실측: 없음 0.838 → 3개 0.858. 속성에는 씌우지 않는다 — 속성별 임계값이 현재 프롬프트 분포로 잡혀 있어 바꾸면 임계값을 다시 재야 한다.",
+  "personalize_alpha": 0.5,
+  "personalize_min_confirmed": 5,
+  "_personalize_note": "사용자가 확정한 사진의 임베딩 평균을 카테고리 프로토타입에 α만큼 섞는다: proto = unit(text + α·mean(confirmed)). 학습이 아니라 기준점 이동이라 즉시 반영되고 되돌릴 수 있다. 확정이 min_confirmed장 미만이면 섞지 않는다 — 한두 장으로 프로토타입을 끌면 그 사진들만 맞고 나머지가 틀린다."
+}

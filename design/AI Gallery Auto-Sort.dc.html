@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#08080A}
+a{color:#E8503A;text-decoration:none}
+a:hover{color:#F4795F}
+*{-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes scanpulse{0%{transform:scale(.92);opacity:.35}50%{transform:scale(1.04);opacity:.8}100%{transform:scale(.92);opacity:.35}}
+@keyframes riseup{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes sweep{0%{transform:translateY(-110%)}100%{transform:translateY(410%)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 20px 64px;box-sizing:border-box;background:radial-gradient(120% 80% at 50% 0%,#15151B 0%,#08080A 60%);font-family:'Gothic A1',system-ui,sans-serif">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div style="font-size:11px;letter-spacing:.18em;color:rgba(242,240,237,.4);text-transform:uppercase">Android · Gallery AI</div>
+    <div style="font-size:19px;font-weight:700;color:#F2F0ED">사진 자동분류 프로토타입</div>
+  </div>
+
+  <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" dark="true" hint-size="428px,908px">
+    <div style="min-height:100%;display:flex;flex-direction:column;background:#0E0E11;color:#F2F0ED;font-family:'Gothic A1',system-ui,sans-serif;position:relative">
+
+      <!-- ONBOARDING -->
+      <sc-if value="{{ isPermission }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:28px 24px 24px;box-sizing:border-box">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px">
+            <div style="position:relative;width:150px;height:150px;align-self:center">
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(232,80,58,.28),transparent 68%);animation:scanpulse 3.4s ease-in-out infinite"></div>
+              <div style="position:absolute;inset:26px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px">
+                <div style="background:#2B2B33;border-radius:4px"></div>
+                <div style="background:#3A2A28;border-radius:4px"></div>
+                <div style="background:#242430;border-radius:4px"></div>
+                <div style="background:#E8503A;border-radius:4px"></div>
+                <div style="background:#2F2F38;border-radius:4px"></div>
+                <div style="background:#3A3A44;border-radius:4px"></div>
+                <div style="background:#26262E;border-radius:4px"></div>
+                <div style="background:#4A3330;border-radius:4px"></div>
+                <div style="background:#2B2B33;border-radius:4px"></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="font-size:27px;font-weight:900;line-height:1.32;letter-spacing:-.02em">쌓아둔 사진,<br>AI가 알아서 정리합니다</div>
+              <div style="font-size:14px;line-height:1.7;color:rgba(242,240,237,.55)">인물, 장소, 날짜, 화면 캡처까지 구분해 앨범을 만들어 둡니다. 분석은 기기 안에서만 처리되고 사진은 어디에도 올라가지 않습니다.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#17171B;border-radius:14px">
+                <div style="width:6px;height:6px;border-radius:50%;background:#E8503A;margin-top:7px;flex:none"></div>
+                <div style="font-size:13px;line-height:1.6;color:rgba(242,240,237,.72)">기기 내 처리 · 네트워크 사용 없음</div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#17171B;border-radius:14px">
+                <div style="width:6px;height:6px;border-radius:50%;background:#E8503A;margin-top:7px;flex:none"></div>
+                <div style="font-size:13px;line-height:1.6;color:rgba(242,240,237,.72)">분류가 틀리면 바로 고칠 수 있고, 다음부터 반영됩니다</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;padding-top:22px">
+            <button onClick="{{ grant }}" style="border:0;height:54px;border-radius:27px;background:#E8503A;color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer" style-hover="background:#F4795F">사진 접근 허용하고 시작</button>
+            <button onClick="{{ grant }}" style="border:0;height:48px;border-radius:24px;background:transparent;color:rgba(242,240,237,.5);font-family:inherit;font-size:14px;cursor:pointer" style-hover="color:#F2F0ED">나중에 할게요</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ANALYZING -->
+      <sc-if value="{{ isAnalyzing }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:28px 24px;box-sizing:border-box;gap:30px">
+          <div style="font-size:13px;letter-spacing:.14em;color:rgba(242,240,237,.4)">STEP 1 / 1 · 첫 분석</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:12px">
+            <div style="position:relative;width:196px;height:196px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0"><div style="{{ ringStyle }}"></div></div>
+              <div style="position:absolute;inset:14px;border-radius:50%;background:#0E0E11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+                <div style="font-size:42px;font-weight:900;letter-spacing:-.03em">{{ progText }}</div>
+                <div style="font-size:12px;color:rgba(242,240,237,.45)">분석 중</div>
+              </div>
+            </div>
+            <div style="font-size:14px;color:rgba(242,240,237,.6)">전체 {{ totalText }}장 중 {{ doneText }}장</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div style="{{ s.style }}">
+                <div style="font-size:13px;flex:1;color:rgba(242,240,237,.85)">{{ s.label }}</div>
+                <div style="font-size:12px;font-weight:700;color:#E8503A">{{ s.state }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;font-size:12px;line-height:1.7;color:rgba(242,240,237,.35)">화면을 닫아도 백그라운드에서 이어집니다. 충전 중일 때 더 빠르게 처리됩니다.</div>
+        </div>
+      </sc-if>
+
+      <!-- HOME -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="padding:18px 20px 12px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:24px;font-weight:900;letter-spacing:-.02em">사진 정리함</div>
+              <div style="font-size:12px;color:rgba(242,240,237,.45)">{{ totalText }}장 · 어제 오후 11:20 분석</div>
+            </div>
+            <div style="width:38px;height:38px;border-radius:50%;background:#22222A;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:rgba(242,240,237,.7)">유</div>
+          </div>
+          <div onClick="{{ goSearch }}" style="margin:0 20px 18px;height:46px;border-radius:23px;background:#17171B;display:flex;align-items:center;gap:10px;padding:0 18px;cursor:pointer;font-size:14px;color:rgba(242,240,237,.42)" style-hover="background:#1F1F25">
+            <div style="width:14px;height:14px;border:1.6px solid rgba(242,240,237,.42);border-radius:50%"></div>
+            <div>"작년 여름 바다" 처럼 말로 찾기</div>
+          </div>
+
+          <div style="padding:0 20px;font-size:12px;font-weight:700;letter-spacing:.1em;color:rgba(242,240,237,.35);margin-bottom:10px">오늘의 이야기</div>
+          <div onClick="{{ openHero }}" style="margin:0 20px 24px;border-radius:20px;overflow:hidden;background:#17171B;cursor:pointer;position:relative">
+            <div style="height:196px;display:grid;grid-template-columns:2fr 1fr;gap:2px">
+              <div style="{{ heroA }}"></div>
+              <div style="display:grid;grid-template-rows:1fr 1fr;gap:2px">
+                <div style="{{ heroB }}"></div>
+                <div style="{{ heroC }}"></div>
+              </div>
+            </div>
+            <div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="font-size:10px;font-weight:700;letter-spacing:.08em;padding:4px 8px;border-radius:6px;background:rgba(232,80,58,.16);color:#E8503A">AI 자동 생성</div>
+                <div style="font-size:11px;color:rgba(242,240,237,.4)">1년 전 오늘</div>
+              </div>
+              <div style="font-size:19px;font-weight:700;letter-spacing:-.01em">제주에서 보낸 3박 4일</div>
+              <div style="font-size:13px;color:rgba(242,240,237,.5);line-height:1.6">성산일출봉과 표선 해변에서 찍은 128장을 하루 단위로 묶었습니다.</div>
+            </div>
+          </div>
+
+          <div style="padding:0 20px;display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:rgba(242,240,237,.35)">자동 분류된 앨범</div>
+            <div onClick="{{ goAlbums }}" style="font-size:12px;color:#E8503A;cursor:pointer">전체보기</div>
+          </div>
+          <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+              <div onClick="{{ c.open }}" style="display:flex;align-items:center;gap:14px;padding:12px;background:#141418;border-radius:16px;cursor:pointer" style-hover="background:#1C1C22">
+                <div style="width:62px;height:62px;border-radius:12px;flex:none;overflow:hidden"><div style="{{ c.thumb }}"></div></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <div style="font-size:15px;font-weight:700;letter-spacing:-.01em">{{ c.title }}</div>
+                  <div style="font-size:12px;color:rgba(242,240,237,.45)">{{ c.meta }}</div>
+                </div>
+                <div style="font-size:12px;color:rgba(242,240,237,.3)">{{ c.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:0 20px 28px">
+            <div onClick="{{ goCleanup }}" style="padding:16px 18px;border-radius:16px;border:1px solid rgba(232,80,58,.3);background:rgba(232,80,58,.06);cursor:pointer;display:flex;flex-direction:column;gap:5px" style-hover="background:rgba(232,80,58,.12)">
+              <div style="font-size:14px;font-weight:700;color:#F4795F">중복·흐린 사진 63장 정리 제안</div>
+              <div style="font-size:12px;color:rgba(242,240,237,.5);line-height:1.6">비슷한 사진 중 가장 잘 나온 한 장만 남기면 1.2GB를 비울 수 있습니다.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ALBUMS -->
+      <sc-if value="{{ isAlbums }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="padding:18px 20px 14px;font-size:24px;font-weight:900;letter-spacing:-.02em">앨범</div>
+          <div style="padding:0 20px 14px;display:flex;gap:7px;flex-wrap:wrap">
+            <sc-for list="{{ axes }}" as="a" hint-placeholder-count="5">
+              <div onClick="{{ a.pick }}" style="{{ a.style }}">{{ a.label }}</div>
+            </sc-for>
+          </div>
+          <div style="padding:0 20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ albumCards }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.open }}" style="display:flex;flex-direction:column;gap:9px;cursor:pointer">
+                <div style="aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative"><div style="{{ c.thumb }}"></div>
+                  <div style="position:absolute;left:10px;bottom:10px;font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:rgba(14,14,17,.72);backdrop-filter:blur(6px)">{{ c.axis }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:14px;font-weight:700;letter-spacing:-.01em">{{ c.title }}</div>
+                  <div style="font-size:11.5px;color:rgba(242,240,237,.42)">{{ c.count }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- CATEGORY DETAIL -->
+      <sc-if value="{{ isCategory }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 16px 12px">
+            <div onClick="{{ back }}" style="width:34px;height:34px;border-radius:17px;background:#1A1A20;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:rgba(242,240,237,.8)">←</div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+              <div style="font-size:17px;font-weight:700;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ catTitle }}</div>
+              <div style="font-size:11.5px;color:rgba(242,240,237,.42)">{{ catMeta }}</div>
+            </div>
+            <div onClick="{{ goFix }}" style="padding:8px 13px;border-radius:15px;background:#1A1A20;font-size:12px;font-weight:700;color:rgba(242,240,237,.75);cursor:pointer" style-hover="background:#26262E">분류 수정</div>
+          </div>
+          <div style="padding:0 16px 14px;display:flex;gap:7px;overflow-x:auto">
+            <sc-for list="{{ catTags }}" as="t" hint-placeholder-count="4">
+              <div style="padding:7px 12px;border-radius:14px;background:rgba(232,80,58,.1);color:#F4795F;font-size:12px;white-space:nowrap;flex:none">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ catGroups }}" as="g" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px">
+              <div style="padding:0 16px;display:flex;align-items:baseline;gap:8px">
+                <div style="font-size:14px;font-weight:700">{{ g.day }}</div>
+                <div style="font-size:11.5px;color:rgba(242,240,237,.38)">{{ g.note }}</div>
+              </div>
+              <div style="{{ g.gridStyle }}">
+                <sc-for list="{{ g.photos }}" as="p" hint-placeholder-count="9">
+                  <div onClick="{{ p.open }}" style="aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative"><div style="{{ p.style }}"></div></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- PHOTO DETAIL -->
+      <sc-if value="{{ isPhoto }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:#08080A">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+            <div onClick="{{ back }}" style="width:34px;height:34px;border-radius:17px;background:#1A1A20;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:rgba(242,240,237,.8)">←</div>
+            <div style="flex:1;font-size:13px;color:rgba(242,240,237,.5)">{{ photoDate }}</div>
+          </div>
+          <div style="aspect-ratio:3/4;margin:0 0 18px;overflow:hidden;position:relative"><div style="{{ photoStyle }}"></div>
+            <div style="position:absolute;left:16px;top:16px;width:96px;height:120px;border:2px solid rgba(232,80,58,.9);border-radius:8px"></div>
+            <div style="position:absolute;left:16px;top:142px;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:6px;background:rgba(232,80,58,.92);color:#fff">인물 · 예린</div>
+          </div>
+          <div style="padding:0 20px 24px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:rgba(242,240,237,.35)">AI가 읽은 정보</div>
+              <sc-for list="{{ photoFacts }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(242,240,237,.07)">
+                  <div style="width:74px;flex:none;font-size:12.5px;color:rgba(242,240,237,.42)">{{ f.k }}</div>
+                  <div style="flex:1;font-size:13.5px;line-height:1.5;color:rgba(242,240,237,.9)">{{ f.v }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <sc-for list="{{ photoTags }}" as="t" hint-placeholder-count="5">
+                <div style="padding:7px 12px;border-radius:14px;background:#17171B;font-size:12px;color:rgba(242,240,237,.7)">#{{ t.label }}</div>
+              </sc-for>
+            </div>
+            <div style="padding:16px 18px;background:#141418;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="font-size:13.5px;color:rgba(242,240,237,.8)">이 사진은 <span style="color:#F4795F;font-weight:700">예린이 첫 걸음마</span> 앨범에 들어갔습니다. 맞나요?</div>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ confirmTag }}" style="flex:1;height:42px;border:0;border-radius:21px;background:#22222A;color:#F2F0ED;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#2E2E38">맞아요</button>
+                <button onClick="{{ goFix }}" style="flex:1;height:42px;border:0;border-radius:21px;background:#E8503A;color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#F4795F">다른 앨범으로</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- SEARCH -->
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="padding:14px 16px 12px;display:flex;align-items:center;gap:10px">
+            <div onClick="{{ goHome }}" style="width:34px;height:34px;border-radius:17px;background:#1A1A20;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:rgba(242,240,237,.8)">←</div>
+            <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="말로 사진 찾기" style="flex:1;height:44px;border-radius:22px;border:1px solid rgba(242,240,237,.1);background:#17171B;color:#F2F0ED;font-family:inherit;font-size:14px;padding:0 16px;outline:none" style-focus="border-color:#E8503A">
+          </div>
+          <div style="padding:6px 16px 16px;display:flex;gap:7px;flex-wrap:wrap">
+            <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="4">
+              <div onClick="{{ s.pick }}" style="padding:8px 13px;border-radius:16px;background:#1A1A20;font-size:12.5px;color:rgba(242,240,237,.62);cursor:pointer" style-hover="background:#26262E;color:#F2F0ED">{{ s.label }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:14px;padding-bottom:24px">
+              <div style="margin:0 16px;padding:15px 17px;background:rgba(232,80,58,.07);border:1px solid rgba(232,80,58,.22);border-radius:16px;display:flex;flex-direction:column;gap:6px">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#E8503A">AI 요약</div>
+                <div style="font-size:13.5px;line-height:1.65;color:rgba(242,240,237,.88)">{{ resultSummary }}</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px">
+                <sc-for list="{{ results }}" as="p" hint-placeholder-count="12">
+                  <div onClick="{{ p.open }}" style="aspect-ratio:1;overflow:hidden;cursor:pointer"><div style="{{ p.style }}"></div></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:44px 34px;text-align:center;font-size:13px;line-height:1.7;color:rgba(242,240,237,.4)">찾고 싶은 장면을 문장으로 적어보세요.<br>날짜, 장소, 인물, 사물을 섞어도 됩니다.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- FIX / RETRAIN -->
+      <sc-if value="{{ isFix }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 16px 10px">
+            <div onClick="{{ back }}" style="width:34px;height:34px;border-radius:17px;background:#1A1A20;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:rgba(242,240,237,.8)">←</div>
+            <div style="flex:1;font-size:17px;font-weight:700;letter-spacing:-.01em">분류 수정</div>
+            <div style="font-size:12px;color:rgba(242,240,237,.42)">{{ selText }}</div>
+          </div>
+          <div style="padding:0 16px 16px;font-size:12.5px;line-height:1.7;color:rgba(242,240,237,.5)">잘못 묶인 사진을 고르면 다른 앨범으로 옮기고, 같은 패턴을 다음 분석에 반영합니다.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px">
+            <sc-for list="{{ fixPhotos }}" as="p" hint-placeholder-count="12">
+              <div onClick="{{ p.toggle }}" style="aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative"><div style="{{ p.style }}"></div>
+                <div style="{{ p.selStyle }}"></div>
+                <div style="{{ p.markStyle }}">{{ p.mark }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;position:sticky;bottom:0;background:linear-gradient(to top,#0E0E11 55%,rgba(14,14,17,0));padding:20px 16px 16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:2px">
+              <sc-for list="{{ moveTargets }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.move }}" style="padding:9px 14px;border-radius:16px;background:#1F1F25;font-size:12.5px;white-space:nowrap;flex:none;cursor:pointer;color:rgba(242,240,237,.8)" style-hover="background:#2C2C36">{{ t.label }}</div>
+              </sc-for>
+            </div>
+            <button onClick="{{ retrain }}" style="{{ retrainStyle }}">{{ retrainLabel }}</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- SETTINGS -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="padding:18px 20px 16px;font-size:24px;font-weight:900;letter-spacing:-.02em">자동분류 설정</div>
+          <div style="margin:0 20px 22px;padding:17px 18px;background:#141418;border-radius:16px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:7px;height:7px;border-radius:50%;background:#5BD08A"></div>
+              <div style="font-size:13.5px;font-weight:700">기기 내 처리 중</div>
+            </div>
+            <div style="font-size:12.5px;line-height:1.7;color:rgba(242,240,237,.5)">사진과 분석 결과는 이 휴대폰을 벗어나지 않습니다. 모델 업데이트만 Wi-Fi에서 내려받습니다.</div>
+          </div>
+          <div style="padding:0 20px;font-size:12px;font-weight:700;letter-spacing:.1em;color:rgba(242,240,237,.35);margin-bottom:6px">분류 항목</div>
+          <div style="padding:0 20px 22px;display:flex;flex-direction:column">
+            <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="5">
+              <div onClick="{{ t.flip }}" style="display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid rgba(242,240,237,.07);cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                  <div style="font-size:14.5px;font-weight:500">{{ t.label }}</div>
+                  <div style="font-size:12px;color:rgba(242,240,237,.42)">{{ t.desc }}</div>
+                </div>
+                <div style="{{ t.trackStyle }}">
+                  <div style="{{ t.knobStyle }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:0 20px 30px;display:flex;flex-direction:column;gap:10px">
+            <div onClick="{{ reanalyze }}" style="padding:15px 17px;border-radius:14px;background:#17171B;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#1F1F25">전체 다시 분석</div>
+            <div onClick="{{ reset }}" style="padding:15px 17px;border-radius:14px;background:#17171B;font-size:13.5px;font-weight:500;color:#F4795F;cursor:pointer" style-hover="background:#1F1F25">분류 결과 전체 삭제</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- TOAST -->
+      <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:sticky;bottom:12px;margin:0 16px 12px;padding:14px 16px;background:#F2F0ED;color:#0E0E11;border-radius:14px;font-size:13px;font-weight:700;box-shadow:0 12px 30px rgba(0,0,0,.5);animation:riseup .22s ease-out">{{ toast }}</div>
+      </sc-if>
+
+      <!-- BOTTOM NAV -->
+      <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+        <div style="position:sticky;bottom:0;margin-top:auto;background:rgba(14,14,17,.92);backdrop-filter:blur(14px);border-top:1px solid rgba(242,240,237,.07);display:flex;padding:8px 6px 10px">
+          <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+            <div onClick="{{ n.go }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;cursor:pointer;min-height:44px;box-sizing:border-box">
+              <div style="{{ n.iconStyle }}"></div>
+              <div style="{{ n.labelStyle }}">{{ n.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </div>
+  </x-import>
+
+  <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:520px">
+    <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="8">
+      <div onClick="{{ j.go }}" style="{{ j.style }}">{{ j.label }}</div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#E8503A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#E8503A&quot;,&quot;#B4F461&quot;,&quot;#3B2FD4&quot;,&quot;#1F6F5C&quot;],&quot;section&quot;:&quot;테마&quot;},&quot;photoTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;컬러&quot;,&quot;options&quot;:[&quot;컬러&quot;,&quot;모노톤&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;테마&quot;},&quot;gridColumns&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:2,&quot;max&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;앨범 상세&quot;}}">
+const TOTAL = 3482;
+
+function tile(seed, opts) {
+  const o = opts || {};
+  const h = (seed * 47 + 17) % 360;
+  const mono = o.mono;
+  const s1 = mono ? 6 : 26 + (seed * 13) % 18;
+  const l1 = 30 + (seed * 7) % 16;
+  const bg = "linear-gradient(" + (110 + (seed * 29) % 80) + "deg, hsl(" + h + " " + s1 + "% " + l1 + "%), hsl(" + ((h + 26) % 360) + " " + Math.max(4, s1 - 10) + "% " + Math.max(12, l1 - 16) + "%))";
+  return { width: "100%", height: "100%", background: bg };
+}
+
+const CATS = [
+  { id: "trip", title: "제주에서 보낸 3박 4일", meta: "여행 · 2025.05.14–17", count: "128장", axis: "여행", seed: 3,
+    tags: ["성산일출봉", "표선 해변", "렌터카", "흐린 날"],
+    groups: [
+      { day: "5월 14일", note: "공항 도착 · 첫날 저녁", n: 9 },
+      { day: "5월 15일", note: "성산일출봉 · 해안도로", n: 12 },
+      { day: "5월 16일", note: "표선 해변", n: 9 }
+    ] },
+  { id: "yerin", title: "예린이 첫 걸음마", meta: "인물 · 최근 4개월", count: "342장", axis: "인물", seed: 11,
+    tags: ["예린", "실내", "동영상 12개", "웃는 얼굴"],
+    groups: [
+      { day: "이번 주", note: "거실에서", n: 9 },
+      { day: "지난 달", note: "처음 서던 날", n: 12 }
+    ] },
+  { id: "docs", title: "화면 캡처 · 영수증", meta: "문서 · 텍스트 인식됨", count: "87장", axis: "문서", seed: 19,
+    tags: ["영수증", "카카오톡 캡처", "예약 확인", "QR"],
+    groups: [
+      { day: "8월", note: "영수증 24장", n: 9 },
+      { day: "7월", note: "캡처 31장", n: 9 }
+    ] },
+  { id: "food", title: "주말 저녁 식탁", meta: "음식 · 반복되는 장면", count: "214장", axis: "음식", seed: 27,
+    tags: ["집밥", "카페", "야외 테이블"],
+    groups: [{ day: "최근", note: "매주 토요일", n: 12 }] },
+  { id: "moment", title: "비 오는 출근길", meta: "순간 · 날씨·시간대", count: "46장", axis: "순간", seed: 34,
+    tags: ["비", "아침", "지하철"],
+    groups: [{ day: "장마철", note: "6–7월", n: 9 }] }
+];
+
+const NAV = [
+  { id: "home", label: "홈" },
+  { id: "albums", label: "앨범" },
+  { id: "search", label: "검색" },
+  { id: "settings", label: "설정" }
+];
+
+const JUMPS = [
+  { id: "permission", label: "온보딩" },
+  { id: "analyzing", label: "분석 중" },
+  { id: "home", label: "홈" },
+  { id: "albums", label: "앨범" },
+  { id: "category", label: "앨범 상세" },
+  { id: "photo", label: "사진 상세" },
+  { id: "search", label: "검색" },
+  { id: "fix", label: "분류 수정" },
+  { id: "settings", label: "설정" }
+];
+
+const SUGGEST = [
+  { q: "작년 여름 바다", sum: "2025년 7–8월, 강릉과 제주에서 찍은 바다 사진 41장을 찾았습니다.", seed: 5, n: 12 },
+  { q: "영수증만 모아줘", sum: "텍스트가 인식된 영수증 사진 24장입니다. 금액 합계는 412,600원으로 읽혔습니다.", seed: 21, n: 9, mono: true },
+  { q: "예린이 웃는 사진", sum: "예린이로 인식된 사진 중 웃는 표정 68장입니다. 가장 잘 나온 9장을 앞에 뒀습니다.", seed: 13, n: 12 },
+  { q: "밤에 찍은 도시", sum: "야간·도심으로 분류된 사진 57장입니다.", seed: 31, n: 12 }
+];
+
+const STEPS = [
+  { label: "얼굴 묶기", at: 20 },
+  { label: "장소·이동 경로 정리", at: 45 },
+  { label: "화면 캡처·문서 구분", at: 70 },
+  { label: "앨범 이름 짓기", at: 90 }
+];
+
+const TOGGLES = [
+  { id: "face", label: "인물 묶기", desc: "같은 얼굴을 한 앨범으로", on: true },
+  { id: "place", label: "장소·여행", desc: "위치와 이동 경로 기준", on: true },
+  { id: "doc", label: "화면 캡처·문서", desc: "텍스트를 읽어 구분", on: true },
+  { id: "thing", label: "사물·음식 태그", desc: "반복되는 피사체 태그", on: false },
+  { id: "clean", label: "정리 제안", desc: "중복·흐린 사진 알림", on: true }
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: "permission", tab: "home", prev: "home",
+    prog: 0, catId: "trip", axis: "전체",
+    query: "", searched: null,
+    sel: {}, toast: null, toggles: TOGGLES.map(t => ({ ...t })),
+    photoSeed: 11
+  };
+
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._tt); }
+
+  toast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._tt);
+    this._tt = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+
+  go(screen, extra) {
+    const patch = { screen, ...(extra || {}) };
+    if (NAV.some(n => n.id === screen)) patch.tab = screen;
+    this.setState(patch);
+  }
+
+  startAnalysis = () => {
+    this.setState({ screen: "analyzing", prog: 0 });
+    clearInterval(this._t);
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const p = s.prog + 2;
+        if (p >= 100) { clearInterval(this._t); setTimeout(() => this.go("home"), 500); return { prog: 100 }; }
+        return { prog: p };
+      });
+    }, 70);
+  };
+
+  accent() { return this.props.accentColor || "#E8503A"; }
+
+  photosFor(seed, n, mono) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const s = seed * 3 + i * 5;
+      out.push({ seed: s, style: tile(s, { mono }), open: () => this.go("photo", { prev: this.state.screen, photoSeed: s }) });
+    }
+    return out;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const ac = this.accent();
+    const mono = this.props.photoTone === "모노톤";
+    const cols = this.props.gridColumns || 3;
+    const cat = CATS.find(c => c.id === st.catId) || CATS[0];
+    const sug = st.searched;
+    const selCount = Object.keys(st.sel).filter(k => st.sel[k]).length;
+    const done = Math.round(TOTAL * st.prog / 100);
+    const fixPhotos = this.photosFor(cat.seed + 4, 12, mono);
+
+    const axes = ["전체", "인물", "여행", "문서", "음식", "순간"].map(a => {
+      const on = a === st.axis;
+      return {
+        label: a, pick: () => this.setState({ axis: a }),
+        style: { padding: "8px 14px", borderRadius: 16, fontSize: 12.5, cursor: "pointer", background: on ? ac : "#1A1A20", color: on ? "#fff" : "rgba(242,240,237,.6)", fontWeight: on ? 700 : 400 }
+      };
+    });
+
+    return {
+      isPermission: st.screen === "permission",
+      isAnalyzing: st.screen === "analyzing",
+      isHome: st.screen === "home",
+      isAlbums: st.screen === "albums",
+      isCategory: st.screen === "category",
+      isPhoto: st.screen === "photo",
+      isSearch: st.screen === "search",
+      isFix: st.screen === "fix",
+      isSettings: st.screen === "settings",
+      showNav: ["home", "albums", "search", "settings"].indexOf(st.screen) >= 0,
+
+      grant: this.startAnalysis,
+      back: () => this.go(st.screen === "photo" || st.screen === "fix" ? (st.prev === "photo" ? "category" : st.prev) : "home"),
+      goHome: () => this.go("home"),
+      goAlbums: () => this.go("albums"),
+      goSearch: () => this.go("search"),
+      goFix: () => this.go("fix", { prev: st.screen === "photo" ? "category" : st.screen, sel: {} }),
+      openHero: () => this.go("category", { catId: "trip", prev: "home" }),
+      goCleanup: () => this.toast("비슷한 사진 63장을 골라 뒀습니다. 정리 화면은 다음 단계입니다."),
+
+      progText: st.prog + "%",
+      ringStyle: { width: "100%", height: "100%", borderRadius: "50%", background: "conic-gradient(" + ac + " " + st.prog + "%, #22222A 0)" },
+      totalText: TOTAL.toLocaleString("ko-KR"),
+      doneText: done.toLocaleString("ko-KR"),
+      steps: STEPS.map(s => ({
+        label: s.label,
+        state: st.prog >= s.at + 10 ? "완료" : st.prog >= s.at ? "진행" : "대기",
+        style: { display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 14, background: st.prog >= s.at ? "#1D1D23" : "#17171B", opacity: st.prog >= s.at ? 1 : 0.45 }
+      })),
+
+      cats: CATS.map(c => ({
+        title: c.title, meta: c.meta, count: c.count,
+        thumb: tile(c.seed, { mono }),
+        open: () => this.go("category", { catId: c.id, prev: st.screen })
+      })),
+      heroA: tile(3, { mono }), heroB: tile(8, { mono }), heroC: tile(14, { mono }),
+
+      axes,
+      albumCards: CATS.filter(c => st.axis === "전체" || c.axis === st.axis).map(c => ({
+        title: c.title, count: c.count, axis: c.axis, thumb: tile(c.seed + 2, { mono }),
+        open: () => this.go("category", { catId: c.id, prev: "albums" })
+      })),
+
+      catTitle: cat.title, catMeta: cat.meta + " · " + cat.count,
+      catTags: cat.tags.map(t => ({ label: t })),
+      catGroups: cat.groups.map((g, gi) => ({
+        day: g.day, note: g.note,
+        gridStyle: { display: "grid", gap: 3, gridTemplateColumns: "repeat(" + cols + ",1fr)" },
+        photos: this.photosFor(cat.seed + gi * 6, g.n, mono)
+      })),
+
+      photoDate: "2026년 8월 24일 오후 6:12 · 서울 마포",
+      photoStyle: tile(st.photoSeed, { mono }),
+      photoFacts: [
+        { k: "인물", v: "예린 (신뢰도 높음), 미확인 1명" },
+        { k: "장소", v: "집 거실 — 최근 128장이 같은 장소로 묶임" },
+        { k: "장면", v: "실내, 저녁, 걷는 동작" },
+        { k: "텍스트", v: "인식된 글자 없음" }
+      ],
+      photoTags: ["예린", "첫걸음", "거실", "저녁", "동영상아님"].map(t => ({ label: t })),
+      confirmTag: () => { this.toast("확인 완료. 같은 기준을 계속 사용합니다."); },
+
+      query: st.query,
+      onQuery: e => this.setState({ query: e.target.value, searched: SUGGEST.find(s => s.q === e.target.value) || null }),
+      suggestions: SUGGEST.map(s => ({ label: s.q, pick: () => this.setState({ query: s.q, searched: s }) })),
+      hasResults: !!sug,
+      noResults: !sug,
+      resultSummary: sug ? sug.sum : "",
+      results: sug ? this.photosFor(sug.seed, sug.n, mono || sug.mono) : [],
+
+      selText: selCount ? selCount + "장 선택" : "사진을 고르세요",
+      fixPhotos: fixPhotos.map(p => ({
+        style: p.style,
+        toggle: () => this.setState(s => ({ sel: { ...s.sel, [p.seed]: !s.sel[p.seed] } })),
+        selStyle: { position: "absolute", inset: 0, boxSizing: "border-box", border: st.sel[p.seed] ? "3px solid " + ac : "0 solid transparent", background: st.sel[p.seed] ? "rgba(0,0,0,.35)" : "transparent" },
+        mark: st.sel[p.seed] ? "✓" : "",
+        markStyle: { position: "absolute", right: 6, top: 6, width: 20, height: 20, borderRadius: 10, boxSizing: "border-box", border: "1.6px solid " + (st.sel[p.seed] ? ac : "rgba(255,255,255,.7)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#fff", background: st.sel[p.seed] ? ac : "rgba(0,0,0,.25)" }
+      })),
+      moveTargets: CATS.filter(c => c.id !== cat.id).map(c => ({
+        label: c.axis + " · " + c.title.slice(0, 10),
+        move: () => {
+          if (!selCount) { this.toast("옮길 사진을 먼저 골라주세요."); return; }
+          this.setState({ sel: {} });
+          this.toast(selCount + "장을 '" + c.title + "'(으)로 옮겼습니다.");
+        }
+      })),
+      retrainLabel: selCount ? selCount + "장 제외하고 다시 학습" : "고른 사진 없음",
+      retrainStyle: { height: 50, border: 0, borderRadius: 25, fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: selCount ? "pointer" : "default", background: selCount ? ac : "#1F1F25", color: selCount ? "#fff" : "rgba(242,240,237,.35)" },
+      retrain: () => {
+        if (!selCount) return;
+        this.setState({ sel: {} });
+        this.toast("반영했습니다. 다음 분석부터 같은 패턴을 제외합니다.");
+      },
+
+      toggles: st.toggles.map(t => ({
+        label: t.label, desc: t.desc,
+        flip: () => this.setState(s => ({ toggles: s.toggles.map(x => x.id === t.id ? { ...x, on: !x.on } : x) })),
+        trackStyle: { width: 46, height: 27, borderRadius: 14, flex: "none", padding: 3, boxSizing: "border-box", transition: "background .18s", background: t.on ? ac : "#26262E" },
+        knobStyle: { width: 21, height: 21, borderRadius: "50%", transition: "transform .18s", background: t.on ? "#fff" : "rgba(242,240,237,.55)", transform: t.on ? "translateX(19px)" : "none" }
+      })),
+      reanalyze: this.startAnalysis,
+      reset: () => this.toast("분류 결과를 삭제하면 되돌릴 수 없습니다."),
+
+      hasToast: !!st.toast,
+      toast: st.toast,
+
+      navItems: NAV.map(n => ({
+        label: n.label, go: () => this.go(n.id),
+        iconStyle: { width: 20, height: 20, borderRadius: 6, background: st.tab === n.id ? ac : "rgba(242,240,237,.28)" },
+        labelStyle: { fontSize: 10.5, fontWeight: 700, color: st.tab === n.id ? "#F2F0ED" : "rgba(242,240,237,.35)" }
+      })),
+      jumps: JUMPS.map(j => ({
+        label: j.label, go: () => this.go(j.id),
+        style: { padding: "7px 12px", borderRadius: 14, fontSize: 11.5, cursor: "pointer", fontFamily: "'Gothic A1',system-ui,sans-serif", background: st.screen === j.id ? ac : "#17171B", color: st.screen === j.id ? "#fff" : "rgba(242,240,237,.5)", fontWeight: st.screen === j.id ? 700 : 400 }
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 미디어 읽기. 버전마다 다른 셋이 필요하다 (ANDROID.md §4.3) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+    <!-- 없으면 EXIF GPS가 시스템에 의해 지워져서 온다 -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!--
+        INTERNET 없음. 이것이 약속이다 (ANDROID.md §16).
+
+        ACCESS_NETWORK_STATE는 WorkManager 매니페스트에서 딸려 온다. 네트워크 제약
+        조건(Constraints.NetworkType)을 쓰지 않으므로 필요 없고, 남겨 두면 앱 정보에
+        네트워크 관련 권한이 뜬다 — 매니페스트가 약속의 증거인데 그 증거를 흐린다.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove"/>
+
+    <application
+        android:label="사진 정리함"
+        android:allowBackup="false"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PhotoLog">
+        <!--
+            WorkManager의 포그라운드 서비스에 타입을 선언한다. 권한만 있고 이 선언이
+            없으면 Android 14+에서 startForeground()가 IllegalArgumentException으로 즉사한다
+            (foregroundServiceType 0x1 is not a subset of 0x0). 라이브러리 매니페스트를
+            merge로 덮어쓰는 것이 문서화된 방법이다.
+        -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

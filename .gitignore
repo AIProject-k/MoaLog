@@ -1,0 +1,19 @@
+# Python runtime state and local photo index
+__pycache__/
+*.py[cod]
+data/*.db
+data/thumbs/
+
+# Downloaded evaluation corpus (scripts and compact parity fixtures stay tracked)
+eval/dataset/
+
+# Android and release build outputs
+.gradle/
+android/.gradle/
+android/**/build/
+*.apk
+*.aab
+
+# Local signing material
+android/testkey.jks
+android/local.properties

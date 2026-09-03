@@ -1,0 +1,15 @@
+{
+  "split_regex": "<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}]+",
+  "normalize": [
+    "NFC",
+    "Replace",
+    "Lowercase"
+  ],
+  "end_of_word_suffix": "</w>",
+  "bos_id": 49406,
+  "eos_id": 49407,
+  "unk_token": "<|endoftext|>",
+  "ctx": 77,
+  "vocab_size": 49408,
+  "merges": 49041
+}
