@@ -59,8 +59,6 @@ private fun mediaPermissions(): Array<String> = when {
     )
 }
 
-enum class Access { None, Partial, Full }
-
 @Composable
 private fun App() {
     val ctx = LocalContext.current
@@ -78,6 +76,8 @@ private fun App() {
 
     var acc by remember { mutableStateOf(access()) }
     var booted by remember { mutableStateOf(false) }
+    var permissionDeferred by remember { mutableStateOf(false) }
+    val screen = if (permissionDeferred) ui.screen else startupScreen(acc, ui.screen)
 
     // 권한이 있으면 곧바로 인덱싱을 시작한다. 고유 워커라 두 번 돌지 않는다.
     LaunchedEffect(acc) {
@@ -124,10 +124,13 @@ private fun App() {
 
     Column(Modifier.fillMaxSize().background(t.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
         Box(Modifier.weight(1f)) {
-            when (ui.screen) {
+            when (screen) {
                 Screen.Permission -> OnboardingScreen(
                     onGrant = { ask.launch(mediaPermissions()) },
-                    onLater = { vm.toast("설정에서 언제든 허용할 수 있습니다.") },
+                    onLater = {
+                        permissionDeferred = true
+                        vm.toast("설정에서 언제든 허용할 수 있습니다.")
+                    },
                 )
                 Screen.Analyzing -> AnalyzingScreen(
                     progress = ui.counts.progress, done = ui.counts.done, total = ui.counts.total,
@@ -150,18 +153,18 @@ private fun App() {
 
             // 일부 허용은 안드로이드가 실제로 만드는 상태다. 그냥 두면 앨범이 왜
             // 비어 있는지 알 수 없다(§4.3).
-            if (acc == Access.Partial && ui.screen == Screen.Home) {
+            if (acc == Access.Partial && screen == Screen.Home) {
                 Box(Modifier.align(Alignment.TopCenter).padding(top = 84.dp)) {
                     PartialAccessBanner { ask.launch(mediaPermissions()) }
                 }
             }
             Toast(ui.toast, Modifier.align(Alignment.BottomCenter))
         }
-        if (ui.screen.showsNav) BottomNav(ui.screen) { vm.go(it) }
+        if (screen.showsNav) BottomNav(screen) { vm.go(it) }
     }
 
     // 하위 화면에서는 위로, 탭 화면에서는 시스템에 넘겨 앱을 닫는다.
-    BackHandler(enabled = !ui.screen.showsNav) { vm.back() }
+    BackHandler(enabled = !screen.showsNav) { vm.back() }
 }
 
 /** 축 설명. 디자인의 toggle desc를 **실제 동작**에 맞춰 적었다. */

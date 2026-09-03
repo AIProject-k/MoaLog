@@ -23,6 +23,12 @@ enum class Screen(val tabLabel: String = "") {
     }
 }
 
+/** 사진 권한 상태. 권한이 없으면 다른 화면보다 안내 화면을 우선한다. */
+enum class Access { None, Partial, Full }
+
+fun startupScreen(access: Access, current: Screen): Screen =
+    if (access == Access.None) Screen.Permission else current
+
 /** 디자인의 `axes` — 앨범 화면 상단 필터. "전체"는 필터 없음을 뜻한다. */
 enum class Axis(val label: String) {
     All("전체"), Person("인물"), Travel("여행"), Doc("문서"), Food("음식"), Moment("순간");
