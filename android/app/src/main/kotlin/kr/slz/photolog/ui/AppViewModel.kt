@@ -61,6 +61,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         // 분류 수정
         val fixPhotos: List<PhotoCard> = emptyList(),
         val selected: Set<Long> = emptySet(),
+        // 중복 정리
+        val cleanupGroups: List<CleanupGroup> = emptyList(),
+        val cleanupSelected: Set<Long> = emptySet(),
         val toast: String? = null,
     )
 
@@ -84,6 +87,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     data class DayGroup(val day: String, val note: String, val photos: List<PhotoCard>)
 
+    data class CleanupGroup(val group: Grouping.Group, val photos: List<PhotoCard>)
+
     private val _ui = MutableStateFlow(Ui())
     val ui: StateFlow<Ui> = _ui.asStateFlow()
 
@@ -105,11 +110,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun back() = _ui.update {
         val target = when (it.screen) {
             Screen.Photo -> if (it.openAlbum != null) Screen.Category else it.previous
-            Screen.Fix -> if (it.openAlbum != null) Screen.Category else it.previous
+            Screen.Fix, Screen.Cleanup -> if (it.openAlbum != null) Screen.Category else it.previous
             Screen.Category -> it.previous
             else -> Screen.Home
         }
-        it.copy(screen = target, selected = emptySet())
+        it.copy(screen = target, selected = emptySet(), cleanupSelected = emptySet())
     }
 
     fun setAxis(a: Axis) = _ui.update { it.copy(axis = a) }
@@ -422,11 +427,37 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---------- 정리 ----------
 
-    /** 중복 그룹에서 지울 수 있는 사진. **그룹당 1장은 코드가 강제로 남긴다**(§12.4). */
+    fun openCleanup() {
+        _ui.update { it.copy(screen = Screen.Cleanup, cleanupSelected = emptySet()) }
+        viewModelScope.launch(Dispatchers.IO) {
+            val groups = AppGraph.store.dupeGroups()
+            val cards = groups.map { group ->
+                val byId = AppGraph.store.photosByIds(group.ids)
+                CleanupGroup(group, group.ids.mapNotNull(byId::get))
+            }.filter { it.photos.size > 1 }
+            withContext(Dispatchers.Main) { _ui.update { it.copy(cleanupGroups = cards) } }
+        }
+    }
+
+    fun toggleCleanupSelect(id: Long) = _ui.update {
+        it.copy(cleanupSelected = if (id in it.cleanupSelected) it.cleanupSelected - id else it.cleanupSelected + id)
+    }
+
+    fun toggleCleanupSelectAll() = _ui.update {
+        val all = it.cleanupGroups.flatMap { group -> group.photos.map(PhotoCard::id) }.toSet()
+        it.copy(cleanupSelected = if (it.cleanupSelected.containsAll(all)) emptySet() else all)
+    }
+
+    /** 중복 그룹에서 지울 수 있는 사진. **그룹당 1장은 코드가 강제로 남는다**(§12.4). */
     fun cleanupCandidates(): Pair<List<Long>, List<Long>> {
-        val groups = AppGraph.store.dupeGroups()
-        val wanted = groups.flatMap { it.ids }.toSet()
-        return Grouping.keepOnePerGroup(wanted, groups)
+        val groups = _ui.value.cleanupGroups.map(CleanupGroup::group)
+        return Grouping.keepOnePerGroup(_ui.value.cleanupSelected, groups)
+    }
+
+    fun onCleanupTrashed() {
+        _ui.update { it.copy(cleanupSelected = emptySet()) }
+        IndexWorker.nudge(getApplication())
+        refresh()
     }
 
     // ---------- 표시 ----------

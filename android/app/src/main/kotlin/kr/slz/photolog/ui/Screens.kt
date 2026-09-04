@@ -13,6 +13,7 @@ enum class Screen(val tabLabel: String = "") {
     Photo,
     Search("검색"),
     Fix,
+    Cleanup,
     Settings("설정");
 
     val showsNav get() = this in tabs

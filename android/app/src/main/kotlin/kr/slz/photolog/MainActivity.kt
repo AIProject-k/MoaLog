@@ -95,13 +95,13 @@ private fun App() {
     ) { r ->
         if (r.resultCode == android.app.Activity.RESULT_OK) {
             vm.toast("휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.")
-            vm.refresh()
+            vm.onCleanupTrashed()
         } else vm.toast("취소했습니다.")
     }
 
-    fun sendToTrash() {
+    fun sendCleanupToTrash() {
         val (delete, kept) = vm.cleanupCandidates()
-        if (delete.isEmpty()) { vm.toast("정리할 중복이 없습니다."); return }
+        if (delete.isEmpty()) { vm.toast("휴지통으로 보낼 사진을 고르세요."); return }
         val uris = delete.map {
             android.content.ContentUris.withAppendedId(
                 MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), it)
@@ -141,13 +141,14 @@ private fun App() {
                 Screen.Photo -> PhotoScreen(vm, ui)
                 Screen.Search -> SearchScreen(vm, ui)
                 Screen.Fix -> FixScreen(vm, ui)
+                Screen.Cleanup -> CleanupScreen(vm, ui, onTrash = ::sendCleanupToTrash)
                 Screen.Settings -> SettingsScreen(
                     vm, ui, toggles,
                     onFlip = { id ->
                         offAxes = if (id in offAxes) offAxes - id else offAxes + id
                         saveOffAxes(offAxes)
                     },
-                    onTrash = ::sendToTrash,
+                    onCleanup = vm::openCleanup,
                 )
             }
 

@@ -31,7 +31,7 @@ fun SettingsScreen(
     ui: AppViewModel.Ui,
     toggles: List<CategoryToggle>,
     onFlip: (String) -> Unit,
-    onTrash: () -> Unit,
+    onCleanup: () -> Unit,
 ) {
     val t = theme
     LazyColumn(Modifier.fillMaxSize()) {
@@ -102,7 +102,7 @@ fun SettingsScreen(
                 if (ui.cleanupCount > 0) ActionRow(
                     "중복 사진 ${ui.cleanupCount}장 휴지통으로",
                     "그룹마다 가장 잘 나온 한 장은 남깁니다",
-                    t.accentHi, onTrash,
+                    t.accentHi, onCleanup,
                 )
                 ActionRow("전체 다시 분석", "촬영 정보는 두고 장면 분류만 다시 합니다", t.text) { vm.reanalyze() }
                 ActionRow("분류 결과 전체 삭제", "사진은 지우지 않습니다", t.accentHi) { vm.clearAnalysis() }
