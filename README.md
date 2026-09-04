@@ -1,16 +1,68 @@
 # MoaLog — 오프라인 AI 사진 정리함
 
-MoaLog는 사진을 기기 밖으로 보내지 않고 **자동 분류 · 정리 · 타임라인 · 한국어 자연어 검색**을 제공하는 사진 기록 앱입니다.
-Windows 데스크톱 앱은 분류 품질을 재고 튜닝하는 테스트베드이며, Android 앱이 첫 제품 릴리스 대상입니다.
+MoaLog는 갤러리에 쌓인 사진을 기기 안에서 분석해 **자동 앨범, 한국어 자연어 검색, 사진 기록, 중복 정리**로 바꿔 주는 Android 앱입니다.
 
-## Android v0.1.0
+사진과 검색어를 서버에 보내지 않습니다. 앱은 `INTERNET` 권한을 선언하지 않으며, 포함된 한국어 CLIP 모델로 모든 분류와 검색을 기기 안에서 처리합니다.
 
-- 기기 안에서만 사진을 분석합니다. `INTERNET` 권한을 요청하지 않습니다.
-- 사진 읽기 권한을 허용한 뒤 첫 인덱싱을 시작하면, 시간순 기록은 먼저 표시되고 AI 태그는 백그라운드에서 채워집니다.
-- 자동 앨범, 한국어 검색, 유사/중복 사진 정리, 촬영시각 기반 로그를 제공합니다.
-- 정리 기능은 파일을 직접 삭제하지 않고 Android 시스템 휴지통만 사용하며, 중복 그룹에서는 항상 한 장을 남깁니다.
+[최신 APK 받기 (v0.1.4)](https://github.com/AIProject-k/MoaLog/releases/download/v0.1.4/MoaLog-v0.1.4.apk) · [릴리스 노트](https://github.com/AIProject-k/MoaLog/releases/tag/v0.1.4)
 
-릴리스 APK는 GitHub Releases의 `MoaLog-v0.1.0.apk` 자산에서 받을 수 있습니다. Android 11 (API 30) 이상이 필요합니다. 변경 사항은 [v0.1.0 릴리스 노트](RELEASE_NOTES.md)에서 확인할 수 있습니다.
+> Android 11 (API 30) 이상이 필요합니다. 첫 실행 시 사진 접근 권한을 허용해야 갤러리를 분류할 수 있습니다.
+
+## 이렇게 씁니다
+
+1. 사진 접근을 허용하면 MediaStore에서 기기 사진을 읽습니다.
+2. 촬영시각·출처·AI 장면 분류를 이용해 앨범과 사진 기록을 만듭니다.
+3. `작년 여름 바다`, `음식`, `밤에 찍은 사진`처럼 한국어로 검색합니다.
+4. 앨범에서 사진을 골라 시스템 휴지통으로 보내거나, 중복 사진을 비교해 안전하게 정리합니다.
+
+## 화면 미리보기
+
+아래 이미지는 API 36 Android 에뮬레이터에서 데모 사진으로 실제 실행·캡처한 화면입니다.
+
+<p align="center">
+  <img src="design/readme/onboarding.png" alt="사진 권한 안내" width="220" />
+  <img src="design/readme/analyzing.png" alt="첫 분석 진행" width="220" />
+  <img src="design/readme/home.png" alt="자동 분류 홈" width="220" />
+</p>
+
+<p align="center">
+  <img src="design/readme/albums.png" alt="자동 앨범" width="220" />
+  <img src="design/readme/album-detail.png" alt="앨범 상세" width="220" />
+  <img src="design/readme/search.png" alt="한국어 자연어 검색" width="220" />
+</p>
+
+<p align="center">
+  <img src="design/readme/album-selection.png" alt="앨범 사진 다중 선택" width="220" />
+  <img src="design/readme/trash-confirmation.png" alt="Android 시스템 휴지통 확인" width="220" />
+  <img src="design/readme/cleanup.png" alt="중복 사진 비교와 정리" width="220" />
+</p>
+
+<p align="center">
+  <img src="design/readme/settings-top.png" alt="온디바이스 처리 설정" width="220" />
+  <img src="design/readme/settings-cleanup-entry.png" alt="중복 정리 진입 설정" width="220" />
+</p>
+
+## 핵심 기능
+
+| 기능 | 하는 일 |
+|---|---|
+| 자동 앨범 | 인물, 음식, 문서/영수증, 반려동물 등 장면별로 사진을 묶습니다. |
+| 자연어 검색 | 한국어 문장으로 원하는 장면을 찾습니다. |
+| 사진 기록 | 촬영 시각과 위치 정보를 바탕으로 한 번에 찍은 사진을 기록으로 묶습니다. |
+| 앨범 선택 삭제 | 일반 갤러리처럼 앨범 안에서 여러 장을 선택해 Android 시스템 휴지통으로 보냅니다. |
+| 중복 정리 | 완전 중복과 비슷한 연속 사진을 비교해 보여 주며, 그룹별 유지 권장 사진을 표시합니다. |
+| 온디바이스 처리 | 모델, 색인, 검색, 분류 결과를 모두 기기에 보관하며 인터넷 연결이 필요 없습니다. |
+
+## 개인정보과 안전
+
+- `INTERNET` 권한과 분석/광고 SDK가 없습니다.
+- 사진 원본·태그·임베딩·검색어는 앱 내부 저장소에만 보관됩니다.
+- 삭제는 파일을 직접 지우지 않고 Android 시스템 휴지통 확인 절차를 거칩니다.
+- 중복 정리에서 한 그룹을 모두 선택해도 가장 잘 나온 한 장은 자동으로 남깁니다.
+
+## 개발 구성
+
+Windows 데스크톱 앱은 분류 품질을 측정하고 프롬프트를 튜닝하는 테스트베드이며, Android 앱이 실제 제품 대상입니다.
 
 ## 설계의 중심
 
