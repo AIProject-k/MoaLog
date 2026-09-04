@@ -25,6 +25,8 @@
 
     <application
         android:label="MoaLog"
+        android:icon="@drawable/ic_moalog_launcher"
+        android:roundIcon="@drawable/ic_moalog_launcher"
         android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/Theme.PhotoLog">
