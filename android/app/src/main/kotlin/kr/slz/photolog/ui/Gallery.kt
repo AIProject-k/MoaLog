@@ -265,53 +265,115 @@ fun AlbumsScreen(vm: AppViewModel, ui: AppViewModel.Ui, uriOf: (Long) -> String?
 // ---------------------------------------------------------------- CATEGORY
 
 @Composable
-fun CategoryScreen(vm: AppViewModel, ui: AppViewModel.Ui, uriOf: (Long) -> String?, columns: Int = 3) {
+fun CategoryScreen(
+    vm: AppViewModel,
+    ui: AppViewModel.Ui,
+    uriOf: (Long) -> String?,
+    onTrash: (Set<Long>) -> Unit,
+    columns: Int = 3,
+) {
     val t = theme
     val album = ui.openAlbum ?: return
-    LazyColumn(Modifier.fillMaxSize()) {
-        item {
-            Row(
-                Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                BackButton { vm.back() }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                    Text(album.title, style = fonts.header, color = t.text,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("${album.meta} · ${album.count}장", style = fonts.meta, color = t.text.copy(alpha = .42f))
-                }
+    val selecting = ui.albumSelectionMode
+    val selected = ui.albumSelected
+    val allIds = ui.albumDays.flatMap { it.photos }.map { it.id }.toSet()
+    val allSelected = allIds.isNotEmpty() && selected.containsAll(allIds)
+
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BackButton { if (selecting) vm.cancelAlbumSelection() else vm.back() }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(
+                    if (selecting) "${selected.size}장 선택" else album.title,
+                    style = fonts.header, color = t.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    if (selecting) "사진을 눌러 선택하거나 해제하세요" else "${album.meta} · ${album.count}장",
+                    style = fonts.meta, color = t.text.copy(alpha = .42f),
+                )
+            }
+            if (selecting) {
                 Box(
                     Modifier.clip(RoundedCornerShape(15.dp)).background(t.surface3)
-                        .clickable { vm.openFix() }.padding(horizontal = 13.dp, vertical = 8.dp)
+                        .clickable { vm.toggleAlbumSelectAll() }.padding(horizontal = 11.dp, vertical = 8.dp),
+                ) { Text(if (allSelected) "선택 해제" else "전체 선택", style = fonts.meta, color = t.text) }
+            } else {
+                Box(
+                    Modifier.clip(RoundedCornerShape(15.dp)).background(t.surface3)
+                        .clickable { vm.startAlbumSelection() }.padding(horizontal = 13.dp, vertical = 8.dp),
+                ) { Text("선택", style = fonts.meta.copy(fontWeight = FontWeight.Bold), color = t.text.copy(alpha = .75f)) }
+                Box(
+                    Modifier.clip(RoundedCornerShape(15.dp)).background(t.surface3)
+                        .clickable { vm.openFix() }.padding(horizontal = 13.dp, vertical = 8.dp),
                 ) { Text("분류 수정", style = fonts.meta.copy(fontWeight = FontWeight.Bold), color = t.text.copy(alpha = .75f)) }
             }
         }
-        items(ui.albumDays, key = { it.day }) { g ->
-            Column(Modifier.padding(bottom = 22.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(g.day, style = fonts.body.copy(fontWeight = FontWeight.Bold), color = t.text)
-                    Text(g.note, style = fonts.meta, color = t.text.copy(alpha = .38f))
-                }
-                // 날짜 안의 사진은 개수가 적어 Column+Row로 격자를 만든다.
-                // 중첩 LazyGrid는 높이 계산이 안 돼서 못 쓴다.
-                for (row in g.photos.chunked(columns)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                        for (p in row) Thumb(p.uri,
-                            Modifier.weight(1f).aspectRatio(1f).clickable { vm.openPhoto(p.id) })
-                        repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+
+        LazyColumn(Modifier.weight(1f)) {
+            items(ui.albumDays, key = { it.day }) { g ->
+                Column(Modifier.padding(bottom = 22.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(g.day, style = fonts.body.copy(fontWeight = FontWeight.Bold), color = t.text)
+                        Text(g.note, style = fonts.meta, color = t.text.copy(alpha = .38f))
+                    }
+                    for (row in g.photos.chunked(columns)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            for (p in row) AlbumThumb(
+                                p, p.id in selected, selecting,
+                                onClick = { if (selecting) vm.toggleAlbumSelect(p.id) else vm.openPhoto(p.id) },
+                                modifier = Modifier.weight(1f),
+                            )
+                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
                     }
                 }
             }
+            if (ui.albumDays.isEmpty()) item {
+                Text("불러오는 중…", style = fonts.caption, color = theme.textFaint,
+                    modifier = Modifier.padding(34.dp))
+            }
         }
-        if (ui.albumDays.isEmpty()) item {
-            Text("불러오는 중…", style = fonts.caption, color = theme.textFaint,
-                modifier = Modifier.padding(34.dp))
+
+        if (selecting) Box(
+            Modifier.fillMaxWidth().height(64.dp).background(t.bg).padding(horizontal = 16.dp, vertical = 7.dp)
+                .clip(RoundedCornerShape(25.dp))
+                .background(if (selected.isNotEmpty()) t.accentHi else t.surface4)
+                .then(if (selected.isNotEmpty()) Modifier.clickable { onTrash(selected) } else Modifier),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                if (selected.isEmpty()) "사진을 선택하세요" else "${selected.size}장 휴지통으로",
+                style = fonts.itemTitle, color = if (selected.isEmpty()) t.textFaint else Color.White,
+            )
         }
+    }
+}
+
+@Composable
+private fun AlbumThumb(
+    photo: PhotoCard,
+    selected: Boolean,
+    selecting: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+    val t = theme
+    Box(modifier.aspectRatio(1f).clickable(onClick = onClick)) {
+        Thumb(photo.uri, Modifier.matchParentSize())
+        if (selected) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = .35f)))
+        if (selecting) Box(
+            Modifier.align(Alignment.TopEnd).padding(6.dp).size(20.dp).clip(CircleShape)
+                .background(if (selected) t.accent else Color.Black.copy(alpha = .28f)),
+            contentAlignment = Alignment.Center,
+        ) { if (selected) Text("✓", style = fonts.badge, color = Color.White) }
     }
 }
 

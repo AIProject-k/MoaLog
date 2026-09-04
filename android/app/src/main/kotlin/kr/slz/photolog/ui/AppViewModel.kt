@@ -10,6 +10,7 @@ import kr.slz.photolog.core.Classifier
 import kr.slz.photolog.core.Embeddings
 import kr.slz.photolog.core.Grouping
 import kr.slz.photolog.core.QueryParser
+import kr.slz.photolog.core.Selection
 import kr.slz.photolog.data.Counts
 import kr.slz.photolog.data.EventRow
 import kr.slz.photolog.data.PhotoCard
@@ -64,6 +65,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         // 중복 정리
         val cleanupGroups: List<CleanupGroup> = emptyList(),
         val cleanupSelected: Set<Long> = emptySet(),
+        // 일반 앨범 선택
+        val albumSelectionMode: Boolean = false,
+        val albumSelected: Set<Long> = emptySet(),
         val toast: String? = null,
     )
 
@@ -114,7 +118,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             Screen.Category -> it.previous
             else -> Screen.Home
         }
-        it.copy(screen = target, selected = emptySet(), cleanupSelected = emptySet())
+        it.copy(screen = target, selected = emptySet(), cleanupSelected = emptySet(),
+            albumSelectionMode = false, albumSelected = emptySet())
     }
 
     fun setAxis(a: Axis) = _ui.update { it.copy(axis = a) }
@@ -254,7 +259,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun openAlbum(album: Album) {
-        _ui.update { it.copy(openAlbum = album, screen = Screen.Category, albumDays = emptyList()) }
+        _ui.update { it.copy(openAlbum = album, screen = Screen.Category, albumDays = emptyList(),
+            albumSelectionMode = false, albumSelected = emptySet()) }
         viewModelScope.launch(Dispatchers.IO) {
             val store = AppGraph.store
             val photos = when (album.kind) {
@@ -439,13 +445,24 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun startAlbumSelection() = _ui.update { it.copy(albumSelectionMode = true, albumSelected = emptySet()) }
+
+    fun cancelAlbumSelection() = _ui.update { it.copy(albumSelectionMode = false, albumSelected = emptySet()) }
+
+    fun toggleAlbumSelect(id: Long) = _ui.update { it.copy(albumSelected = Selection.toggle(it.albumSelected, id)) }
+
+    fun toggleAlbumSelectAll() = _ui.update {
+        val ids = it.albumDays.flatMap { day -> day.photos.map(PhotoCard::id) }.toSet()
+        it.copy(albumSelected = Selection.toggleAll(it.albumSelected, ids))
+    }
+
     fun toggleCleanupSelect(id: Long) = _ui.update {
-        it.copy(cleanupSelected = if (id in it.cleanupSelected) it.cleanupSelected - id else it.cleanupSelected + id)
+        it.copy(cleanupSelected = Selection.toggle(it.cleanupSelected, id))
     }
 
     fun toggleCleanupSelectAll() = _ui.update {
         val all = it.cleanupGroups.flatMap { group -> group.photos.map(PhotoCard::id) }.toSet()
-        it.copy(cleanupSelected = if (it.cleanupSelected.containsAll(all)) emptySet() else all)
+        it.copy(cleanupSelected = Selection.toggleAll(it.cleanupSelected, all))
     }
 
     /** 중복 그룹에서 지울 수 있는 사진. **그룹당 1장은 코드가 강제로 남는다**(§12.4). */
@@ -454,8 +471,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         return Grouping.keepOnePerGroup(_ui.value.cleanupSelected, groups)
     }
 
-    fun onCleanupTrashed() {
-        _ui.update { it.copy(cleanupSelected = emptySet()) }
+    fun onSystemTrashComplete() {
+        _ui.update { it.copy(cleanupSelected = emptySet(), albumSelected = emptySet(), albumSelectionMode = false) }
         IndexWorker.nudge(getApplication())
         refresh()
     }

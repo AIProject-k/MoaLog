@@ -95,7 +95,7 @@ private fun App() {
     ) { r ->
         if (r.resultCode == android.app.Activity.RESULT_OK) {
             vm.toast("휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.")
-            vm.onCleanupTrashed()
+            vm.onSystemTrashComplete()
         } else vm.toast("취소했습니다.")
     }
 
@@ -109,6 +109,16 @@ private fun App() {
         val req = MediaStore.createTrashRequest(ctx.contentResolver, uris, true)
         trash.launch(IntentSenderRequest.Builder(req.intentSender).build())
         if (kept.isNotEmpty()) vm.toast("${kept.size}개 그룹은 한 장씩 남겼습니다.")
+    }
+
+    fun sendAlbumToTrash(ids: Set<Long>) {
+        if (ids.isEmpty()) { vm.toast("휴지통으로 보낼 사진을 고르세요."); return }
+        val uris = ids.map {
+            android.content.ContentUris.withAppendedId(
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), it)
+        }
+        val req = MediaStore.createTrashRequest(ctx.contentResolver, uris, true)
+        trash.launch(IntentSenderRequest.Builder(req.intentSender).build())
     }
 
     // 분류 항목 토글. 끄면 그 축의 앨범을 숨긴다 — 이미 계산된 태그는 지우지 않는다.
@@ -137,7 +147,7 @@ private fun App() {
                 )
                 Screen.Home -> HomeScreen(vm, visible, uriOf)
                 Screen.Albums -> AlbumsScreen(vm, visible, uriOf)
-                Screen.Category -> CategoryScreen(vm, ui, uriOf)
+                Screen.Category -> CategoryScreen(vm, ui, uriOf, onTrash = ::sendAlbumToTrash)
                 Screen.Photo -> PhotoScreen(vm, ui)
                 Screen.Search -> SearchScreen(vm, ui)
                 Screen.Fix -> FixScreen(vm, ui)
