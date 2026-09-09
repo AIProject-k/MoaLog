@@ -1,26 +1,37 @@
 package kr.slz.photolog.ui
 
 /**
- * 디자인의 `screen` 상태를 그대로 옮긴 것. `design/AI Gallery Auto-Sort.dc.html`의
- * JUMPS·NAV 목록과 1:1로 맞춘다 — 이름이 어긋나면 디자인과 코드를 대조할 수 없다.
+ * 화면 상태 기계. 내비게이션 라이브러리 없이 이 enum 하나로 돈다.
+ *
+ * **하단 탭이 사진 / 앨범 / 검색 / 정리로 바뀌었다.** 이전에는 홈·앨범·검색·설정이었는데
+ * 두 가지가 문제였다:
+ *  - 설정은 하루에 한 번도 안 누르는 화면인데 탭 하나를 차지했다. 정리는 매번 쓰는데
+ *    설정 안에 숨어 있었다. 자리를 맞바꾼다.
+ *  - 홈이 앨범 목록을 다시 그려서 앨범 탭과 겹쳤다. 홈을 [Photos]로 바꾸고 **전체 사진**을
+ *    맡긴다 — 분류를 몰라도 사진에 닿을 수 있어야 갤러리다.
  */
 enum class Screen(val tabLabel: String = "") {
     Permission,
     Analyzing,
-    Home("홈"),
+
+    /** 전체 사진. 위에 추억·이번 주 모음이 작게 붙는다. */
+    Photos("사진"),
     Albums("앨범"),
+
+    /** 앨범 하나를 연 상태(태그·이벤트·기기 폴더·내 앨범 공통). */
     Category,
-    Photo,
+
+    /** 전체 화면 사진 보기. 좌우로 넘기고 확대할 수 있다. */
+    Viewer,
     Search("검색"),
     Fix,
-    Cleanup,
-    Settings("설정");
+    Cleanup("정리"),
+    Settings;
 
     val showsNav get() = this in tabs
 
     companion object {
-        /** 하단 탭에 나오는 넷. 디자인의 NAV 순서를 지킨다. */
-        val tabs = listOf(Home, Albums, Search, Settings)
+        val tabs = listOf(Photos, Albums, Search, Cleanup)
     }
 }
 
@@ -30,7 +41,27 @@ enum class Access { None, Partial, Full }
 fun startupScreen(access: Access, current: Screen): Screen =
     if (access == Access.None) Screen.Permission else current
 
-/** 디자인의 `axes` — 앨범 화면 상단 필터. "전체"는 필터 없음을 뜻한다. */
+/**
+ * 앨범의 **출처**. 사용자가 가장 먼저 알아야 하는 구분이다 —
+ * "카메라" 폴더에서 사진을 빼는 것과 "음식" 분류에서 빼는 것은 완전히 다른 행동이다.
+ */
+enum class AlbumKind(val label: String, val chip: String) {
+    /** 사용자가 직접 만든 모음. */
+    User("내 앨범", "내 앨범"),
+
+    /** 카메라·스크린샷·다운로드 등 실제 저장 위치. */
+    Folder("기기 폴더", "폴더"),
+
+    /** CLIP·규칙이 내용으로 묶은 분류. */
+    Tag("AI 앨범", "AI 분류"),
+
+    /** 시간·장소로 묶인 기록. */
+    Event("기록", "기록");
+
+    companion object { val ordered = entries }
+}
+
+/** 앨범 화면 상단 필터. "전체"는 필터 없음을 뜻한다. */
 enum class Axis(val label: String) {
     All("전체"), Person("인물"), Travel("여행"), Doc("문서"), Food("음식"), Moment("순간");
 

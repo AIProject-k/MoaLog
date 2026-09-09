@@ -1,7 +1,10 @@
 package kr.slz.photolog
 
 import android.Manifest
+import android.content.ContentUris
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -95,33 +98,42 @@ private fun App() {
     ) { r ->
         if (r.resultCode == android.app.Activity.RESULT_OK) {
             vm.toast("휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.")
-            vm.onSystemTrashComplete()
-        } else vm.toast("취소했습니다.")
-    }
-
-    fun sendCleanupToTrash() {
-        val (delete, kept) = vm.cleanupCandidates()
-        if (delete.isEmpty()) { vm.toast("휴지통으로 보낼 사진을 고르세요."); return }
-        val uris = delete.map {
-            android.content.ContentUris.withAppendedId(
-                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), it)
+            vm.onTrashConfirmed()
+        } else {
+            vm.cancelTrash()
+            vm.toast("취소했습니다.")
         }
-        val req = MediaStore.createTrashRequest(ctx.contentResolver, uris, true)
-        trash.launch(IntentSenderRequest.Builder(req.intentSender).build())
-        if (kept.isNotEmpty()) vm.toast("${kept.size}개 그룹은 한 장씩 남겼습니다.")
     }
 
-    fun sendAlbumToTrash(ids: Set<Long>) {
+    fun uriOf(id: Long): Uri = ContentUris.withAppendedId(
+        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), id)
+
+    /**
+     * 휴지통으로. **어떤 id를 보냈는지 뷰모델에 먼저 알린다** — 시스템이 확인해 주면
+     * 그 목록을 화면과 DB에서 바로 지워야 방금 정리한 사진이 계속 보이지 않는다.
+     */
+    fun sendToTrash(ids: Collection<Long>) {
         if (ids.isEmpty()) { vm.toast("휴지통으로 보낼 사진을 고르세요."); return }
-        val uris = ids.map {
-            android.content.ContentUris.withAppendedId(
-                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), it)
-        }
-        val req = MediaStore.createTrashRequest(ctx.contentResolver, uris, true)
+        vm.willTrash(ids)
+        val req = MediaStore.createTrashRequest(ctx.contentResolver, ids.map(::uriOf), true)
         trash.launch(IntentSenderRequest.Builder(req.intentSender).build())
     }
 
-    // 분류 항목 토글. 끄면 그 축의 앨범을 숨긴다 — 이미 계산된 태그는 지우지 않는다.
+    /** 공유 시트. 받는 앱은 사용자가 고른다 — 우리가 어디로 보낼지 정하지 않는다. */
+    fun share(ids: Collection<Long>) {
+        if (ids.isEmpty()) return
+        val uris = ArrayList(ids.map(::uriOf))
+        val intent = if (uris.size == 1) {
+            Intent(Intent.ACTION_SEND).apply { putExtra(Intent.EXTRA_STREAM, uris[0]) }
+        } else {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply { putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris) }
+        }
+        intent.type = "image/*"
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        ctx.startActivity(Intent.createChooser(intent, "사진 공유"))
+    }
+
+    // 분류 항목 토글. 끄면 그 축의 AI 앨범을 숨긴다 — 이미 계산된 태그는 지우지 않는다.
     // 다시 켜면 바로 돌아오므로 되돌릴 수 없는 동작이 아니다.
     var offAxes by remember { mutableStateOf(loadOffAxes()) }
     val toggles = remember(offAxes) {
@@ -129,53 +141,68 @@ private fun App() {
             .map { CategoryToggle(it.name, it.label, axisDesc(it), it.name !in offAxes) }
     }
 
-    val uriOf: (Long) -> String? = remember { { id -> AppGraph.store.photo(id)?.uri } }
-    val visible = remember(ui, offAxes) { ui.copy(albums = ui.albums.filter { it.axis.name !in offAxes }) }
+    val uriText: (Long) -> String? = remember { { id -> mediaUri(id) } }
+    // 숨김은 AI 앨범에만 건다. 기기 폴더와 내 앨범은 우리가 분류한 것이 아니다.
+    val visible = remember(ui, offAxes) {
+        ui.copy(albums = ui.albums.filterNot { it.kind == AlbumKind.Tag && it.axis.name in offAxes })
+    }
+    val actions = remember { AppActions(trash = ::sendToTrash, share = ::share) }
 
-    Column(Modifier.fillMaxSize().background(t.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
-        Box(Modifier.weight(1f)) {
-            when (screen) {
-                Screen.Permission -> OnboardingScreen(
-                    onGrant = { ask.launch(mediaPermissions()) },
-                    onLater = {
-                        permissionDeferred = true
-                        vm.toast("설정에서 언제든 허용할 수 있습니다.")
-                    },
-                )
-                Screen.Analyzing -> AnalyzingScreen(
-                    progress = ui.counts.progress, done = ui.counts.done, total = ui.counts.total,
-                )
-                Screen.Home -> HomeScreen(vm, visible, uriOf)
-                Screen.Albums -> AlbumsScreen(vm, visible, uriOf)
-                Screen.Category -> CategoryScreen(vm, ui, uriOf, onTrash = ::sendAlbumToTrash)
-                Screen.Photo -> PhotoScreen(vm, ui)
-                Screen.Search -> SearchScreen(vm, ui)
-                Screen.Fix -> FixScreen(vm, ui)
-                Screen.Cleanup -> CleanupScreen(vm, ui, onTrash = ::sendCleanupToTrash)
-                Screen.Settings -> SettingsScreen(
-                    vm, ui, toggles,
-                    onFlip = { id ->
-                        offAxes = if (id in offAxes) offAxes - id else offAxes + id
-                        saveOffAxes(offAxes)
-                    },
-                    onCleanup = vm::openCleanup,
-                )
-            }
-
-            // 일부 허용은 안드로이드가 실제로 만드는 상태다. 그냥 두면 앨범이 왜
-            // 비어 있는지 알 수 없다(§4.3).
-            if (acc == Access.Partial && screen == Screen.Home) {
-                Box(Modifier.align(Alignment.TopCenter).padding(top = 84.dp)) {
-                    PartialAccessBanner { ask.launch(mediaPermissions()) }
+    CompositionLocalProvider(LocalActions provides actions) {
+        Column(Modifier.fillMaxSize().background(t.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
+            Box(Modifier.weight(1f)) {
+                when (screen) {
+                    Screen.Permission -> OnboardingScreen(
+                        onGrant = { ask.launch(mediaPermissions()) },
+                        onLater = {
+                            permissionDeferred = true
+                            vm.toast("설정에서 언제든 허용할 수 있습니다.")
+                        },
+                    )
+                    Screen.Analyzing -> AnalyzingScreen(
+                        progress = ui.counts.progress, done = ui.counts.done, total = ui.counts.total,
+                    )
+                    Screen.Photos -> PhotosScreen(vm, visible)
+                    Screen.Albums -> AlbumsScreen(vm, visible, uriText)
+                    Screen.Category -> CategoryScreen(vm, ui)
+                    Screen.Viewer -> ViewerScreen(vm, ui)
+                    Screen.Search -> SearchScreen(vm, ui)
+                    Screen.Fix -> FixScreen(vm, ui)
+                    Screen.Cleanup -> CleanupScreen(vm, ui)
+                    Screen.Settings -> SettingsScreen(
+                        vm, ui, toggles,
+                        onFlip = { id ->
+                            offAxes = if (id in offAxes) offAxes - id else offAxes + id
+                            saveOffAxes(offAxes)
+                        },
+                    )
                 }
+
+                // 일부 허용은 안드로이드가 실제로 만드는 상태다. 그냥 두면 앨범이 왜
+                // 비어 있는지 알 수 없다(§4.3).
+                if (acc == Access.Partial && screen == Screen.Photos) {
+                    Box(Modifier.align(Alignment.TopCenter).padding(top = 84.dp)) {
+                        PartialAccessBanner { ask.launch(mediaPermissions()) }
+                    }
+                }
+                if (ui.pickerOpen) AlbumPicker(vm, ui)
+                Toast(ui.toast, Modifier.align(Alignment.BottomCenter))
             }
-            Toast(ui.toast, Modifier.align(Alignment.BottomCenter))
+            if (screen.showsNav && !ui.selectionMode) BottomNav(screen) { vm.go(it) }
         }
-        if (screen.showsNav) BottomNav(screen) { vm.go(it) }
     }
 
-    // 하위 화면에서는 위로, 탭 화면에서는 시스템에 넘겨 앱을 닫는다.
-    BackHandler(enabled = !screen.showsNav) { vm.back() }
+    // 정리 탭에 들어올 때마다 묶음을 다시 읽는다. 사진을 지운 뒤 남은 묶음이 달라진다.
+    LaunchedEffect(screen) { if (screen == Screen.Cleanup) vm.loadCleanup() }
+
+    // 하위 화면에서는 위로, 선택 중이면 선택부터 푼다. 탭 화면에서는 시스템에 넘겨 앱을 닫는다.
+    BackHandler(enabled = !screen.showsNav || ui.selectionMode || ui.pickerOpen) {
+        when {
+            ui.pickerOpen -> vm.closePicker()
+            ui.selectionMode -> vm.cancelSelection()
+            else -> vm.back()
+        }
+    }
 }
 
 /** 축 설명. 디자인의 toggle desc를 **실제 동작**에 맞춰 적었다. */

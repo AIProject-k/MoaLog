@@ -104,6 +104,26 @@ object Grouping {
     }
 
     /**
+     * 재분석해도 같은 묶음을 가리키는 열쇠.
+     *
+     * `group_id`는 그룹핑을 돌 때마다 0부터 다시 매겨진다. 그것을 열쇠로 쓰면
+     * 사용자의 "이 묶음은 유지"가 다음 분석 뒤 엉뚱한 묶음에 붙는다. 구성원 중
+     * 가장 작은 id는 사진이 지워지지 않는 한 그대로다.
+     */
+    fun key(g: Group): String = "${g.kind.name.lowercase()}:${g.ids.min()}"
+
+    /** 사용자가 보관할 사진을 직접 골랐으면 그것을 쓴다. 묶음에 없는 id는 무시한다. */
+    fun withKeep(g: Group, keepId: Long?): Group =
+        if (keepId != null && keepId in g.ids) g.copy(bestId = keepId) else g
+
+    /**
+     * "보관 추천 제외하고 선택". 묶음마다 남길 한 장만 빼고 나머지를 고른다 —
+     * 사용자가 가장 자주 하려는 일이라 버튼 하나로 둔다.
+     */
+    fun allButKept(groups: List<Group>): Set<Long> =
+        groups.flatMapTo(HashSet()) { g -> g.ids.filter { it != g.bestId } }
+
+    /**
      * 한 중복 그룹의 사본을 **전부** 지우려 하면 1장은 남긴다.
      *
      * 중복 정리는 '한 장만 남기기'지 '사진을 없애기'가 아니다. 놓친 중복은 다음에 잡으면

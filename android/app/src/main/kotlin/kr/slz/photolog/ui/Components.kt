@@ -15,17 +15,22 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -238,3 +243,78 @@ private val TILE_COLORS = listOf(
     ACCENT_SLOT, 0xFF2F2F38, 0xFF3A3A44,
     0xFF26262E, 0xFF4A3330, 0xFF2B2B33,
 )
+
+/**
+ * "앨범에 추가" 시트. 사진을 **복사하지 않는다** — 내 앨범은 사진을 가리키는 목록일 뿐이라
+ * 앨범에 넣어도 원래 자리에 그대로 있고, 앨범을 지워도 사진은 남는다. 그 사실을 적어 둔다.
+ */
+@Composable
+fun AlbumPicker(vm: AppViewModel, ui: AppViewModel.Ui) {
+    val t = theme
+    var name by remember { mutableStateOf("") }
+    val scrim = remember { MutableInteractionSource() }
+    val sheet = remember { MutableInteractionSource() }
+    Box(
+        Modifier.fillMaxSize().background(Color.Black.copy(alpha = .55f))
+            .clickable(scrim, indication = null) { vm.closePicker() },
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                .background(t.surface2)
+                .clickable(sheet, indication = null) { }
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text("${ui.selected.size}장을 넣을 앨범", style = fonts.header, color = t.text)
+            Text(
+                "사진은 원래 자리에 그대로 있습니다. 앨범은 사진을 가리키는 목록입니다.",
+                style = fonts.meta, color = t.textMuted,
+            )
+
+            for (a in ui.userAlbums) Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.chip)).background(t.surface3)
+                    .clickable { vm.addSelectedToAlbum(a.id) }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(a.name, style = fonts.bodySm, color = t.text, modifier = Modifier.weight(1f))
+                Text("${a.count}장", style = fonts.meta, color = t.textFaint)
+            }
+
+            SectionLabel("새 앨범 만들기")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.weight(1f).height(46.dp).clip(RoundedCornerShape(Radius.field))
+                        .background(t.surface3).padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    BasicTextField(
+                        value = name, onValueChange = { name = it }, singleLine = true,
+                        textStyle = fonts.body.copy(color = t.text),
+                        cursorBrush = SolidColor(t.accent),
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { inner ->
+                            if (name.isEmpty())
+                                Text("앨범 이름", style = fonts.body, color = t.text.copy(alpha = .38f))
+                            inner()
+                        },
+                    )
+                }
+                Box(
+                    Modifier.height(46.dp).clip(RoundedCornerShape(23.dp))
+                        .background(if (name.isBlank()) t.surface4 else t.accent)
+                        .then(if (name.isBlank()) Modifier
+                        else Modifier.clickable { vm.createAlbumWithSelected(name) })
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("만들기", style = fonts.caption.copy(fontWeight = FontWeight.Bold),
+                        color = if (name.isBlank()) t.textFaint else Color.White)
+                }
+            }
+            GhostButton("닫기") { vm.closePicker() }
+        }
+    }
+}

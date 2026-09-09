@@ -191,4 +191,46 @@ class GroupingTest {
         val ev = Events.build(g, 3, 0.0, seoul).single()
         assertEquals("3월 2일 · 사진 2장", ev.title)
     }
+
+    // ---------- 사용자의 결정 ----------
+
+    @Test fun `묶음 열쇠는 순서가 바뀌어도 같다`() {
+        val a = Grouping.Group(Grouping.Kind.BURST, listOf(7L, 3L, 9L), bestId = 7L)
+        val b = Grouping.Group(Grouping.Kind.BURST, listOf(9L, 7L, 3L), bestId = 9L)
+        // 재분석하면 정렬 순서도 대표 사진도 달라질 수 있다. 열쇠는 그래도 같아야
+        // "이 묶음은 유지"가 같은 묶음에 붙는다.
+        assertEquals(Grouping.key(a), Grouping.key(b))
+        assertEquals("burst:3", Grouping.key(a))
+    }
+
+    @Test fun `종류가 다르면 열쇠도 다르다`() {
+        val ids = listOf(3L, 7L)
+        assertTrue(Grouping.key(Grouping.Group(Grouping.Kind.EXACT, ids, 3L)) !=
+            Grouping.key(Grouping.Group(Grouping.Kind.BURST, ids, 3L)))
+    }
+
+    @Test fun `보관할 사진을 사람이 바꾼다`() {
+        val g = Grouping.Group(Grouping.Kind.BURST, listOf(1L, 2L, 3L), bestId = 2L)
+        assertEquals(3L, Grouping.withKeep(g, 3L).bestId)
+    }
+
+    @Test fun `묶음에 없는 사진을 보관하라고 해도 무시한다`() {
+        // 사진이 지워진 뒤 남아 있던 선택이 살아 돌아오는 경우다. 그대로 쓰면
+        // keepOnePerGroup이 남길 사진을 못 찾아 엉뚱한 장을 남긴다.
+        val g = Grouping.Group(Grouping.Kind.EXACT, listOf(1L, 2L), bestId = 1L)
+        assertEquals(1L, Grouping.withKeep(g, 99L).bestId)
+        assertEquals(1L, Grouping.withKeep(g, null).bestId)
+    }
+
+    @Test fun `보관 추천 제외하고 선택하면 묶음마다 한 장씩 빠진다`() {
+        val groups = listOf(
+            Grouping.Group(Grouping.Kind.EXACT, listOf(1L, 2L, 3L), bestId = 1L),
+            Grouping.Group(Grouping.Kind.BURST, listOf(4L, 5L), bestId = 5L),
+        )
+        assertEquals(setOf(2L, 3L, 4L), Grouping.allButKept(groups))
+        // 그대로 지워도 보호 규칙이 더 뺄 것이 없다 — 이미 한 장씩 남겼기 때문이다.
+        val (delete, kept) = Grouping.keepOnePerGroup(Grouping.allButKept(groups), groups)
+        assertEquals(setOf(2L, 3L, 4L), delete.toSet())
+        assertTrue(kept.isEmpty())
+    }
 }

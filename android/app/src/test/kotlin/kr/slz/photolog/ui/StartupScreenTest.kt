@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class StartupScreenTest {
     @Test
     fun `사진 권한이 없으면 권한 안내 화면을 표시한다`() {
-        assertEquals(Screen.Permission, startupScreen(Access.None, Screen.Home))
+        assertEquals(Screen.Permission, startupScreen(Access.None, Screen.Photos))
     }
 
     @Test

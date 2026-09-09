@@ -100,3 +100,15 @@ data class EventRow(
     val count: Int,
     val coverIds: List<Long>,
 )
+
+/** 기기 폴더 하나. 카메라·스크린샷처럼 **실제 저장 위치**를 뜻한다. */
+data class BucketRow(val name: String, val count: Int, val coverIds: List<Long>)
+
+/** 사용자가 직접 만든 앨범. */
+data class UserAlbumRow(val id: Long, val name: String, val count: Int, val coverIds: List<Long>)
+
+/** 중복 묶음에 대한 사용자의 결정. `keepId`는 보관 추천을 바꾼 것, `dismissed`는 "이 묶음은 유지". */
+data class DupeChoice(val keepId: Long?, val dismissed: Boolean)
+
+/** 월 하나. `offset`은 날짜순 전체 목록에서 이 달이 시작하는 자리다. */
+data class MonthRow(val ym: String, val count: Int, val offset: Int)

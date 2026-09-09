@@ -39,7 +39,7 @@ fun SearchScreen(vm: AppViewModel, ui: AppViewModel.Ui) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                BackButton { vm.go(Screen.Home) }
+                BackButton { vm.go(Screen.Photos) }
                 Box(
                     Modifier.weight(1f).height(44.dp).clip(RoundedCornerShape(Radius.field))
                         .background(t.surface2).padding(horizontal = 16.dp),
@@ -108,13 +108,16 @@ fun SearchScreen(vm: AppViewModel, ui: AppViewModel.Ui) {
                         Text(ui.resultSummary, style = fonts.bodySm, color = t.text.copy(alpha = .88f))
                     }
                 }
+                // 검색 결과 안에서도 좌우로 넘길 수 있어야 한다 — 한 장 보고 뒤로 나갔다
+                // 다시 들어오게 만들면 결과를 훑을 수가 없다.
+                val ids = ui.results.map { it.id }
                 items(ui.results.chunked(3)) { row ->
                     Row(
                         Modifier.padding(top = 3.dp),
                         horizontalArrangement = Arrangement.spacedBy(3.dp),
                     ) {
                         for (p in row) Thumb(p.uri,
-                            Modifier.weight(1f).aspectRatio(1f).clickable { vm.openPhoto(p.id) })
+                            Modifier.weight(1f).aspectRatio(1f).clickable { vm.openViewer(ids, p.id) })
                         repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }

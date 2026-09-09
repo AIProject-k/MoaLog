@@ -31,13 +31,18 @@ fun SettingsScreen(
     ui: AppViewModel.Ui,
     toggles: List<CategoryToggle>,
     onFlip: (String) -> Unit,
-    onCleanup: () -> Unit,
 ) {
     val t = theme
     LazyColumn(Modifier.fillMaxSize()) {
         item {
-            Text("자동분류 설정", style = fonts.screenTitle, color = t.text,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 16.dp))
+            Row(
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 20.dp, top = 14.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                BackButton { vm.back() }
+                Text("설정", style = fonts.screenTitle, color = t.text)
+            }
         }
 
         item {
@@ -94,18 +99,21 @@ fun SettingsScreen(
             Box(Modifier.padding(horizontal = 20.dp).fillMaxWidth().height(1.dp).background(t.divider))
         }
 
+        // 전체 재분석과 결과 삭제는 하루에 한 번 누를 일이 없고, 잘못 누르면 몇 시간이
+        // 날아간다. 일반 조작과 섞어 두지 않고 '데이터 관리'로 따로 내린다.
+        item { SectionLabel("데이터 관리", Modifier.padding(start = 20.dp, top = 26.dp, bottom = 8.dp)) }
         item {
             Column(
-                Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 30.dp),
+                Modifier.padding(start = 20.dp, end = 20.dp, bottom = 30.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (ui.cleanupCount > 0) ActionRow(
-                    "중복 사진 ${ui.cleanupCount}장 휴지통으로",
-                    "그룹마다 가장 잘 나온 한 장은 남깁니다",
-                    t.accentHi, onCleanup,
-                )
                 ActionRow("전체 다시 분석", "촬영 정보는 두고 장면 분류만 다시 합니다", t.text) { vm.reanalyze() }
                 ActionRow("분류 결과 전체 삭제", "사진은 지우지 않습니다", t.accentHi) { vm.clearAnalysis() }
+                Text(
+                    "정리 기능은 아래 '정리' 탭에 있습니다.",
+                    style = fonts.meta, color = t.textFaint,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
             }
         }
     }
