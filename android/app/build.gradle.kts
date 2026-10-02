@@ -8,7 +8,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "kr.slz.photolog"
+        applicationId = "com.moalog.personal"
         minSdk = 30                     // createTrashRequest · GENERATION_* · setRequireOriginal
         targetSdk = 35
         versionCode = 6
@@ -27,6 +27,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = signingConfigs.getByName("test")
             // R8을 끈다. ORT의 JNI 진입점과 Compose를 지키려면 규칙을 써야 하는데,
