@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{margin:0}a{color:#8FB8FF}a:hover{color:#B5D0FF}input::placeholder{color:#8E8B86}@keyframes moaspin{to{transform:rotate(360deg)}}</style></helmet>
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<symbol id="i-gallery" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></symbol>
+<symbol id="i-album" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="3.5" y="8" width="17" height="12.5" rx="2"></rect><path d="M6 5h12M8.5 2.5h7"></path></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 20.5 20.5"></path></symbol>
+<symbol id="i-clean" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="3.5" y="3.5" width="12" height="12" rx="2"></rect><rect x="8.5" y="8.5" width="12" height="12" rx="2"></rect><path d="m11.5 14.5 2 2 4-4"></path></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"></path><circle cx="15" cy="7" r="2"></circle><circle cx="9" cy="17" r="2"></circle></symbol>
+<symbol id="i-back" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></symbol>
+<symbol id="i-close" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M6 6l12 12M18 6 6 18"></path></symbol>
+<symbol id="i-more" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5.5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="18.5" r="1.6"></circle></symbol>
+<symbol id="i-share" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3.5v11M8 7.5l4-4 4 4"></path><path d="M5.5 12v6.5a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V12"></path></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4.5 6.5h15M9.5 6.5V4.5h5v2"></path><path d="M6.5 6.5l.9 12.2a2 2 0 0 0 2 1.8h5.2a2 2 0 0 0 2-1.8l.9-12.2"></path><path d="M10 10.5v6M14 10.5v6"></path></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"></path></symbol>
+<symbol id="i-heart-f" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor;stroke-width:1.75;stroke-linejoin:round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"></path></symbol>
+<symbol id="i-info" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.5"></path><circle cx="12" cy="7.8" r="1" style="fill:currentColor;stroke:none"></circle></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></symbol>
+<symbol id="i-play" viewBox="0 0 24 24" style="fill:currentColor;stroke:currentColor;stroke-width:1.5;stroke-linejoin:round"><path d="M8 5.5v13l10.5-6.5z"></path></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="6.5" y="5" width="3.5" height="14" rx="1"></rect><rect x="14" y="5" width="3.5" height="14" rx="1"></rect></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"></path></symbol>
+<symbol id="i-mute" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path><path d="M16 9.5l5 5M21 9.5l-5 5"></path></symbol>
+<symbol id="i-fs" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></symbol>
+<symbol id="i-fs-exit" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path></symbol>
+<symbol id="i-video" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="5.5" width="18" height="13" rx="3"></rect><path d="M10.5 9.5v5l4-2.5z" style="fill:currentColor"></path></symbol>
+<symbol id="i-photo" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><circle cx="9" cy="10" r="1.8"></circle><path d="M20.5 16l-5-5-8 8.5"></path></symbol>
+<symbol id="i-mine" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"></path></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 7a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"></path></symbol>
+<symbol id="i-ai" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 12.2V5A1.5 1.5 0 0 1 5 3.5h7.2l8.3 8.3-8.7 8.7z"></path><circle cx="8.5" cy="8.5" r="1.5"></circle></symbol>
+<symbol id="i-record" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M4 6h16M7 12h10M10 18h4"></path></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M12 5v14M5 12h14"></path></symbol>
+<symbol id="i-device" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect><path d="M10.5 18.5h3M9.5 10.5l2 2 3.5-3.5"></path></symbol>
+<symbol id="i-offline" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.8 16a4.6 4.6 0 0 1 6.4 0"></path><circle cx="12" cy="19.3" r="1" style="fill:currentColor;stroke:none"></circle><path d="M4 3.5 20 20.5"></path></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M12 4 21 19.5H3z"></path><path d="M12 10v4.5"></path><circle cx="12" cy="17" r=".9" style="fill:currentColor;stroke:none"></circle></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M9 14 4.5 9.5 9 5"></path><path d="M4.5 9.5h9.5a5.5 5.5 0 0 1 0 11H11"></path></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"></path><path d="M19.5 4.5v4h-4"></path></symbol>
+<symbol id="i-scene" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3.5l5 5-5 5-5-5z"></path><path d="M12 13.5v7"></path></symbol>
+<symbol id="i-remove" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M8 12h8"></path></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9.5l6 6 6-6"></path></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M9 5.5l6.5 6.5L9 18.5"></path></symbol>
+<symbol id="i-rw" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M5.2 13a7 7 0 1 0 2.3-6.2"></path><path d="M7.5 3v4h4"></path></symbol>
+<symbol id="i-ff" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M18.8 13a7 7 0 1 1-2.3-6.2"></path><path d="M16.5 3v4h-4"></path></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round"><path d="M9 3.5h6l-1 6 3.5 3.5h-11L10 9.5z"></path><path d="M12 13v7.5"></path></symbol>
+</defs></svg>
+<div style="width:411px;height:891px;position:relative;overflow:hidden;border-radius:28px;background:#0E0E10;color:#F2F0ED;font-family:'IBM Plex Sans KR',sans-serif;box-shadow:0 0 0 6px #1b1b1e;flex:none;user-select:none;-webkit-user-select:none;font-variant-numeric:tabular-nums">
+<sc-if value="{{ is.Permission }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Permission" style="position:absolute;inset:0;padding:48px 24px 36px;box-sizing:border-box;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><div style="width:22px;height:22px;border-radius:6px;background:#16161A;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px;box-sizing:border-box"><span style="background:#F2F0ED;border-radius:1.5px"></span><span style="background:#F2F0ED;border-radius:1.5px"></span><span style="background:#F2F0ED;border-radius:1.5px"></span><span style="background:#8FB8FF;border-radius:4px"></span></div>MoaLog</div>
+<div style="margin:36px auto 0;width:228px;height:228px;position:relative;flex:none"><div style="position:absolute;inset:0;border-radius:36px;background:#16161A;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"></div><div style="position:absolute;inset:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ permTiles }}" as="t" hint-placeholder-count="9"><div style="border-radius:8px;background:{{ t.bg }}"></div></sc-for></div><div style="position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);height:36px;padding:0 14px 0 10px;border-radius:18px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;white-space:nowrap"><svg style="width:18px;height:18px"><use href="#i-device"></use></svg>이 휴대폰 안에서만</div></div>
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:34px;font-size:12px;color:#8E8B86"><span style="width:40px;height:1px;border-top:1px dashed #5E5C59"></span><svg style="width:18px;height:18px"><use href="#i-offline"></use></svg>외부로 보내지 않습니다<span style="width:40px;height:1px;border-top:1px dashed #5E5C59"></span></div>
+<div style="margin-top:28px;font-size:22px;font-weight:700;line-height:30px;text-wrap:pretty">쌓아둔 사진·영상, AI가 알아서 정리합니다</div>
+<div style="margin-top:10px;font-size:14px;line-height:22px;color:#BDBAB4;text-wrap:pretty">인물, 장소, 날짜, 화면 캡처까지 구분해 앨범을 만들어 둡니다. 분석은 기기 안에서만 처리되고 사진·영상은 어디에도 올라가지 않습니다.</div>
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;font-size:13.5px;line-height:20px"><div style="display:flex;gap:10px;align-items:flex-start"><svg style="width:20px;height:20px;flex:none;color:#8FB8FF"><use href="#i-offline"></use></svg>기기 내 처리 · 네트워크 사용 없음</div><div style="display:flex;gap:10px;align-items:flex-start"><svg style="width:20px;height:20px;flex:none;color:#8FB8FF"><use href="#i-undo"></use></svg>분류가 틀리면 바로 고칠 수 있고, 다음부터 반영됩니다</div></div>
+<div style="flex:1"></div>
+<sc-if value="{{ perm.later }}"><div style="margin-bottom:12px;padding:12px 14px;border-radius:12px;background:#16161A;font-size:12.5px;line-height:19px;color:#BDBAB4">나중에 허용해도 됩니다. 허용하기 전에는 갤러리가 비어 있습니다.</div></sc-if>
+<div onClick="{{ allow }}" style="height:52px;border-radius:26px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;cursor:pointer">사진·동영상 접근 허용하고 시작</div>
+<sc-if value="{{ perm.ask }}"><div onClick="{{ later }}" style="height:48px;margin-top:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#BDBAB4;cursor:pointer">나중에 할게요</div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ is.Analyzing }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Analyzing" style="position:absolute;inset:0;padding:48px 24px 36px;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch">
+<div style="font-size:15px;font-weight:700">MoaLog</div>
+<div style="margin:40px auto 0;width:200px;height:200px;position:relative"><svg viewBox="0 0 200 200" style="width:200px;height:200px"><circle cx="100" cy="100" r="88" style="fill:none;stroke:#1D1D22;stroke-width:10"></circle><circle cx="100" cy="100" r="88" style="fill:none;stroke:{{ ana.ring }};stroke-width:10;stroke-linecap:round;stroke-dasharray:{{ ana.dash }} 553;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dasharray .2s"></circle></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font-size:42px;font-weight:700;line-height:48px">{{ ana.pct }}%</div><div style="font-size:12.5px;color:#BDBAB4">{{ ana.count }}</div></div></div>
+<sc-if value="{{ ana.paused }}"><div style="margin-top:20px;padding:12px 14px;border-radius:12px;background:#16161A;display:flex;align-items:center;gap:10px"><svg style="width:20px;height:20px;color:#F2C66D;flex:none"><use href="#i-pause"></use></svg><div style="flex:1;font-size:13.5px;font-weight:600">{{ ana.pausedMsg }}</div><div onClick="{{ anaResume }}" style="height:40px;padding:0 12px;display:flex;align-items:center;font-size:13px;font-weight:600;color:#8FB8FF;cursor:pointer">이어서</div></div></sc-if>
+<div style="margin-top:24px;border-radius:16px;background:#16161A;padding:4px 0"><sc-for list="{{ ana.steps }}" as="p" hint-placeholder-count="4"><div style="height:52px;display:flex;align-items:center;gap:12px;padding:0 16px"><div style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex:none"><sc-if value="{{ p.done }}"><svg style="width:20px;height:20px;color:#6FD49A"><use href="#i-check"></use></svg></sc-if><sc-if value="{{ p.act }}"><span style="width:12px;height:12px;border-radius:6px;border:2px solid #8FB8FF"></span></sc-if><sc-if value="{{ p.wait }}"><span style="width:6px;height:6px;border-radius:3px;background:#5E5C59"></span></sc-if></div><span style="flex:1;font-size:14px;color:{{ p.col }}">{{ p.t }}</span><span style="font-size:12px;color:#8E8B86">{{ p.stT }}</span></div></sc-for></div>
+<div style="flex:1"></div>
+<div style="font-size:12.5px;line-height:19px;color:#8E8B86;text-wrap:pretty;display:flex;gap:8px"><svg style="width:16px;height:16px;flex:none;margin-top:2px"><use href="#i-info"></use></svg>화면을 닫아도 백그라운드에서 이어집니다. 충전 중일 때 더 빠르게 처리됩니다.</div>
+</div></sc-if>
+
+<sc-if value="{{ is.grid }}" hint-placeholder-val="{{ true }}"><div data-screen-label="Photos / Category" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<sc-if value="{{ topbar.photos }}" hint-placeholder-val="{{ true }}"><div style="padding-top:28px;flex:none"><div style="height:56px;display:flex;align-items:center;padding:0 4px 0 16px"><div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700;line-height:26px">갤러리</div><div style="font-size:12px;line-height:16px;color:#BDBAB4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ photosSub }}</div></div><div onClick="{{ openSearch }}" aria-label="검색" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-search"></use></svg></div><div onClick="{{ openSettings }}" aria-label="설정" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-settings"></use></svg></div></div></div></sc-if>
+<sc-if value="{{ topbar.cat }}"><div style="padding-top:28px;flex:none"><div style="height:64px;display:flex;align-items:center;padding:0 4px"><div onClick="{{ back }}" aria-label="뒤로" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-back"></use></svg></div><div style="flex:1;min-width:0;padding-left:4px"><div style="font-size:18px;font-weight:700;line-height:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ catT }}</div><div style="font-size:12px;line-height:16px;color:#BDBAB4;display:flex;align-items:center;gap:4px;white-space:nowrap"><svg style="width:13px;height:13px;flex:none"><use href="{{ catIc }}"></use></svg>{{ catSub }}</div></div><div onClick="{{ catSelect }}" aria-label="선택" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-check"></use></svg></div><sc-if value="{{ catMoreShow }}"><div onClick="{{ catMore }}" aria-label="더보기" style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-more"></use></svg></div></sc-if></div></div></sc-if>
+<sc-if value="{{ topbar.sel }}"><div style="padding-top:28px;flex:none;background:#16161A"><div style="height:64px;display:flex;align-items:center;padding:0 4px"><div onClick="{{ back }}" aria-label="선택 해제" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-close"></use></svg></div><div style="flex:1;min-width:0;padding-left:4px"><div style="font-size:18px;font-weight:700;line-height:24px">{{ selT }}</div><div style="font-size:12px;line-height:16px;color:#BDBAB4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selSub }}</div></div><div onClick="{{ selAll }}" style="height:48px;padding:0 12px;display:flex;align-items:center;font-size:14px;font-weight:600;color:#8FB8FF;cursor:pointer;white-space:nowrap">{{ selAllT }}</div></div></div></sc-if>
+<div ref="{{ gridRef }}" onScroll="{{ onGridScroll }}" style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;position:relative;overscroll-behavior:contain">
+<sc-if value="{{ limited }}"><div style="margin:4px 16px 8px;padding:14px;border-radius:16px;background:#16161A;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600"><svg style="width:20px;height:20px;color:#F2C66D;flex:none"><use href="#i-warn"></use></svg>미디어 접근이 일부만 허용됐습니다</div><div style="font-size:12.5px;line-height:19px;color:#BDBAB4;text-wrap:pretty">사진과 동영상 중 허용한 항목만 분석합니다. 전체 갤러리를 보려면 두 권한을 모두 허용해 주세요.</div><div onClick="{{ allowAll }}" style="align-self:flex-start;height:40px;padding:0 16px;border-radius:20px;background:#26262C;display:flex;align-items:center;font-size:13.5px;font-weight:600;color:#8FB8FF;cursor:pointer">전체 허용</div></div></sc-if>
+<sc-if value="{{ photosTop }}" hint-placeholder-val="{{ true }}"><div style="height:52px;display:flex;align-items:center;padding:0 16px"><div style="display:flex;background:#1D1D22;border-radius:12px;padding:3px;gap:2px"><sc-for list="{{ pfSeg }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="height:42px;padding:0 16px;border-radius:9px;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};display:flex;align-items:center;font-size:13px;cursor:pointer">{{ o.t }}</div></sc-for></div></div></sc-if>
+<sc-if value="{{ catTop }}"><div style="height:52px;display:flex;align-items:center;padding:0 16px"><div style="display:flex;background:#1D1D22;border-radius:12px;padding:3px;gap:2px"><sc-for list="{{ cfSeg }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="height:42px;padding:0 16px;border-radius:9px;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};display:flex;align-items:center;font-size:13px;cursor:pointer">{{ o.t }}</div></sc-for></div></div></sc-if>
+<sc-if value="{{ moaShow }}"><div style="display:flex;gap:8px;padding:4px 16px 12px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ moa }}" as="m" hint-placeholder-count="2"><div onClick="{{ m.go }}" style="flex:none;width:132px;height:76px;border-radius:12px;background:{{ m.bg }};position:relative;overflow:hidden;cursor:pointer"><div style="position:absolute;inset:0;background:linear-gradient(transparent 25%,rgba(0,0,0,.7))"></div><div style="position:absolute;left:10px;right:10px;bottom:8px"><div style="font-size:12.5px;font-weight:600;line-height:17px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.t }}</div><div style="font-size:11px;line-height:14px;color:#fff">{{ m.m }}</div></div></div></sc-for><sc-if value="{{ moaClean }}"><div onClick="{{ goClean }}" style="flex:none;width:132px;height:76px;border-radius:12px;background:#16161A;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);box-sizing:border-box;padding:10px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer"><svg style="width:20px;height:20px;color:#BDBAB4"><use href="#i-clean"></use></svg><div style="font-size:12px;font-weight:600;line-height:16px">{{ moaCleanT }}</div></div></sc-if></div></sc-if>
+<sc-for list="{{ sections }}" as="g" hint-placeholder-count="3"><div data-month="{{ g.month }}"><div style="height:40px;display:flex;align-items:flex-end;gap:8px;padding:0 16px 8px;box-sizing:border-box"><span style="font-size:14px;font-weight:600;line-height:18px;white-space:nowrap">{{ g.h }}</span><span style="font-size:12px;line-height:16px;color:#8E8B86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.meta }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px"><sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="6"><div data-id="{{ c.id }}" onPointerDown="{{ cellDown }}" onPointerUp="{{ cellUp }}" onPointerLeave="{{ cellCancel }}" onContextMenu="{{ noCtx }}" style="aspect-ratio:1;position:relative;background:{{ c.bg }};cursor:pointer;touch-action:pan-y"><sc-if value="{{ c.fail }}"><div style="position:absolute;inset:0;background:#1D1D22;display:flex;align-items:center;justify-content:center;color:#5E5C59"><svg style="width:32px;height:32px"><use href="#i-video"></use></svg><span style="position:absolute;right:6px;bottom:5px;font-size:11px;font-weight:600;color:#BDBAB4">{{ c.dur }}</span></div></sc-if><sc-if value="{{ c.scrim }}"><div style="position:absolute;left:0;right:0;bottom:0;height:30px;background:linear-gradient(transparent,rgba(0,0,0,.6))"></div></sc-if><sc-if value="{{ c.video }}"><div style="position:absolute;right:6px;bottom:5px;display:flex;align-items:center;gap:3px;font-size:11px;font-weight:600;line-height:14px;color:#fff"><svg style="width:12px;height:12px"><use href="#i-play"></use></svg>{{ c.dur }}</div></sc-if><sc-if value="{{ c.fav }}"><svg style="position:absolute;left:6px;bottom:6px;width:14px;height:14px;color:#fff"><use href="#i-heart-f"></use></svg></sc-if><sc-if value="{{ c.sel }}"><div style="position:absolute;inset:0;background:rgba(143,184,255,.22);box-shadow:inset 0 0 0 3px #8FB8FF"></div><div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:12px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;justify-content:center"><svg style="width:15px;height:15px"><use href="#i-check"></use></svg></div></sc-if><sc-if value="{{ c.un }}"><div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:12px;border:2px solid #fff;box-sizing:border-box;background:rgba(0,0,0,.25)"></div></sc-if></div></sc-for></div></div></sc-for>
+<sc-if value="{{ gridEmpty }}"><div style="padding:96px 32px 0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center"><div style="width:64px;height:64px;border-radius:32px;background:#16161A;display:flex;align-items:center;justify-content:center;color:#8E8B86"><svg style="width:28px;height:28px"><use href="{{ empty.ic }}"></use></svg></div><div style="font-size:15px;font-weight:600;line-height:22px">{{ empty.t }}</div><sc-if value="{{ empty.hasD }}"><div style="font-size:13px;line-height:20px;color:#BDBAB4;text-wrap:pretty">{{ empty.d }}</div></sc-if></div></sc-if>
+<sc-if value="{{ hasFooter }}"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8E8B86">{{ gridFooter }}</div></sc-if>
+<div style="height:120px"></div>
+</div>
+<sc-if value="{{ scrub }}"><div onClick="{{ openMonth }}" style="position:absolute;right:2px;top:200px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:3"><div style="height:28px;padding:0 10px;border-radius:14px;background:#26262C;display:flex;align-items:center;font-size:12px;font-weight:600;white-space:nowrap">{{ scrubLabel }}</div><div style="width:5px;height:44px;border-radius:3px;background:#F2F0ED"></div></div></sc-if>
+<sc-if value="{{ vpShow }}"><div style="position:absolute;left:50%;transform:translateX(-50%);bottom:96px;height:36px;padding:0 14px 0 10px;border-radius:18px;background:#1D1D22;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;white-space:nowrap;z-index:3"><svg viewBox="0 0 20 20" style="width:18px;height:18px"><circle cx="10" cy="10" r="7.5" style="fill:none;stroke:#3A3A42;stroke-width:2.5"></circle><circle cx="10" cy="10" r="7.5" style="fill:none;stroke:#8FB8FF;stroke-width:2.5;stroke-dasharray:{{ vpDash }} 47.1;transform:rotate(-90deg);transform-origin:10px 10px"></circle></svg>{{ vpText }}</div></sc-if>
+<sc-if value="{{ catMenuShow }}"><div onClick="{{ closeMenu }}" style="position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:8"></div><div style="position:absolute;top:84px;right:12px;width:232px;padding:6px 0;border-radius:14px;background:#26262C;box-shadow:0 12px 32px rgba(0,0,0,.5);z-index:9"><sc-for list="{{ catMenu }}" as="m" hint-placeholder-count="1"><div onClick="{{ m.go }}" style="height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:14px;color:{{ m.fg }};cursor:pointer"><svg style="width:20px;height:20px"><use href="{{ m.ic }}"></use></svg>{{ m.t }}</div></sc-for><div style="padding:8px 16px;font-size:11.5px;line-height:16px;color:#8E8B86;border-top:1px solid rgba(255,255,255,.08)">{{ catNote }}</div></div></sc-if>
+<sc-if value="{{ selBar }}"><div style="position:absolute;left:0;right:0;bottom:0;height:100px;background:#16161A;border-top:1px solid rgba(255,255,255,.07);padding:8px 10px 20px 4px;box-sizing:border-box;display:flex;align-items:center;z-index:6"><sc-for list="{{ selActs }}" as="a" hint-placeholder-count="3"><div onClick="{{ a.go }}" style="min-width:48px;padding:0 5px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;opacity:{{ a.op }};cursor:pointer"><svg style="width:24px;height:24px"><use href="{{ a.ic }}"></use></svg><span style="font-size:11px;font-weight:500;white-space:nowrap">{{ a.t }}</span></div></sc-for><div style="flex:1"></div><div style="width:1px;height:32px;background:rgba(255,255,255,.12);margin-right:8px"></div><div onClick="{{ doTrash }}" style="height:48px;padding:0 14px;border-radius:24px;background:{{ trashBg }};color:{{ trashFg }};display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer"><svg style="width:20px;height:20px"><use href="#i-trash"></use></svg>{{ trashLabel }}</div></div></sc-if>
+</div></sc-if>
+<sc-if value="{{ is.Albums }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Albums" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="padding-top:28px;flex:none">
+<div style="height:56px;display:flex;align-items:center;padding:0 4px 0 16px"><div style="flex:1;font-size:20px;font-weight:700;line-height:26px">앨범</div><div onClick="{{ newAlbum }}" style="height:48px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#BDBAB4;cursor:pointer"><svg style="width:20px;height:20px"><use href="#i-plus"></use></svg>새 앨범<span style="font-size:10px;padding:1px 5px;border-radius:4px;box-shadow:inset 0 0 0 1px #5E5C59;color:#8E8B86">제안</span></div></div>
+<div style="padding:0 16px 8px"><div style="display:grid;grid-template-columns:repeat(3,1fr);background:#1D1D22;border-radius:12px;padding:3px;gap:2px"><sc-for list="{{ afSeg }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="height:42px;border-radius:9px;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;cursor:pointer"><sc-if value="{{ o.hasIc }}"><svg style="width:18px;height:18px"><use href="{{ o.ic }}"></use></svg></sc-if>{{ o.t }}</div></sc-for></div></div>
+<div style="height:48px;display:flex;gap:18px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px;white-space:nowrap;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ kindTabs }}" as="k" hint-placeholder-count="5"><div onClick="{{ k.go }}" style="display:flex;align-items:center;color:{{ k.fg }};font-weight:{{ k.fw }};box-shadow:{{ k.line }};cursor:pointer">{{ k.t }}</div></sc-for></div>
+</div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none">
+<sc-if value="{{ afVideo }}"><div style="margin:12px 16px 0;padding:10px 12px;border-radius:12px;background:#16161A;display:flex;align-items:center;gap:8px;font-size:12.5px;line-height:18px;color:#BDBAB4"><svg style="width:18px;height:18px;flex:none;color:#8FB8FF"><use href="#i-video"></use></svg>{{ videoBanner }}</div></sc-if>
+<sc-for list="{{ albumSecs }}" as="sec" hint-placeholder-count="3"><div style="padding-top:20px">
+<div style="padding:0 4px 0 16px;display:flex;align-items:flex-start;gap:8px"><div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:6px"><svg style="width:18px;height:18px;color:#BDBAB4"><use href="{{ sec.ic }}"></use></svg><span style="font-size:15px;font-weight:600">{{ sec.t }}</span><span style="font-size:12px;color:#8E8B86">{{ sec.n }}</span></div><div style="font-size:12px;line-height:17px;color:#8E8B86;text-wrap:pretty">{{ sec.d }}</div></div><sc-if value="{{ sec.axis }}"><div onClick="{{ sec.openAxis }}" style="height:40px;padding:0 8px 0 12px;margin-right:12px;display:flex;align-items:center;gap:2px;font-size:13px;font-weight:600;color:#BDBAB4;border-radius:20px;background:#1D1D22;cursor:pointer;white-space:nowrap">{{ sec.axisT }}<svg style="width:18px;height:18px"><use href="#i-chev-d"></use></svg></div></sc-if></div>
+<sc-if value="{{ sec.emptyShow }}"><div style="margin:12px 16px 0;padding:20px 16px;border-radius:16px;background:#16161A;text-align:center"><div style="font-size:14px;font-weight:600">{{ sec.emptyT }}</div><sc-if value="{{ sec.hasEmptyD }}"><div style="font-size:12.5px;line-height:19px;color:#BDBAB4;margin-top:4px">{{ sec.emptyD }}</div></sc-if></div></sc-if>
+<sc-if value="{{ sec.row }}"><div style="display:flex;gap:10px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ sec.cards }}" as="a" hint-placeholder-count="4"><div onClick="{{ a.go }}" style="flex:none;width:112px;cursor:pointer"><div style="width:112px;height:112px;border-radius:12px;background:{{ a.bg }};position:relative;overflow:hidden"><sc-if value="{{ a.fav }}"><div style="position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:#fff"><svg style="width:32px;height:32px"><use href="#i-heart-f"></use></svg></div></sc-if><sc-if value="{{ a.video }}"><div style="position:absolute;right:6px;bottom:6px;width:22px;height:22px;border-radius:11px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff"><svg style="width:12px;height:12px"><use href="#i-play"></use></svg></div></sc-if></div><div style="font-size:13.5px;font-weight:600;line-height:19px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.t }}</div><div style="font-size:12px;line-height:16px;color:#8E8B86;white-space:nowrap">{{ a.m }}</div></div></sc-for></div></sc-if>
+<sc-if value="{{ sec.grid }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;padding:12px 16px 0"><sc-for list="{{ sec.cards }}" as="a" hint-placeholder-count="4"><div onClick="{{ a.go }}" style="cursor:pointer;min-width:0"><div style="aspect-ratio:1;border-radius:12px;background:{{ a.bg }};position:relative;overflow:hidden"><sc-if value="{{ a.video }}"><div style="position:absolute;right:8px;bottom:8px;width:26px;height:26px;border-radius:13px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff"><svg style="width:14px;height:14px"><use href="#i-play"></use></svg></div></sc-if></div><div style="font-size:14px;font-weight:600;line-height:20px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.t }}</div><div style="font-size:12px;line-height:16px;color:#8E8B86">{{ a.m }}</div></div></sc-for></div></sc-if>
+<sc-if value="{{ sec.list }}"><div style="padding:8px 0 0"><sc-for list="{{ sec.cards }}" as="a" hint-placeholder-count="3"><div onClick="{{ a.go }}" style="height:68px;display:flex;align-items:center;gap:12px;padding:0 12px 0 16px;cursor:pointer"><div style="width:52px;height:52px;border-radius:10px;background:{{ a.bg }};flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.t }}</div><div style="font-size:12px;line-height:16px;color:#8E8B86">{{ a.m }}</div></div><svg style="width:20px;height:20px;color:#8E8B86;flex:none"><use href="#i-chev-r"></use></svg></div></sc-for></div></sc-if>
+</div></sc-for>
+<div style="height:120px"></div>
+</div>
+</div></sc-if>
+
+<sc-if value="{{ is.Viewer }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Viewer" style="position:absolute;inset:0;background:#000;z-index:25;overflow:hidden">
+<sc-if value="{{ vw.photo }}"><div onPointerDown="{{ vDown }}" onPointerUp="{{ vUp }}" onDoubleClick="{{ vDbl }}" style="position:absolute;left:0;right:0;top:{{ vw.stTop }}px;height:{{ vw.stH }}px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none"><div style="width:{{ vw.w }}px;height:{{ vw.h }}px;background:{{ vw.bg }};transform:scale({{ vw.zoom }});transition:transform .25s ease-out,width .25s,height .25s;pointer-events:none"></div></div></sc-if>
+<sc-if value="{{ vw.isVid }}"><div style="position:absolute;left:0;right:0;top:{{ vw.regTop }}px;height:{{ vw.regH }}px;display:flex;align-items:center;justify-content:center">
+<div onPointerDown="{{ vDown }}" onPointerUp="{{ vUp }}" style="position:absolute;inset:0;cursor:pointer;touch-action:none"></div>
+<sc-if value="{{ vw.video }}"><div style="width:{{ vw.w }}px;height:{{ vw.h }}px;background:{{ vw.bg }};position:relative;pointer-events:none;transition:width .25s,height .25s"><sc-if value="{{ vw.badge }}"><div style="position:absolute;left:10px;top:10px;height:28px;padding:0 10px;border-radius:14px;background:rgba(0,0,0,.6);display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap"><svg style="width:13px;height:13px"><use href="#i-scene"></use></svg>{{ vw.badgeT }}</div></sc-if></div>
+<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:32px;color:#fff;opacity:{{ vw.chromeOp }};pointer-events:{{ vw.chromePe }};transition:opacity .15s">
+<div onClick="{{ vRw }}" aria-label="5초 뒤로" style="width:48px;height:48px;border-radius:24px;background:rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:28px;height:28px"><use href="#i-rw"></use></svg><span style="position:absolute;font-size:9px;font-weight:700;top:19px">5</span></div>
+<div onClick="{{ vPlay }}" aria-label="재생/일시정지" style="width:64px;height:64px;border-radius:32px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:30px;height:30px"><use href="{{ vw.playIc }}"></use></svg></div>
+<div onClick="{{ vFf }}" aria-label="15초 앞으로" style="width:48px;height:48px;border-radius:24px;background:rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:28px;height:28px"><use href="#i-ff"></use></svg><span style="position:absolute;font-size:9px;font-weight:700;top:19px">15</span></div>
+</div></sc-if>
+<sc-if value="{{ vw.err }}"><div style="width:411px;height:231px;background:#16161A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#BDBAB4;pointer-events:none"><svg style="width:36px;height:36px;color:#5E5C59"><use href="#i-video"></use></svg><div style="font-size:14px;line-height:21px;text-align:center;padding:0 40px">이 기기에서 재생할 수 없는 동영상입니다.</div><div style="font-size:12px;color:#8E8B86">{{ vw.tAll }}</div></div></sc-if>
+</div></sc-if>
+<sc-if value="{{ vw.seekShow }}"><div style="position:absolute;left:16px;right:16px;top:{{ vw.seekTop }}px;display:flex;flex-direction:column;gap:2px">
+<div onClick="{{ seek }}" style="position:relative;height:32px;cursor:pointer"><div style="position:absolute;left:0;right:0;top:18px;height:4px;border-radius:2px;background:#3A3A42"></div><div style="position:absolute;left:0;width:{{ vw.pct }}%;top:18px;height:4px;border-radius:2px;background:#8FB8FF"></div><sc-for list="{{ vw.markers }}" as="mk" hint-placeholder-count="0"><div style="position:absolute;left:{{ mk.left }}%;top:3px;width:8px;height:8px;margin-left:-4px;transform:rotate(45deg);background:#8FB8FF"></div></sc-for><div style="position:absolute;left:{{ vw.pct }}%;top:13px;width:14px;height:14px;margin-left:-7px;border-radius:7px;background:#fff"></div></div>
+<div style="display:flex;align-items:center"><span style="flex:1;font-size:13px;font-weight:500">{{ vw.tNow }} <span style="color:#8E8B86">/ {{ vw.tAll }}</span></span><div onClick="{{ vMute }}" aria-label="{{ vw.volT }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="{{ vw.volIc }}"></use></svg></div><div onClick="{{ vFs }}" aria-label="전체 화면" style="width:48px;height:48px;margin-right:-12px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-fs"></use></svg></div></div>
+</div></sc-if>
+<sc-if value="{{ vw.scenesShow }}"><div style="position:absolute;left:16px;right:16px;top:{{ vw.sceneTop }}px;display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;font-weight:600;color:#8E8B86;display:flex;align-items:center;gap:6px">찾은 장면<span style="font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;box-shadow:inset 0 0 0 1px #5E5C59">막대 위 마커는 제안</span></div><div style="display:flex;gap:8px"><sc-for list="{{ vw.scenes }}" as="sc" hint-placeholder-count="3"><div onClick="{{ sc.go }}" style="height:40px;padding:0 14px 0 12px;border-radius:20px;background:{{ sc.bg }};color:{{ sc.fg }};font-weight:{{ sc.fw }};display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><sc-if value="{{ sc.act }}"><svg style="width:14px;height:14px"><use href="#i-play"></use></svg></sc-if>{{ sc.t }}</div></sc-for></div></div></sc-if>
+<div style="position:absolute;left:0;right:0;top:0;z-index:3;opacity:{{ vw.chromeOp }};pointer-events:{{ vw.chromePe }};transition:opacity .15s"><div style="position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(rgba(0,0,0,.7),transparent);pointer-events:none"></div><div style="position:relative;padding-top:28px"><div style="height:56px;display:flex;align-items:center;padding:0 4px"><div onClick="{{ vBack }}" aria-label="뒤로" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-back"></use></svg></div><div style="flex:1;min-width:0;text-align:center"><div style="font-size:14px;font-weight:600;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ vw.title }}</div><div style="font-size:12px;line-height:16px;color:#BDBAB4">{{ vw.pos }}</div></div><div onClick="{{ vFav }}" aria-label="즐겨찾기" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:{{ vw.favCol }};cursor:pointer"><svg style="width:24px;height:24px"><use href="{{ vw.favIc }}"></use></svg></div></div></div></div>
+<sc-if value="{{ vw.botShow }}"><div style="position:absolute;left:0;right:0;bottom:20px;height:72px;display:grid;grid-template-columns:repeat(3,1fr);opacity:{{ vw.botOp }};pointer-events:{{ vw.botPe }};transition:opacity .15s;background:linear-gradient(transparent,rgba(0,0,0,.5))"><div onClick="{{ vShare }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-share"></use></svg><span style="font-size:11px">공유</span></div><div onClick="{{ vInfo }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-info"></use></svg><span style="font-size:11px">정보</span></div><div onClick="{{ vTrash }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-trash"></use></svg><span style="font-size:11px">휴지통</span></div></div></sc-if>
+<sc-if value="{{ vw.info }}"><div style="position:absolute;left:0;right:0;top:420px;bottom:0;background:#16161A;border-radius:20px 20px 0 0;padding:8px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;overflow-y:auto;scrollbar-width:none;z-index:4">
+<div style="width:36px;height:4px;border-radius:2px;background:#5E5C59;align-self:center;flex:none"></div>
+<div style="display:flex;align-items:center"><div style="flex:1;font-size:15px;font-weight:600">이 사진·영상의 분류</div><div onClick="{{ vInfo }}" aria-label="정보 닫기" style="width:48px;height:48px;margin-right:-12px;display:flex;align-items:center;justify-content:center;color:#BDBAB4;cursor:pointer"><svg style="width:22px;height:22px"><use href="#i-close"></use></svg></div></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:-8px"><sc-for list="{{ vw.chips }}" as="ch" hint-placeholder-count="3"><div onClick="{{ ch.go }}" style="height:36px;padding:0 12px;border-radius:18px;background:{{ ch.bg }};box-shadow:{{ ch.ring }};color:{{ ch.fg }};display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;cursor:pointer"><sc-if value="{{ ch.pinned }}"><svg style="width:15px;height:15px"><use href="#i-pin"></use></svg></sc-if>{{ ch.t }}<sc-if value="{{ ch.pinned }}"><span style="font-weight:500"> · 고정됨</span></sc-if></div></sc-for></div>
+<div style="font-size:12.5px;line-height:19px;color:#BDBAB4;text-wrap:pretty">태그를 누르면 그 분류를 고정합니다. 고정한 분류는 다시 분석해도 유지됩니다.</div>
+<div style="height:1px;background:rgba(255,255,255,.08);flex:none"></div>
+<div onClick="{{ vDetails }}" style="display:flex;align-items:center;min-height:44px;cursor:pointer"><div style="flex:1;font-size:14px;font-weight:600">상세 정보</div><svg style="width:20px;height:20px;color:#BDBAB4;transform:{{ vw.detRot }};transition:transform .2s"><use href="#i-chev-d"></use></svg></div>
+<sc-if value="{{ vw.details }}"><div style="display:grid;grid-template-columns:56px 1fr;gap:8px 12px;font-size:12.5px;line-height:18px;margin-top:-6px"><sc-for list="{{ vw.rows }}" as="r" hint-placeholder-count="7"><span style="color:#8E8B86">{{ r.k }}</span><span style="word-break:break-all">{{ r.v }}</span></sc-for></div><div style="font-size:11.5px;line-height:17px;color:#8E8B86;display:flex;gap:6px;padding-bottom:28px"><svg style="width:14px;height:14px;flex:none;margin-top:2px"><use href="#i-info"></use></svg>분류 옆의 %는 정답 확률이 아니라 기준 문장과 얼마나 닮았는지의 값입니다.</div></sc-if>
+</div></sc-if>
+<sc-if value="{{ vw.fs }}"><div style="position:absolute;left:-240px;top:240px;width:891px;height:411px;transform:rotate(90deg);background:#000;z-index:10;display:flex;align-items:center;justify-content:center">
+<div onPointerDown="{{ vDown }}" onPointerUp="{{ vUp }}" style="position:absolute;inset:0;cursor:pointer"></div>
+<div style="width:{{ vw.fw }}px;height:{{ vw.fh }}px;background:{{ vw.bg }};pointer-events:none"></div>
+<div style="position:absolute;inset:0;pointer-events:none;opacity:{{ vw.fsChrome }};transition:opacity .15s">
+<div style="position:absolute;left:0;right:0;top:0;height:90px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div><div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(transparent,rgba(0,0,0,.7))"></div>
+<div style="position:absolute;left:24px;top:18px;font-size:14px;font-weight:600">{{ vw.title }}</div>
+<div onClick="{{ vPlay }}" style="position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:32px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer"><svg style="width:30px;height:30px"><use href="{{ vw.playIc }}"></use></svg></div>
+<div style="position:absolute;left:24px;right:16px;bottom:12px;display:flex;align-items:center;gap:12px;pointer-events:auto"><span style="font-size:13px;font-weight:500;white-space:nowrap">{{ vw.tNow }} / {{ vw.tAll }}</span><div style="flex:1;position:relative;height:32px"><div style="position:absolute;left:0;right:0;top:14px;height:4px;border-radius:2px;background:rgba(255,255,255,.3)"></div><div style="position:absolute;left:0;width:{{ vw.pct }}%;top:14px;height:4px;border-radius:2px;background:#8FB8FF"></div><div style="position:absolute;left:{{ vw.pct }}%;top:9px;width:14px;height:14px;margin-left:-7px;border-radius:7px;background:#fff"></div></div><div onClick="{{ vMute }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="{{ vw.volIc }}"></use></svg></div><div onClick="{{ vFs }}" aria-label="화면 복귀" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-fs-exit"></use></svg></div></div>
+</div></div></sc-if>
+</div></sc-if>
+<sc-if value="{{ is.Search }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Search" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="padding:36px 16px 8px;flex:none"><div style="height:48px;border-radius:24px;background:#1D1D22;display:flex;align-items:center;gap:10px;padding:0 4px 0 16px"><svg onClick="{{ sGo }}" style="width:22px;height:22px;color:#BDBAB4;flex:none;cursor:pointer"><use href="#i-search"></use></svg><input ref="{{ inputRef }}" value="{{ sx.input }}" onChange="{{ sOnInput }}" onKeyDown="{{ sKey }}" onFocus="{{ sFocus }}" onBlur="{{ sBlur }}" placeholder="사진·영상 속 장면 찾기" enterKeyHint="search" style="flex:1;min-width:0;height:44px;background:transparent;border:none;outline:none;color:#F2F0ED;font-family:inherit;font-size:15px;padding:0"><sc-if value="{{ sx.hasInput }}"><div onClick="{{ sClear }}" aria-label="지우기" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#8E8B86;cursor:pointer"><svg style="width:20px;height:20px"><use href="#i-close"></use></svg></div></sc-if></div></div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none">
+<sc-if value="{{ sx.initial }}"><div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:16px"><div style="font-size:13.5px;line-height:21px;color:#BDBAB4;text-wrap:pretty">찾고 싶은 장면을 문장으로 적어보세요. 날짜, 장소, 사물을 섞어도 됩니다.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><div onClick="{{ sVideo }}" style="height:40px;padding:0 14px 0 10px;border-radius:20px;background:{{ sx.vBg }};color:{{ sx.vFg }};box-shadow:{{ sx.vRing }};display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer"><svg style="width:16px;height:16px"><use href="#i-video"></use></svg>동영상만</div><sc-for list="{{ sSugg }}" as="g" hint-placeholder-count="4"><div onClick="{{ g.go }}" style="height:40px;padding:0 14px;border-radius:20px;background:#1D1D22;display:flex;align-items:center;font-size:13px;cursor:pointer">{{ g.t }}</div></sc-for></div>
+<div style="font-size:12px;font-weight:600;color:#8E8B86;margin-top:4px">자주 나오는 분류</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:-6px"><sc-for list="{{ sCats }}" as="g" hint-placeholder-count="4"><div onClick="{{ g.go }}" style="height:40px;padding:0 14px 0 10px;border-radius:20px;background:#16161A;display:flex;align-items:center;gap:6px;font-size:13px;color:#BDBAB4;cursor:pointer"><svg style="width:15px;height:15px"><use href="#i-ai"></use></svg>{{ g.t }}</div></sc-for></div>
+<div style="display:flex;gap:8px;align-items:center;font-size:11.5px;line-height:17px;color:#8E8B86"><svg style="width:15px;height:15px;flex:none"><use href="#i-offline"></use></svg>검색어는 이 휴대폰 안에서만 처리됩니다.</div></div></sc-if>
+<sc-if value="{{ sx.loading }}"><div style="padding:96px 0 0;display:flex;flex-direction:column;align-items:center;gap:14px;font-size:13.5px;color:#BDBAB4">{{ spinner }}찾고 있습니다…</div></sc-if>
+<sc-if value="{{ sx.hasChips }}"><div style="display:flex;gap:6px;align-items:center;padding:4px 16px 0;flex-wrap:wrap"><span style="font-size:11.5px;color:#8E8B86;margin-right:2px">이렇게 이해했습니다</span><sc-for list="{{ sx.chips }}" as="c" hint-placeholder-count="3"><div onClick="{{ c.go }}" style="height:32px;padding:0 10px;border-radius:16px;border:{{ c.ring }};box-sizing:border-box;display:flex;align-items:center;gap:4px;font-size:12.5px;color:{{ c.fg }};text-decoration:{{ c.deco }};cursor:pointer">{{ c.t }}<svg style="width:12px;height:12px"><use href="#i-close"></use></svg></div></sc-for></div></sc-if>
+<sc-if value="{{ sx.none }}"><div style="padding:72px 32px 0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center"><div style="width:64px;height:64px;border-radius:32px;background:#16161A;display:flex;align-items:center;justify-content:center;color:#8E8B86"><svg style="width:28px;height:28px"><use href="#i-search"></use></svg></div><div style="font-size:14px;line-height:22px;color:#BDBAB4;text-wrap:pretty">조건에 맞는 사진·영상을 찾지 못했습니다. 다른 말로 적어보세요.</div></div></sc-if>
+<sc-if value="{{ sx.results }}"><div>
+<div style="margin:12px 16px 0;padding:14px;border-radius:16px;background:#16161A;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center"><span style="flex:1;font-size:11px;font-weight:600;letter-spacing:.08em;color:#8E8B86">검색 요약</span><div onClick="{{ sVideo }}" style="height:32px;padding:0 10px;border-radius:16px;background:{{ sx.vBg }};color:{{ sx.vFg }};box-shadow:{{ sx.vRing }};display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer"><svg style="width:15px;height:15px"><use href="#i-video"></use></svg>동영상만</div></div>
+<div style="font-size:14px;line-height:21px;text-wrap:pretty">{{ sx.summary }}</div>
+<div onClick="{{ sCollect }}" style="align-self:flex-start;height:40px;padding:0 16px;border-radius:20px;background:#26262C;display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;cursor:pointer"><svg style="width:18px;height:18px"><use href="#i-album"></use></svg>앨범으로 모으기</div>
+<div style="font-size:11.5px;line-height:16px;color:#8E8B86">영상은 5초 간격 장면으로 찾습니다. 표시 시각은 근사값입니다.</div></div>
+<div style="height:44px;display:flex;align-items:flex-end;gap:8px;padding:0 16px 8px;box-sizing:border-box"><span style="font-size:14px;font-weight:600">가까운 결과</span><span style="font-size:12px;color:#8E8B86">{{ sx.closeN }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px"><sc-for list="{{ sx.closeCells }}" as="c" hint-placeholder-count="9"><div onClick="{{ c.go }}" style="aspect-ratio:1;position:relative;background:{{ c.bg }};cursor:pointer"><sc-if value="{{ c.video }}"><svg style="position:absolute;top:6px;right:6px;width:16px;height:16px;color:#fff;filter:drop-shadow(0 0 2px rgba(0,0,0,.7))"><use href="#i-video"></use></svg><div style="position:absolute;left:0;right:0;bottom:0;height:24px;background:rgba(0,0,0,.72);display:flex;align-items:center;gap:3px;padding:0 6px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap"><svg style="width:11px;height:11px;flex:none"><use href="#i-scene"></use></svg>{{ c.cap }}</div></sc-if></div></sc-for></div>
+<sc-if value="{{ sx.otherHas }}"><div onClick="{{ sOthers }}" style="margin:16px 16px 0;height:48px;border-radius:12px;background:#16161A;display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;font-size:13px;color:#BDBAB4;cursor:pointer"><span style="flex:1">{{ sx.otherT }}</span><svg style="width:20px;height:20px;transform:{{ sx.otherRot }}"><use href="#i-chev-d"></use></svg></div></sc-if>
+<sc-if value="{{ sx.otherOpen }}"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:8px;opacity:.85"><sc-for list="{{ sx.otherCells }}" as="c" hint-placeholder-count="3"><div onClick="{{ c.go }}" style="aspect-ratio:1;position:relative;background:{{ c.bg }};cursor:pointer"><sc-if value="{{ c.video }}"><div style="position:absolute;left:0;right:0;bottom:0;height:24px;background:rgba(0,0,0,.72);display:flex;align-items:center;gap:3px;padding:0 6px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap"><svg style="width:11px;height:11px;flex:none"><use href="#i-scene"></use></svg>{{ c.cap }}</div></sc-if></div></sc-for></div></sc-if>
+</div></sc-if>
+<div style="height:120px"></div>
+</div>
+<sc-if value="{{ sx.kb }}"><div style="position:absolute;left:0;right:0;bottom:0;height:272px;background:#1D1D22;z-index:30;padding:8px 4px 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ kbRows }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:5px;flex:1"><sc-for list="{{ r.keys }}" as="k" hint-placeholder-count="10"><div style="flex:{{ k.w }};border-radius:6px;background:#3A3A42;display:flex;align-items:center;justify-content:center;font-size:16px">{{ k.t }}</div></sc-for></div></sc-for></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ is.Review }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Search/review" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="background:#16233D;padding-top:28px;flex:none"><div style="height:64px;display:flex;align-items:center;padding:0 16px 0 4px"><div onClick="{{ rvCancel }}" aria-label="닫기" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-close"></use></svg></div><div style="flex:1;padding-left:4px"><div style="font-size:18px;font-weight:700;line-height:24px;display:flex;align-items:center;gap:6px"><svg style="width:20px;height:20px;color:#8FB8FF"><use href="#i-album"></use></svg>앨범으로 모으기</div><div style="font-size:12px;line-height:16px;color:#BDBAB4">{{ rv.sub }}</div></div></div><div style="padding:0 16px 12px;font-size:13px;line-height:19px;color:#DCE7FF;display:flex;gap:6px;align-items:center"><svg style="width:16px;height:16px;flex:none"><use href="#i-info"></use></svg>앨범에 넣지 않을 결과를 눌러 빼세요.</div></div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;padding-top:3px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px"><sc-for list="{{ rv.cells }}" as="c" hint-placeholder-count="12"><div onClick="{{ c.go }}" style="aspect-ratio:1;position:relative;background:{{ c.bg }};cursor:pointer"><sc-if value="{{ c.video }}"><div style="position:absolute;left:0;right:0;bottom:0;height:24px;background:rgba(0,0,0,.72);display:flex;align-items:center;gap:3px;padding:0 6px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap"><svg style="width:11px;height:11px;flex:none"><use href="#i-scene"></use></svg>{{ c.cap }}</div></sc-if><sc-if value="{{ c.on }}"><div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:12px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;justify-content:center"><svg style="width:15px;height:15px"><use href="#i-check"></use></svg></div></sc-if><sc-if value="{{ c.off }}"><div style="position:absolute;inset:0;background:rgba(14,14,16,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#BDBAB4;font-size:12px;font-weight:600"><svg style="width:24px;height:24px"><use href="#i-remove"></use></svg>뺌</div></sc-if></div></sc-for></div><div style="height:260px"></div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:#16161A;border-radius:20px 20px 0 0;padding:16px 16px 32px;display:flex;flex-direction:column;gap:12px;box-shadow:0 -8px 24px rgba(0,0,0,.4)"><div style="font-size:12px;font-weight:600;color:#8E8B86">앨범 이름</div><input value="{{ rv.name }}" onChange="{{ rvName }}" maxLength="20" style="height:48px;border-radius:12px;background:#1D1D22;border:none;outline:none;box-shadow:inset 0 0 0 2px #8FB8FF;padding:0 14px;color:#F2F0ED;font-family:inherit;font-size:15px"><div style="font-size:11.5px;line-height:16px;color:#8E8B86">영상은 찾은 장면 시각이 함께 저장되어, 앨범에서 열어도 그 장면부터 재생됩니다.</div><div style="display:flex;gap:8px"><div onClick="{{ rvCancel }}" style="height:48px;padding:0 20px;border-radius:24px;display:flex;align-items:center;font-size:15px;font-weight:600;color:#BDBAB4;cursor:pointer">취소</div><div onClick="{{ rvSave }}" style="flex:1;height:48px;border-radius:24px;background:{{ rv.saveBg }};color:{{ rv.saveFg }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;cursor:pointer">{{ rv.saveT }}</div></div></div>
+</div></sc-if>
+
+<sc-if value="{{ is.Cleanup }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Cleanup" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="padding-top:28px;flex:none"><div style="height:56px;display:flex;align-items:center;padding:0 16px"><div style="flex:1"><div style="font-size:20px;font-weight:700;line-height:26px">정리</div><div style="font-size:12px;line-height:16px;color:#BDBAB4">{{ cl.sub }}</div></div></div><sc-if value="{{ cl.has }}"><div style="display:flex;gap:4px;padding:0 4px"><div onClick="{{ clAuto }}" style="height:44px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#8FB8FF;cursor:pointer"><svg style="width:18px;height:18px"><use href="#i-check"></use></svg>보관 추천 제외하고 선택</div><div onClick="{{ clAll }}" style="height:44px;padding:0 12px;display:flex;align-items:center;font-size:13.5px;font-weight:600;color:#BDBAB4;cursor:pointer">{{ cl.allT }}</div></div></sc-if></div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none">
+<sc-if value="{{ cl.empty }}"><div style="padding:120px 32px 0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center"><div style="width:64px;height:64px;border-radius:32px;background:#16161A;display:flex;align-items:center;justify-content:center;color:#6FD49A"><svg style="width:28px;height:28px"><use href="#i-check"></use></svg></div><div style="font-size:15px;font-weight:600">정리할 것이 없습니다.</div><div style="font-size:13px;line-height:20px;color:#BDBAB4">겹치는 사진·영상이 생기면 여기에 모입니다.</div></div></sc-if>
+<sc-for list="{{ cl.groups }}" as="g" hint-placeholder-count="2"><div style="margin:8px 16px 12px;padding:12px;border-radius:16px;background:#16161A;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:flex-start"><div style="flex:1"><div style="font-size:14px;font-weight:600;line-height:20px">{{ g.title }}</div><div style="font-size:12px;line-height:16px;color:#8E8B86">{{ g.sub }}</div></div><div onClick="{{ g.hold }}" style="height:40px;padding:0 10px;margin:-6px -4px 0 0;display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:#BDBAB4;cursor:pointer">{{ g.holdT }}</div></div>
+<sc-if value="{{ g.held }}"><div style="font-size:12.5px;color:#8E8B86;margin-top:-6px">이 묶음은 그대로 둡니다.</div></sc-if>
+<sc-if value="{{ g.open }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 8px"><sc-for list="{{ g.tiles }}" as="t" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:6px;min-width:0"><div onClick="{{ t.view }}" style="aspect-ratio:1;border-radius:10px;background:{{ t.bg }};position:relative;box-shadow:{{ t.ring }};cursor:zoom-in"><sc-if value="{{ t.sel }}"><div style="position:absolute;inset:0;border-radius:10px;background:rgba(0,0,0,.4)"></div></sc-if><sc-if value="{{ t.video }}"><div style="position:absolute;right:8px;bottom:6px;display:flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.6)"><svg style="width:12px;height:12px"><use href="#i-play"></use></svg>{{ t.dur }}</div></sc-if><sc-if value="{{ t.notKeep }}"><div onClick="{{ t.toggle }}" style="position:absolute;top:0;right:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><sc-if value="{{ t.sel }}"><div style="width:24px;height:24px;border-radius:12px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;justify-content:center"><svg style="width:15px;height:15px"><use href="#i-check"></use></svg></div></sc-if><sc-if value="{{ t.un }}"><div style="width:24px;height:24px;border-radius:12px;border:2px solid #fff;box-sizing:border-box;background:rgba(0,0,0,.25)"></div></sc-if></div></sc-if></div>
+<sc-if value="{{ t.keep }}"><div style="font-size:12px;line-height:16px;color:#6FD49A;font-weight:600;display:flex;gap:4px;min-height:28px;align-items:flex-start"><svg style="width:14px;height:14px;flex:none;margin-top:1px"><use href="#i-check"></use></svg>{{ t.keepT }}</div></sc-if>
+<sc-if value="{{ t.notKeep }}"><div onClick="{{ t.choose }}" style="height:32px;align-self:flex-start;padding:0 12px;border-radius:16px;background:#26262C;display:flex;align-items:center;font-size:12px;font-weight:600;cursor:pointer">이걸 보관</div></sc-if>
+<div style="font-size:11.5px;color:#8E8B86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.meta }}</div></div></sc-for></div></sc-if>
+</div></sc-for>
+<div style="height:200px"></div>
+</div>
+<sc-if value="{{ cl.barShow }}"><div style="position:absolute;left:0;right:0;bottom:84px;background:#16161A;border-top:1px solid rgba(255,255,255,.07);padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:5"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:20px">{{ cl.barT }}</div><div style="font-size:11.5px;line-height:16px;color:#8E8B86">묶음마다 한 장은 항상 남습니다.</div></div><div onClick="{{ clTrash }}" style="height:48px;padding:0 16px;border-radius:24px;background:#C8322C;color:#fff;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer"><svg style="width:20px;height:20px"><use href="#i-trash"></use></svg>{{ cl.trashT }}</div></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ is.Settings }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Settings" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="padding-top:28px;flex:none"><div style="height:56px;display:flex;align-items:center;padding:0 4px"><div onClick="{{ back }}" aria-label="뒤로" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-back"></use></svg></div><div style="font-size:18px;font-weight:700;padding-left:4px">설정</div></div></div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;padding:8px 16px 40px;display:flex;flex-direction:column;gap:12px">
+<div style="padding:16px;border-radius:16px;background:#16161A;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:22px;background:rgba(143,184,255,.14);color:#8FB8FF;display:flex;align-items:center;justify-content:center;flex:none"><svg style="width:24px;height:24px"><use href="#i-device"></use></svg></div><div style="flex:1"><div style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px">기기 내 처리<span style="width:8px;height:8px;border-radius:4px;background:#6FD49A"></span></div><div style="font-size:12px;color:#8E8B86;display:flex;align-items:center;gap:4px"><svg style="width:13px;height:13px"><use href="#i-offline"></use></svg>네트워크 사용 없음</div></div></div><div style="font-size:13px;line-height:20px;color:#BDBAB4;text-wrap:pretty">사진·영상과 분석 결과는 이 휴대폰을 벗어나지 않습니다. 모델도 앱과 함께 설치되어 네트워크를 쓰지 않습니다.</div></div>
+<div style="padding:14px 16px;border-radius:16px;background:#16161A;display:flex;flex-direction:column;gap:8px"><div style="font-size:13.5px;line-height:20px">{{ st.idx }}</div>
+<sc-if value="{{ st.prog }}"><div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#BDBAB4">{{ spinner }}{{ st.progT }}</div></sc-if>
+<sc-if value="{{ st.paused }}"><div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#F2C66D"><svg style="width:16px;height:16px"><use href="#i-pause"></use></svg><span style="flex:1">{{ st.pausedT }}</span><span onClick="{{ stResume }}" style="color:#8FB8FF;font-weight:600;cursor:pointer;padding:8px 0 8px 8px">이어서</span></div></sc-if>
+<sc-if value="{{ st.done }}"><div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6FD49A"><svg style="width:15px;height:15px"><use href="#i-check"></use></svg>분석이 모두 끝났습니다</div></sc-if></div>
+<div style="font-size:12px;font-weight:600;color:#8E8B86;letter-spacing:.08em;padding:12px 4px 0">분류 항목</div>
+<div style="border-radius:16px;background:#16161A;padding:4px 0"><sc-for list="{{ st.axes }}" as="a" hint-placeholder-count="5"><div onClick="{{ a.go }}" style="min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px;box-sizing:border-box;cursor:pointer"><div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:600">{{ a.t }}</div><div style="font-size:12px;line-height:17px;color:#8E8B86">{{ a.d }}</div></div><div style="width:48px;height:28px;border-radius:14px;background:{{ a.track }};position:relative;flex:none;transition:background .15s"><div style="position:absolute;top:2px;left:{{ a.knob }};width:24px;height:24px;border-radius:12px;background:{{ a.kc }};transition:left .15s"></div></div></div></sc-for></div>
+<div style="font-size:12px;line-height:17px;color:#8E8B86;padding:0 4px">끄면 그 분류의 AI 앨범을 숨깁니다. 분석 데이터는 지우지 않습니다.</div>
+<div style="font-size:12px;font-weight:600;color:#8E8B86;letter-spacing:.08em;padding:12px 4px 0">데이터 관리</div>
+<div style="border-radius:16px;background:#16161A;padding:4px 0"><div onClick="{{ stReanalyze }}" style="min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px;box-sizing:border-box;cursor:pointer"><svg style="width:22px;height:22px;color:#BDBAB4;flex:none"><use href="#i-refresh"></use></svg><div style="flex:1"><div style="font-size:14.5px;font-weight:600">전체 다시 분석</div><div style="font-size:12px;color:#8E8B86">촬영 정보는 두고 장면 분류만 다시 합니다</div></div></div><div style="height:1px;background:rgba(255,255,255,.06);margin:0 16px"></div><div onClick="{{ stDelAll }}" style="min-height:60px;display:flex;align-items:center;gap:12px;padding:8px 16px;box-sizing:border-box;cursor:pointer"><svg style="width:22px;height:22px;color:#FF7B72;flex:none"><use href="#i-warn"></use></svg><div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#FF7B72">분류 결과 전체 삭제</div><div style="font-size:12px;color:#8E8B86">사진·영상은 지우지 않습니다</div></div></div></div>
+<div style="font-size:12px;font-weight:600;color:#8E8B86;letter-spacing:.08em;padding:12px 4px 0;display:flex;align-items:center;gap:6px">앱 정보<span style="font-size:10px;font-weight:500;letter-spacing:0;padding:1px 5px;border-radius:4px;box-shadow:inset 0 0 0 1px #5E5C59">제안</span></div>
+<div style="border-radius:16px;background:#16161A;padding:4px 0;font-size:14px"><div style="height:52px;display:flex;align-items:center;padding:0 16px"><span style="flex:1">버전</span><span style="color:#8E8B86">0.3.x</span></div><div style="height:52px;display:flex;align-items:center;padding:0 16px"><span style="flex:1">분석 모델</span><span style="color:#8E8B86">한국어 CLIP · 기기 내장</span></div><div style="height:52px;display:flex;align-items:center;padding:0 12px 0 16px"><span style="flex:1">오픈소스 라이선스</span><svg style="width:20px;height:20px;color:#8E8B86"><use href="#i-chev-r"></use></svg></div></div>
+</div></div></sc-if>
+
+<sc-if value="{{ is.Fix }}" hint-placeholder-val="{{ false }}"><div data-screen-label="Fix" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<div style="padding-top:28px;flex:none"><div style="height:64px;display:flex;align-items:center;padding:0 4px"><div onClick="{{ back }}" aria-label="뒤로" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg style="width:24px;height:24px"><use href="#i-back"></use></svg></div><div style="flex:1;padding-left:4px"><div style="font-size:18px;font-weight:700;line-height:24px">{{ fx.title }}</div><div style="font-size:12px;line-height:16px;color:#BDBAB4">{{ fx.sub }}</div></div></div>
+<div style="margin:0 16px 12px;padding:12px 14px;border-radius:12px;background:#16161A;font-size:13px;line-height:20px;color:#BDBAB4;text-wrap:pretty">잘못 묶인 사진·영상을 고르면 다른 앨범으로 옮기거나 이 앨범에서 뺍니다. 어느 쪽이든 사진·영상은 기기에 그대로 남습니다.</div></div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px"><sc-for list="{{ fx.cells }}" as="c" hint-placeholder-count="12"><div onClick="{{ c.go }}" style="aspect-ratio:1;position:relative;background:{{ c.bg }};cursor:pointer"><sc-if value="{{ c.video }}"><div style="position:absolute;right:6px;bottom:5px;display:flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.6)"><svg style="width:12px;height:12px"><use href="#i-play"></use></svg>{{ c.dur }}</div></sc-if><sc-if value="{{ c.sel }}"><div style="position:absolute;inset:0;background:rgba(143,184,255,.22);box-shadow:inset 0 0 0 3px #8FB8FF"></div><div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:12px;background:#8FB8FF;color:#0B1A33;display:flex;align-items:center;justify-content:center"><svg style="width:15px;height:15px"><use href="#i-check"></use></svg></div></sc-if><sc-if value="{{ c.un }}"><div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:12px;border:2px solid #fff;box-sizing:border-box;background:rgba(0,0,0,.25)"></div></sc-if></div></sc-for></div><div style="height:140px"></div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:#16161A;border-top:1px solid rgba(255,255,255,.07);padding:12px 16px 32px;display:flex;flex-direction:column;gap:10px;z-index:5"><div style="font-size:13px;color:#BDBAB4">{{ fx.selT }}</div><div style="display:flex;gap:8px;opacity:{{ fx.op }}"><div onClick="{{ fxMove }}" style="flex:1;height:48px;border-radius:24px;background:#26262C;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer"><svg style="width:20px;height:20px"><use href="#i-ai"></use></svg>다른 앨범으로 옮기기</div><div onClick="{{ fxRemove }}" style="flex:1;height:48px;border-radius:24px;background:#26262C;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap"><svg style="width:20px;height:20px"><use href="#i-remove"></use></svg>{{ fx.removeT }}</div></div></div>
+</div></sc-if>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;right:0;bottom:0;height:84px;background:#131316;border-top:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:20px;box-sizing:border-box;z-index:20"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4"><div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:{{ t.fg }};cursor:pointer"><div style="width:56px;height:28px;border-radius:14px;background:{{ t.pill }};display:flex;align-items:center;justify-content:center;position:relative;transition:background .2s"><svg style="width:24px;height:24px"><use href="{{ t.ic }}"></use></svg><sc-if value="{{ t.dot }}"><span style="position:absolute;top:2px;right:14px;width:7px;height:7px;border-radius:4px;background:#8FB8FF"></span></sc-if></div><span style="font-size:11px;font-weight:600">{{ t.t }}</span></div></sc-for></div></sc-if>
+
+<sc-if value="{{ sheetOn }}"><div onClick="{{ sheetClose }}" style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:50"></div><div style="position:absolute;left:0;right:0;bottom:0;max-height:680px;background:#16161A;border-radius:20px 20px 0 0;padding:8px 16px 32px;display:flex;flex-direction:column;gap:12px;z-index:51;overflow-y:auto;scrollbar-width:none;box-sizing:border-box">
+<div style="width:36px;height:4px;border-radius:2px;background:#5E5C59;align-self:center;flex:none"></div>
+<sc-if value="{{ sh.add }}"><div style="display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center"><div style="flex:1;font-size:17px;font-weight:700">{{ addT }}</div><div onClick="{{ sheetClose }}" aria-label="닫기" style="width:48px;height:48px;margin-right:-12px;display:flex;align-items:center;justify-content:center;color:#BDBAB4;cursor:pointer"><svg style="width:22px;height:22px"><use href="#i-close"></use></svg></div></div><div style="font-size:12.5px;line-height:19px;color:#BDBAB4;margin-top:-8px;text-wrap:pretty">사진·영상은 원래 자리에 그대로 있습니다. 앨범은 사진·영상을 가리키는 목록입니다.</div>
+<sc-if value="{{ addHasList }}"><div style="display:flex;flex-direction:column"><sc-for list="{{ addList }}" as="a" hint-placeholder-count="3"><div onClick="{{ a.go }}" style="height:64px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:48px;height:48px;border-radius:10px;background:{{ a.bg }};flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.t }}</div><div style="font-size:12px;color:#8E8B86">{{ a.m }}</div></div><svg style="width:20px;height:20px;color:#8E8B86"><use href="#i-plus"></use></svg></div></sc-for></div></sc-if>
+<div style="font-size:12px;font-weight:600;color:#8E8B86;margin-top:4px">새 앨범 만들기</div><div style="display:flex;gap:8px"><input value="{{ newName }}" onChange="{{ onNewName }}" placeholder="앨범 이름 (20자까지)" maxLength="20" style="flex:1;min-width:0;height:48px;border-radius:12px;background:#1D1D22;border:none;outline:none;padding:0 14px;color:#F2F0ED;font-family:inherit;font-size:15px"><div onClick="{{ createAlbum }}" style="height:48px;padding:0 18px;border-radius:24px;background:{{ newBtnBg }};color:{{ newBtnFg }};display:flex;align-items:center;font-size:14.5px;font-weight:600;cursor:pointer">만들기</div></div></div></sc-if>
+<sc-if value="{{ sh.month }}"><div style="display:flex;flex-direction:column"><div style="font-size:17px;font-weight:700;padding:4px 0 8px">월별 이동</div><sc-for list="{{ months }}" as="m" hint-placeholder-count="8"><div onClick="{{ m.go }}" style="height:48px;display:flex;align-items:center;font-size:14.5px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)"><span style="flex:1">{{ m.t }}</span><span style="font-size:12.5px;color:#8E8B86">{{ m.m }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ sh.axis }}"><div style="display:flex;flex-direction:column"><div style="font-size:17px;font-weight:700;padding:4px 0 8px">AI 앨범 분류</div><sc-for list="{{ axisOpts }}" as="a" hint-placeholder-count="6"><div onClick="{{ a.go }}" style="height:52px;display:flex;align-items:center;font-size:15px;cursor:pointer"><span style="flex:1">{{ a.t }}</span><sc-if value="{{ a.on }}"><svg style="width:22px;height:22px;color:#8FB8FF"><use href="#i-check"></use></svg></sc-if></div></sc-for></div></sc-if>
+<sc-if value="{{ sh.move }}"><div style="display:flex;flex-direction:column"><div style="font-size:17px;font-weight:700;padding:4px 0 4px">옮길 AI 앨범</div><div style="font-size:12.5px;color:#BDBAB4;padding-bottom:8px">사진·영상은 기기에 그대로 남습니다.</div><sc-for list="{{ moveOpts }}" as="a" hint-placeholder-count="6"><div onClick="{{ a.go }}" style="height:60px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:44px;height:44px;border-radius:10px;background:{{ a.bg }};flex:none"></div><div style="flex:1"><div style="font-size:14.5px;font-weight:600">{{ a.t }}</div><div style="font-size:12px;color:#8E8B86">{{ a.m }}</div></div><svg style="width:20px;height:20px;color:#8E8B86"><use href="#i-chev-r"></use></svg></div></sc-for></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ dlg.show }}"><div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:60;display:flex;align-items:center;justify-content:center;padding:0 28px"><div style="width:100%;border-radius:20px;background:#1D1D22;padding:24px 20px 12px;display:flex;flex-direction:column;gap:10px"><div style="font-size:17px;font-weight:700;line-height:24px">{{ dlg.t }}</div><div style="font-size:13.5px;line-height:21px;color:#BDBAB4">{{ dlg.d }}</div><div style="display:flex;justify-content:flex-end;gap:4px;margin-top:8px"><div onClick="{{ dlgCancel }}" style="height:48px;padding:0 16px;display:flex;align-items:center;font-size:14.5px;font-weight:600;color:#BDBAB4;cursor:pointer">취소</div><div onClick="{{ dlgOk }}" style="height:48px;padding:0 18px;border-radius:24px;background:#C8322C;color:#fff;display:flex;align-items:center;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.ok }}</div></div></div></div></sc-if>
+
+<sc-if value="{{ toastOn }}"><div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }};min-height:48px;border-radius:12px;background:#2E2E35;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;align-items:center;gap:8px;padding:10px 6px 10px 16px;box-sizing:border-box;z-index:45"><span style="flex:1;font-size:13.5px;line-height:20px;text-wrap:pretty">{{ toastMsg }}</span><sc-if value="{{ toastHasAct }}"><div onClick="{{ toastGo }}" style="height:40px;padding:0 10px;display:flex;align-items:center;font-size:13.5px;font-weight:600;color:#8FB8FF;cursor:pointer;white-space:nowrap">{{ toastAct }}</div></sc-if></div></sc-if>
+
+<sc-if value="{{ showStatus }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;right:0;top:0;height:28px;z-index:70;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:500;pointer-events:none"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span style="width:14px;height:9px;border-radius:2px;background:currentColor"></span><span style="width:20px;height:10px;border-radius:3px;border:1.5px solid currentColor;box-sizing:border-box"></span></span></div><div style="position:absolute;left:0;right:0;bottom:0;height:20px;display:flex;align-items:center;justify-content:center;z-index:70;pointer-events:none"><div style="width:108px;height:4px;border-radius:2px;background:#F2F0ED;opacity:.5"></div></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:423,&quot;height&quot;:903},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Permission&quot;,&quot;Analyzing&quot;,&quot;Photos&quot;,&quot;Photos/selecting&quot;,&quot;Albums&quot;,&quot;Albums/video-only&quot;,&quot;Category&quot;,&quot;Viewer&quot;,&quot;Viewer/video&quot;,&quot;Search/results&quot;,&quot;Search/review&quot;,&quot;Cleanup&quot;,&quot;Settings&quot;],&quot;default&quot;:&quot;Photos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;still&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  static _D = null;
+  state = this.preset((this.props || {}).start);
+
+  D() {
+    if (Component._D) return Component._D;
+    const T = {sea:['#9CC0D6','#3C6A86'],sand:['#E8D5B5','#B08F62'],food:['#E0A877','#7B3E22'],dog:['#C2A283','#5A4431'],leaf:['#A3BF8F','#44603A'],night:['#46507A','#141830'],dusk:['#EDB2A0','#6C4B77'],doc:['#ECE9E2','#ACA79C'],city:['#9492A3','#393848'],cafe:['#D8BFA3','#6E5641']};
+    const TAG = {sea:[['풍경/여행',31],['바다·해변',28],['물/바다',24]],sand:[['풍경/여행',29],['바다·해변',26],['물/바다',21]],food:[['음식',33],['한식',27]],cafe:[['음식',30],['카페·디저트',29],['음료',22]],dog:[['반려동물',31],['강아지',27],['자연/식물',19]],leaf:[['자연/식물',30],['공원·정원',24]],night:[['행사/축제',28],['도시 야경',25],['저조도',22]],dusk:[['풍경/여행',29],['하늘·노을',27]],doc:[['화면캡처내용',34],['대화',29]],city:[['건물/거리',30],['도시 야경',22]]};
+    const BIG = ['인물','음식','풍경/여행','반려동물','문서/영수증','상품/쇼핑','실내일상','화면캡처내용','자연/식물','탈것','행사/축제','예술/전시','운동/스포츠','건물/거리'];
+    const AR = {doc:[9,19.5],dog:[3,4],food:[3,4],cafe:[3,4],city:[3,4],sea:[4,3],sand:[4,3],leaf:[4,3],night:[4,3],dusk:[4,3]};
+    const VAR = {sea:[16,9],sand:[16,9],dusk:[16,9],night:[16,9],dog:[9,16],food:[1,1],city:[16,9]};
+    const SPEC = [
+      ['2026-09-30','dog sea|0:45 cafe leaf+ sea|0:45* food'],['2026-09-29','doc doc~ food'],['2026-09-25','doc night|14:56'],['2026-09-24','city'],
+      ['2026-09-23','dog+ dog dog|0:21 leaf food'],['2026-09-22','doc doc'],['2026-09-19','leaf sea dusk food'],['2026-09-14','doc city city food|1:02:03!'],
+      ['2026-09-02','dog dog leaf dog|0:09 doc'],['2026-08-30','doc doc food* cafe* cafe'],['2026-08-15','night night night|2:14 city'],['2026-07-11','dog leaf dog doc'],
+      ['2026-05-05','dog+ dog dog leaf leaf food food'],['2026-03-02','sea sea sea sand food food city'],['2025-12-24','night night|0:32 cafe cafe food'],
+      ['2025-08-14','sea sea sea|1:12+ sea|0:38 sand sand|4:05 dusk dusk|0:22'],['2025-08-02','sea sea sea sea|0:51+ sand food'],['2025-07-26','sea sea dusk dusk sand'],
+      ['2025-06-21','sea sea sand leaf doc'],['2025-03-10','doc doc doc doc city city city'],['2024-09-30','dog+ dog dog dog food food leaf leaf dusk'],[null,'doc~ doc~ doc doc dog city food*']
+    ];
+    const SCN = {'2026-09-30|0:45':[20],'2025-08-14|1:12':[36,15,51],'2025-08-14|0:38':[12],'2025-08-14|4:05':[90,210],'2025-08-14|0:22':[5],'2025-08-02|0:51':[45,5,30],'2026-09-23|0:21':[8],'2026-09-02|0:09':[5],'2026-09-25|14:56':[300],'2026-08-15|2:14':[60,95],'2025-12-24|0:32':[10],'2026-09-14|1:02:03':[600]};
+    const GEO = {'2026-03-02':[37.7519,128.8761],'2025-08-14':[33.2442,126.4122],'2025-08-02':[35.1587,129.1604],'2025-07-26':[34.7604,127.6622],'2025-06-21':[33.4586,126.9425]};
+    const pad = n => String(n).padStart(2, '0');
+    const items = []; let idx = 0;
+    SPEC.forEach(([date, str]) => str.split(' ').forEach(tok => {
+      const m = tok.match(/^([a-z]+)(?:\|([\d:]+))?([!*~+]*)$/);
+      const k = m[1], dur = m[2] || null, fl = m[3] || '', i = idx++;
+      const video = !!dur, secs = dur ? dur.split(':').reduce((a, b) => a * 60 + Number(b), 0) : 0;
+      const folder = fl.indexOf('*') >= 0 ? 'KakaoTalk' : fl.indexOf('~') >= 0 ? 'Download' : k === 'doc' ? 'Screenshots' : 'Camera';
+      const hh = 8 + (i * 7) % 14, mm = (i * 13) % 60, ss = (i * 29) % 60;
+      const c = T[k], ang = 125 + (i * 37) % 70, cx = 18 + (i * 29) % 55, cy = 15 + (i * 17) % 45;
+      const tg = TAG[k].map(t => [t[0], t[1] + ((i * 3) % 5) - 2]);
+      const ar = video ? VAR[k] : AR[k];
+      const ds = date ? date.replace(/-/g, '') : null, hms = pad(hh) + pad(mm) + pad(ss);
+      const file = !ds ? (k === 'doc' ? 'Screenshot_' + (1000 + i) + '.png' : 'IMG_' + (8000 + i) + '.jpg') : folder === 'Screenshots' ? 'Screenshot_' + ds + '-' + hms + '.png' : folder === 'KakaoTalk' ? 'KakaoTalk_' + ds + '_' + hms + (video ? '.mp4' : '.jpg') : folder === 'Download' ? 'download_' + ds + '_' + i + '.png' : (video ? 'VID_' : 'IMG_') + ds + '_' + hms + (video ? '.mp4' : '.jpg');
+      const dims = video ? (ar[0] > ar[1] ? '1920 × 1080' : ar[0] < ar[1] ? '1080 × 1920' : '1080 × 1080') : k === 'doc' ? '1080 × 2340' : ar[0] > ar[1] ? '4000 × 3000' : '3000 × 4000';
+      const g = GEO[date] || [37.5665, 126.978];
+      const outdoor = ['sea','sand','leaf','dusk','city','night','dog'].indexOf(k) >= 0 && folder === 'Camera';
+      items.push({ id: 'm' + i, idx: i, k, date, dur, secs, video, fail: fl.indexOf('!') >= 0, fav: fl.indexOf('+') >= 0, folder,
+        fileTime: folder === 'KakaoTalk' || folder === 'Download',
+        src: {Camera:'카메라촬영',Screenshots:'스크린샷',KakaoTalk:'메신저저장',Download:'다운로드'}[folder],
+        time: (hh < 12 ? '오전 ' : '오후 ') + ((hh % 12) || 12) + ':' + pad(mm),
+        size: video ? Math.max(2, Math.round(secs * 0.4)) : k === 'doc' ? Math.round((0.6 + (i % 6) / 10) * 10) / 10 : Math.round((2.4 + (i % 17) / 10) * 10) / 10,
+        file, dims, cam: folder === 'Camera' ? 'Galaxy S23' : '없음',
+        geo: outdoor ? (g[0] + ((i % 7) - 3) / 1000).toFixed(4) + ', ' + (g[1] + ((i % 5) - 2) / 1000).toFixed(4) : '없음',
+        sharp: 80 + (i * 47) % 160, ar,
+        bg: 'radial-gradient(circle at ' + cx + '% ' + cy + '%, rgba(255,255,255,.3), transparent 55%), linear-gradient(' + ang + 'deg, ' + c[0] + ', ' + c[1] + ')',
+        bgS: 'radial-gradient(circle at ' + (90 - cx / 2) + '% ' + (75 - cy / 2) + '%, rgba(255,255,255,.24), transparent 50%), linear-gradient(' + (ang + 60) + 'deg, ' + c[1] + ', ' + c[0] + ')',
+        ai: tg.filter(t => BIG.indexOf(t[0]) >= 0).map(t => t[0]), sub: tg.filter(t => BIG.indexOf(t[0]) < 0).map(t => t[0]), scores: tg,
+        scenes: video ? (SCN[date + '|' + dur] || [5]) : null, allowed: i % 4 === 0, trashed: false, pinned: {} });
+    }));
+    const pick = (d, f) => items.filter(x => x.date === d && f(x)).map(x => x.id);
+    const byId = id => items.find(x => x.id === id);
+    const groups = [
+      { gid: 'g1', kind: 'same', ids: pick('2026-09-30', x => x.video), why: '원본으로 보이는 파일' },
+      { gid: 'g2', kind: 'similar', ids: pick('2024-09-30', x => x.k === 'dog'), why: '가장 선명함' },
+      { gid: 'g3', kind: 'same', ids: pick('2026-09-29', x => x.k === 'doc'), why: '원본으로 보이는 파일' },
+      { gid: 'g4', kind: 'similar', ids: pick('2026-03-02', x => x.k === 'sea'), why: '가장 선명함' }
+    ];
+    groups.forEach(g => {
+      g.keep = g.kind === 'same' ? g.ids.find(id => ['Camera','Screenshots'].indexOf(byId(id).folder) >= 0) : g.ids[g.gid === 'g4' ? 1 : 0];
+      if (g.kind === 'same') { const a = byId(g.ids[0]); g.ids.slice(1).forEach(id => { const b = byId(id); b.bg = a.bg; b.bgS = a.bgS; b.size = a.size; }); }
+    });
+    const mine = [
+      { id: 'u1', t: '여름 바다', ids: items.filter(x => x.date === '2025-08-02' && (x.k === 'sea' || x.k === 'sand')).map(x => x.id) },
+      { id: 'u2', t: '강릉 여행', ids: pick('2026-03-02', () => true) },
+      { id: 'u3', t: '영수증 모음', ids: pick('2025-03-10', x => x.k === 'doc') }
+    ];
+    return (Component._D = { items, groups, mine });
+  }
+
+  pad(n) { return String(n).padStart(2, '0'); }
+  n(n) { return Number(n).toLocaleString('en-US'); }
+  fmtT(t) { t = Math.floor(t); const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60; return h ? h + ':' + this.pad(m) + ':' + this.pad(s) : m + ':' + this.pad(s); }
+  dayLabel(d, abs) { if (!d) return '날짜 미상'; if (!abs && d === '2026-09-30') return '오늘'; if (!abs && d === '2026-09-29') return '어제'; const [y, m, dd] = d.split('-').map(Number); return (y === 2026 ? '' : y + '년 ') + m + '월 ' + dd + '일'; }
+  fullDate(x) { if (!x.date) return '날짜 미상'; const [y, m, d] = x.date.split('-').map(Number); return y + '년 ' + m + '월 ' + d + '일 ' + x.time + (x.fileTime ? ' · 파일 시각' : ''); }
+  meta(its) { const v = its.filter(x => x.video).length, p = its.length - v; return [p ? '사진 ' + p + '장' : '', v ? '영상 ' + v + '개' : ''].filter(Boolean).join(' · '); }
+  count(its, view) { const v = its.filter(x => x.video).length, p = its.length - v; if (view === 'video') return '영상 ' + v + '개'; if (view === 'photo') return '사진 ' + p + '장'; if (v && p) return this.n(its.length) + '개 · 영상 ' + v; if (v) return '영상 ' + v + '개'; return this.n(its.length) + '개'; }
+  pass(x, f) { return f === 'all' || (f === 'video' ? x.video : !x.video); }
+  visible(s) { return s.items.filter(x => !x.trashed && (!s.limited || x.allowed)); }
+  top(s) { return s.stack[s.stack.length - 1]; }
+  baseOf(s) { const t = this.top(s); return t === 'Viewer' ? s.stack[s.stack.length - 2] : t; }
+  still() { const p = this.props || {}; return p.still === true || p.still === '1' || p.still === 'true'; }
+
+  base() {
+    const D = this.D();
+    return { stack: ['Photos'], tab: 'Photos', items: D.items.map(x => Object.assign({}, x, { ai: x.ai.slice(), pinned: {} })),
+      mine: D.mine.map(a => ({ id: a.id, t: a.t, ids: a.ids.slice(), scenes: {} })), pf: 'all', af: 'all', akind: 'all', axis: '전체', cf: 'all',
+      cat: null, catMenu: false, sel: null, limited: false, sheet: null, dialog: null, toast: null, viewer: null, fixSel: {}, newName: '',
+      search: { input: '', q: '', phase: 'initial', videoOnly: false, focus: false, off: {}, others: false, res: null, review: null },
+      clean: { keep: Object.fromEntries(D.groups.map(g => [g.gid, g.keep])), sel: {}, hold: {} },
+      vprog: { done: 3, total: 13, scene: 2 }, perm: 'ask', ana: { p: 0, paused: null },
+      axes: { 인물: true, 여행: true, 문서: true, 음식: true, 순간: true }, paused: null, noVideoAI: false, scrollM: '' };
+  }
+  vw(ids, i, o) { return Object.assign({ ids, i, info: false, details: false, chrome: true, zoom: 1, playing: false, t: 0, muted: false, fs: false, scenes: null, lastScene: null }, o || {}); }
+  preset(start) {
+    const s = this.base(); start = start || 'Photos';
+    const find = (d, f) => s.items.find(x => x.date === d && f(x)).id;
+    const tab = t => { s.stack = [t]; s.tab = t; };
+    const vis = () => this.visible(s).map(x => x.id);
+    const srch = q => { s.search = Object.assign(s.search, { input: q, q, phase: 'results' }); const r = this.runSearch(s, q); s.search.res = r; if (!r || !r.close.length) s.search.phase = 'none'; };
+    const cleanPre = () => { const D = this.D(); D.groups.forEach(g => g.ids.forEach(id => { if (id !== s.clean.keep[g.gid]) s.clean.sel[id] = true; })); };
+    switch (start) {
+      case 'Permission': tab('Permission'); s.vprog = null; break;
+      case 'Permission/later': tab('Permission'); s.perm = 'later'; s.vprog = null; break;
+      case 'Analyzing': tab('Analyzing'); s.ana = { p: 0.42, paused: null }; s.vprog = null; break;
+      case 'Analyzing/paused': tab('Analyzing'); s.ana = { p: 0.63, paused: '기기가 뜨거워 잠시 멈췄습니다' }; s.vprog = null; break;
+      case 'Photos/selecting': s.sel = { ids: { m0: 1, m1: 1, m3: 1 } }; break;
+      case 'Photos/video-filter': s.pf = 'video'; break;
+      case 'Photos/limited-access': s.limited = true; break;
+      case 'Photos/limited-empty': s.limited = true; s.items.forEach(x => x.allowed = false); break;
+      case 'Photos/empty': s.items.forEach(x => x.trashed = true); s.vprog = null; break;
+      case 'Photos/month': s.sheet = 'month'; break;
+      case 'Sheet/add-to-album': s.sel = { ids: { m0: 1, m1: 1, m3: 1 } }; s.sheet = 'add'; break;
+      case 'Toast/trash': s.toast = { msg: '휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.' }; break;
+      case 'Toast/favorite': s.toast = { msg: '3개를 즐겨찾기에 넣었습니다.' }; break;
+      case 'Albums': tab('Albums'); break;
+      case 'Albums/video-only': tab('Albums'); s.af = 'video'; break;
+      case 'Albums/empty': tab('Albums'); s.af = 'video'; s.noVideoAI = true; break;
+      case 'Albums/axis': tab('Albums'); s.sheet = 'axis'; break;
+      case 'Category': tab('Albums'); s.stack.push('Category'); s.cat = 'ai:반려동물'; break;
+      case 'Category/video-only': tab('Albums'); s.stack.push('Category'); s.cat = 'ai:반려동물'; s.cf = 'video'; break;
+      case 'Category/menu': tab('Albums'); s.stack.push('Category'); s.cat = 'ai:반려동물'; s.catMenu = true; break;
+      case 'Category/selecting': tab('Albums'); s.stack.push('Category'); s.cat = 'ai:반려동물'; s.sel = { ids: { m20: 1, m21: 1 } }; break;
+      case 'Category/empty': tab('Albums'); s.stack.push('Category'); s.cat = 'u2'; s.cf = 'video'; break;
+      case 'Dialog/delete-album': tab('Albums'); s.stack.push('Category'); s.cat = 'u1'; s.dialog = 'delAlbum'; break;
+      case 'Toast/removed': tab('Albums'); s.stack.push('Category'); s.cat = 'ai:반려동물'; s.toast = { msg: '2개를 앨범에서 뺐습니다. 사진·영상은 그대로 있습니다.', act: '되돌리기' }; break;
+      case 'Fix': tab('Albums'); s.stack.push('Category', 'Fix'); s.cat = 'ai:반려동물'; s.fixSel = { m21: 1, m32: 1 }; break;
+      case 'Fix/move': tab('Albums'); s.stack.push('Category', 'Fix'); s.cat = 'ai:반려동물'; s.fixSel = { m21: 1, m32: 1 }; s.sheet = 'move'; break;
+      case 'Viewer': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2026-09-23', x => x.k === 'dog'))); s.viewer.chrome = true; break; }
+      case 'Viewer/photo-info': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2026-09-23', x => x.k === 'dog')), { info: true, details: true }); break; }
+      case 'Viewer/zoomed': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2026-09-23', x => x.k === 'dog')), { zoom: 2.5, chrome: false }); break; }
+      case 'Viewer/no-date': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.length - 3); break; }
+      case 'Viewer/video': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf('m1')); break; }
+      case 'Viewer/video-playing': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2026-09-23', x => x.video)), { playing: true, t: 8, muted: true }); break; }
+      case 'Viewer/video-fullscreen': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2025-08-14', x => x.dur === '1:12')), { playing: true, t: 41, fs: true }); break; }
+      case 'Viewer/video-error': { const ids = vis(); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(find('2026-09-14', x => x.video))); break; }
+      case 'Viewer/video-scene': { tab('Search'); srch('작년 여름 바다'); const ids = s.search.res.close; const vid = find('2025-08-14', x => x.dur === '1:12'); s.stack.push('Viewer'); s.viewer = this.vw(ids, ids.indexOf(vid), { playing: true, t: 37, scenes: [36, 15, 51], lastScene: 36 }); break; }
+      case 'Search': case 'Search/empty': tab('Search'); break;
+      case 'Search/typing': tab('Search'); s.search.focus = true; s.search.input = '작년 여름'; break;
+      case 'Search/loading': tab('Search'); s.search.input = s.search.q = '작년 여름 바다'; s.search.phase = 'loading'; break;
+      case 'Search/results': tab('Search'); srch('작년 여름 바다'); break;
+      case 'Search/results-video': tab('Search'); srch('강아지가 나오는 영상'); break;
+      case 'Search/no-results': tab('Search'); srch('눈 내린 산'); break;
+      case 'Search/review': tab('Search'); srch('작년 여름 바다'); { const c = s.search.res.close; s.search.review = { removed: { [c[3]]: 1, [c[8]]: 1 }, name: '작년 여름 바다' }; } break;
+      case 'Toast/saved': tab('Search'); srch('작년 여름 바다'); s.toast = { msg: "'작년 여름 바다' 앨범에 15개를 담았습니다.", act: '앨범 보기' }; break;
+      case 'Cleanup': tab('Cleanup'); cleanPre(); break;
+      case 'Cleanup/empty': tab('Cleanup'); { const D = this.D(); D.groups.forEach(g => g.ids.forEach(id => { if (id !== g.keep) s.items.find(x => x.id === id).trashed = true; })); } break;
+      case 'Toast/cleanup': tab('Cleanup'); s.toast = { msg: '휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.' }; break;
+      case 'Settings': s.stack.push('Settings'); break;
+      case 'Settings/paused': s.stack.push('Settings'); s.paused = '배터리가 낮아 잠시 멈췄습니다'; break;
+      case 'Dialog/delete-all': s.stack.push('Settings'); s.dialog = 'delAll'; break;
+      default: break;
+    }
+    return s;
+  }
+
+  componentDidMount() { this.kick(); if (!this.still()) { this.onKey = e => this.key(e); window.addEventListener('keydown', this.onKey); } }
+  componentWillUnmount() { this.stopAll(); if (this.onKey) window.removeEventListener('keydown', this.onKey); }
+  componentDidUpdate(pp) { const p = this.props || {}; if (pp.start !== p.start || pp.nonce !== p.nonce) { this.stopAll(); this.setState(this.preset(p.start), () => this.kick()); } }
+  stopAll() { clearInterval(this.anaT); clearInterval(this.vpT); clearInterval(this.playT); clearTimeout(this.toastT); clearTimeout(this.searchT); clearTimeout(this.hideT); }
+  kick() {
+    if (this.still()) return;
+    const s = this.state;
+    if (this.top(s) === 'Analyzing' && !s.ana.paused) this.startAna();
+    if (s.vprog) this.startVp();
+    if (s.viewer && s.viewer.playing) this.startPlay();
+    if (s.toast) this.toastTimer(!!s.toast.act);
+  }
+  key(e) {
+    const s = this.state; if (e.target && e.target.tagName === 'INPUT') return;
+    if (this.top(s) === 'Viewer') { if (e.key === 'ArrowRight') this.step(1); if (e.key === 'ArrowLeft') this.step(-1); if (e.key === ' ') { e.preventDefault(); this.togglePlay(); } }
+    if (e.key === 'Escape') this.back();
+  }
+  toast(msg, act) { this.setState({ toast: { msg, act } }); this.toastTimer(!!act); }
+  toastTimer(long) { clearTimeout(this.toastT); if (this.still()) return; this.toastT = setTimeout(() => this.setState({ toast: null }), long ? 4000 : 2600); }
+  snap() { this.snapV = { items: this.state.items, mine: this.state.mine }; }
+  undo() { if (!this.snapV) return; this.setState({ items: this.snapV.items, mine: this.snapV.mine }); this.snapV = null; this.toast('취소했습니다.'); }
+  toastAct() { const t = this.state.toast; if (!t) return; if (t.act === '되돌리기') this.undo(); else if (t.act === '앨범 보기' && this.lastAlbum) { this.setState({ toast: null, stack: ['Albums', 'Category'], tab: 'Albums', cat: this.lastAlbum, cf: 'all', sel: null }); } }
+  startAna() {
+    clearInterval(this.anaT);
+    this.anaT = setInterval(() => {
+      const p = this.state.ana.p + 0.018;
+      if (p >= 1) { clearInterval(this.anaT); this.setState({ ana: { p: 1, paused: null }, stack: ['Photos'], tab: 'Photos', vprog: { done: 0, total: 13, scene: 1 } }, () => this.startVp()); }
+      else this.setState({ ana: { p, paused: null } });
+    }, 90);
+  }
+  startVp() {
+    clearInterval(this.vpT); if (this.still()) return;
+    this.vpT = setInterval(() => {
+      const v = this.state.vprog; if (!v) return clearInterval(this.vpT);
+      if (this.state.paused) return;
+      let scene = v.scene + 1, done = v.done; if (scene > 8) { scene = 1; done++; }
+      if (done >= v.total) { clearInterval(this.vpT); this.setState({ vprog: null }); } else this.setState({ vprog: { done, total: v.total, scene } });
+    }, 700);
+  }
+  setV(p) { this.setState(s => ({ viewer: s.viewer ? Object.assign({}, s.viewer, typeof p === 'function' ? p(s.viewer) : p) : null })); }
+  cur() { const v = this.state.viewer; return v ? this.state.items.find(x => x.id === v.ids[v.i]) : null; }
+  startPlay() {
+    clearInterval(this.playT); if (this.still()) return;
+    this.playT = setInterval(() => {
+      const v = this.state.viewer, it = this.cur(); if (!v || !it) return clearInterval(this.playT);
+      const t = v.t + 0.25;
+      if (t >= it.secs) { clearInterval(this.playT); this.setV({ t: it.secs, playing: false, chrome: true }); } else this.setV({ t });
+    }, 250);
+    clearTimeout(this.hideT); this.hideT = setTimeout(() => { const v = this.state.viewer; if (v && v.playing) this.setV({ chrome: false }); }, 2600);
+  }
+  stopPlay() { clearInterval(this.playT); clearTimeout(this.hideT); }
+  togglePlay() {
+    const v = this.state.viewer, it = this.cur(); if (!v || !it || !it.video || it.fail) return;
+    if (v.playing) { this.stopPlay(); this.setV({ playing: false, chrome: true }); }
+    else { this.setV({ playing: true, t: v.t >= it.secs ? 0 : v.t }); setTimeout(() => this.startPlay(), 0); }
+  }
+  step(d) {
+    const v = this.state.viewer; if (!v) return; const i = v.i + d; if (i < 0 || i >= v.ids.length) return;
+    this.stopPlay(); this.setV({ i, zoom: 1, t: 0, playing: false, chrome: true, scenes: null, lastScene: null, fs: false });
+  }
+  openViewer(ids, id, o) {
+    this.stopPlay(); if (this.baseOf(this.state) === 'Photos') this.saveScroll();
+    const v = this.vw(ids, Math.max(0, ids.indexOf(id)), o);
+    this.setState(s => ({ stack: s.stack.concat('Viewer'), viewer: v }), () => { if (v.playing) this.startPlay(); });
+  }
+  saveScroll() { const el = this.gridRef.current; if (el) this.pScroll = el.scrollTop; }
+  setScroll(y) { requestAnimationFrame(() => { const el = this.gridRef.current; if (el) el.scrollTop = y || 0; }); }
+  back() {
+    const s = this.state, t = this.top(s);
+    if (s.dialog) return this.setState({ dialog: null });
+    if (s.sheet) return this.setState({ sheet: null });
+    if (s.catMenu) return this.setState({ catMenu: false });
+    if (t === 'Viewer') { if (s.viewer && s.viewer.fs) return this.setV({ fs: false }); this.stopPlay(); return this.setState(st => ({ stack: st.stack.slice(0, -1), viewer: null })); }
+    if (s.sel) return this.setState({ sel: null });
+    if (t === 'Search' && s.search.review) return this.setState({ search: Object.assign({}, s.search, { review: null }) });
+    if (s.stack.length > 1) { const next = s.stack.slice(0, -1); this.setState({ stack: next, sel: null, catMenu: false, fixSel: {} }, () => { if (next[next.length - 1] === 'Photos') this.setScroll(this.pScroll); }); }
+  }
+  tabGo(t) { this.stopPlay(); if (this.baseOf(this.state) === 'Photos') this.saveScroll(); this.setState({ stack: [t], tab: t, sel: null, viewer: null, catMenu: false, sheet: null }, () => { if (t === 'Photos') this.setScroll(this.pScroll); }); }
+  push(scr, extra) { if (this.baseOf(this.state) === 'Photos') this.saveScroll(); this.setState(s => Object.assign({ stack: s.stack.concat(scr), sel: null }, extra || {}), () => this.setScroll(0)); }
+  openCat(id) { this.push('Category', { cat: id, cf: this.state.tab === 'Albums' ? this.state.af : 'all', catMenu: false }); }
+
+  albumsAll(s) {
+    const vis = this.visible(s), M = {}; vis.forEach(x => M[x.id] = x);
+    const A = [{ id: 'fav', kind: 'fav', t: '즐겨찾기', ids: vis.filter(x => x.fav).map(x => x.id) }];
+    s.mine.forEach(a => A.push({ id: a.id, kind: 'mine', t: a.t, ids: a.ids.filter(id => M[id]), scenes: a.scenes }));
+    const F = {}; vis.forEach(x => (F[x.folder] = F[x.folder] || []).push(x.id));
+    ['Camera','Screenshots','KakaoTalk','Download'].forEach(f => { if (F[f] && F[f].length >= 3) A.push({ id: 'folder:' + f, kind: 'folder', t: f, ids: F[f] }); });
+    const AX = { 인물: [], 여행: ['풍경/여행'], 문서: ['화면캡처내용','문서/영수증'], 음식: ['음식'], 순간: ['실내일상','행사/축제','건물/거리','자연/식물','반려동물','상품/쇼핑'] };
+    const G = {}; vis.forEach(x => x.ai.forEach(n => (G[n] = G[n] || []).push(x.id)));
+    Object.keys(G).sort((a, b) => G[b].length - G[a].length).forEach(n => { const ax = Object.keys(AX).find(a => AX[a].indexOf(n) >= 0); if (ax && !s.axes[ax]) return; A.push({ id: 'ai:' + n, kind: 'ai', t: n, ids: G[n], axis: ax }); });
+    const R = {}; vis.forEach(x => { if (x.date && !x.fileTime) (R[x.date] = R[x.date] || []).push(x); });
+    Object.keys(R).sort().reverse().forEach(d => { const its = R[d]; if (its.length < 5) return; const C = {}; its.forEach(x => { const n = x.ai[0] || '기타'; C[n] = C[n] || { n: 0, v: 0 }; C[n].n++; if (x.video) C[n].v++; });
+      const tp = Object.keys(C).sort((a, b) => C[b].n - C[a].n).slice(0, 2).map(n => n + ' ' + C[n].n + (C[n].v ? '개' : '장'));
+      A.push({ id: 'rec:' + d, kind: 'record', t: this.dayLabel(d, true) + ' · ' + tp.join(', '), ids: its.map(x => x.id) }); });
+    A.push({ id: 'moa:week', kind: 'moa', t: '이번 주 사진·영상', ids: vis.filter(x => x.date && x.date >= '2026-09-24').map(x => x.id) });
+    A.push({ id: 'moa:2y', kind: 'moa', t: '2년 전 오늘', ids: vis.filter(x => x.date === '2024-09-30').map(x => x.id) });
+    return A;
+  }
+  gridList(s, A) {
+    const b = this.baseOf(s), vis = this.visible(s);
+    if (b === 'Category' || b === 'Fix') { const a = A.find(x => x.id === s.cat); if (!a) return []; const set = {}; a.ids.forEach(id => set[id] = 1); return vis.filter(x => set[x.id] && (b === 'Fix' || this.pass(x, s.cf))); }
+    return vis.filter(x => this.pass(x, s.pf));
+  }
+  groupDays(list) {
+    const out = [];
+    list.forEach(x => { const key = x.date || 'none'; let g = out[out.length - 1]; if (!g || g.key !== key) { g = { key, date: x.date, items: [] }; out.push(g); } g.items.push(x); });
+    const res = [], rel = ['2026-09-30', '2026-09-29'];
+    out.forEach(g => {
+      const p = res[res.length - 1];
+      const ok = p && g.date && p.to && rel.indexOf(p.to) < 0 && rel.indexOf(g.date) < 0 && p.to.slice(0, 7) === g.date.slice(0, 7) && p.last <= 3 && g.items.length <= 3 && (new Date(p.from) - new Date(g.date)) / 864e5 <= 3;
+      if (ok) { p.items = p.items.concat(g.items); p.from = g.date; p.last = g.items.length; }
+      else res.push({ key: g.key, to: g.date, from: g.date, items: g.items.slice(), last: g.items.length });
+    });
+    return res.map(g => {
+      let h = this.dayLabel(g.to);
+      if (g.to && g.from !== g.to) { const [y, m, d2] = g.to.split('-').map(Number), d1 = +g.from.split('-')[2]; h = (y === 2026 ? '' : y + '년 ') + m + '월 ' + d1 + '일 – ' + d2 + '일'; }
+      return { key: g.key, month: g.to ? g.to.slice(0, 7) : 'none', h, meta: this.meta(g.items), items: g.items };
+    });
+  }
+  runSearch(s, q, off) {
+    off = off || {}; const has = k => !off[k], chips = []; const add = (k, t) => chips.push({ k, t });
+    let year = null, months = null, tones = null, media = s.search.videoOnly ? 'video' : null;
+    if (/작년/.test(q)) { add('y', '시간: 작년'); if (has('y')) year = 2025; } else if (/올해/.test(q)) { add('y', '시간: 올해'); if (has('y')) year = 2026; }
+    if (/지난달/.test(q)) { add('lm', '시간: 지난달'); if (has('lm')) { year = 2026; months = [8]; } }
+    if (/여름/.test(q)) { add('m', '시간: 여름'); if (has('m')) months = [6, 7, 8]; } else if (/겨울/.test(q)) { add('m', '시간: 겨울'); if (has('m')) months = [12, 1, 2]; }
+    const TM = [[/바다|해변|파도/, '물/바다', ['sea','sand']], [/강아지/, '강아지', ['dog']], [/반려|고양이/, '반려동물', ['dog']], [/카페|디저트|커피/, '카페·디저트', ['cafe']], [/음식|밥|맛집|요리/, '음식', ['food','cafe']], [/밤|야경/, '저조도', ['night','city']], [/노을|하늘/, '하늘·노을', ['dusk']], [/풍경|여행/, '풍경/여행', ['sea','sand','dusk']], [/캡처|스크린샷|대화/, '화면캡처내용', ['doc']], [/영수증|문서/, '문서/영수증', ['doc']], [/꽃|식물|공원|나무/, '자연/식물', ['leaf']], [/축제|행사|공연/, '행사/축제', ['night']], [/거리|건물|도시/, '건물/거리', ['city']]];
+    TM.forEach((r, j) => { if (r[0].test(q)) { add('t' + j, '태그: ' + r[1]); if (has('t' + j)) tones = (tones || []).concat(r[2]); } });
+    if (/영상/.test(q)) { add('v', '종류: 동영상'); if (has('v')) media = 'video'; } else if (/사진/.test(q)) { add('v', '종류: 사진'); if (has('v')) media = 'photo'; }
+    if (!chips.length) return { chips, close: [], other: [], summary: '' };
+    let pool = s.items.filter(x => !x.trashed && (!s.limited || x.allowed));
+    if (year || months) pool = pool.filter(x => x.date && (!year || +x.date.slice(0, 4) === year) && (!months || months.indexOf(+x.date.slice(5, 7)) >= 0));
+    if (media) pool = pool.filter(x => media === 'video' ? x.video : !x.video);
+    const close = tones ? pool.filter(x => tones.indexOf(x.k) >= 0) : pool, other = tones ? pool.filter(x => tones.indexOf(x.k) < 0) : [];
+    const all = close.concat(other).slice(0, 120), ds = all.filter(x => x.date).map(x => x.date).sort();
+    const ym = d => d.slice(0, 4) + '.' + (+d.slice(5, 7));
+    const period = (year || months) && ds.length ? (ym(ds[0]) === ym(ds[ds.length - 1]) ? ym(ds[0]) : ym(ds[0]) + ' – ' + ym(ds[ds.length - 1])) : '';
+    const tl = chips.filter(c => (c.k === 'y' || c.k === 'm' || c.k === 'lm') && has(c.k)).map(c => c.t.replace('시간: ', ''));
+    let head = [period].concat(tl).filter(Boolean); if (!head.length) head = chips.filter(c => c.k[0] === 't' && has(c.k)).map(c => c.t.replace('태그: ', ''));
+    const p = all.filter(x => !x.video).length, v = all.length - p;
+    return { chips, close: close.map(x => x.id), other: other.map(x => x.id), summary: head.join(', ') + ' · ' + [p ? '사진 ' + p + '장' : '', v ? '영상 ' + v + '개' : ''].filter(Boolean).join(' · ') + ' 찾았습니다.' };
+  }
+  setSearch(p, cb) { this.setState(s => ({ search: Object.assign({}, s.search, p) }), cb); }
+  doSearch(q) {
+    q = (q || '').trim(); if (!q) return; clearTimeout(this.searchT);
+    if (this.inputRef.current) this.inputRef.current.blur();
+    this.setSearch({ input: q, q, phase: 'loading', off: {}, others: false, focus: false, review: null });
+    this.searchT = setTimeout(() => { const r = this.runSearch(this.state, q); this.setSearch({ res: r, phase: r.close.length ? 'results' : 'none' }); }, 650);
+  }
+  reSearch(off) { const s = this.state; const r = this.runSearch(s, s.search.q, off); this.setSearch({ off, res: r, phase: r.close.length ? 'results' : 'none' }); }
+
+  gridRef = React.createRef(); inputRef = React.createRef();
+  cellDown = e => { const id = e.currentTarget.dataset.id; clearTimeout(this.lpT); this.lp = { id, fired: false, x: e.clientX, y: e.clientY }; this.lpT = setTimeout(() => { if (!this.lp) return; this.lp.fired = true; const s = this.state; if (!s.sel) this.setState({ sel: { ids: { [id]: 1 } } }); else this.toggleSel(id); }, 450); };
+  cellUp = e => { clearTimeout(this.lpT); const lp = this.lp; this.lp = null; if (!lp || lp.fired) return; if (Math.abs(e.clientX - lp.x) + Math.abs(e.clientY - lp.y) > 10) return; this.tapCell(lp.id); };
+  cellCancel = () => { clearTimeout(this.lpT); this.lp = null; };
+  noCtx = e => e.preventDefault();
+  toggleSel(id) { this.setState(s => { const ids = Object.assign({}, s.sel.ids); if (ids[id]) delete ids[id]; else ids[id] = 1; return { sel: { ids } }; }); }
+  tapCell(id) {
+    const s = this.state; if (s.sel) return this.toggleSel(id);
+    const A = this.albumsAll(s), list = this.gridList(s, A).map(x => x.id), a = A.find(x => x.id === s.cat), it = s.items.find(x => x.id === id);
+    const sc = this.baseOf(s) === 'Category' && a && a.scenes && a.scenes[id] != null ? a.scenes[id] : null;
+    this.openViewer(list, id, sc != null && it.video ? { playing: true, t: sc, lastScene: sc, scenes: it.scenes } : null);
+  }
+  selIds() { const s = this.state; return s.sel ? Object.keys(s.sel.ids) : []; }
+  upd(ids, fn) { const set = {}; ids.forEach(id => set[id] = 1); return this.state.items.map(x => set[x.id] ? fn(Object.assign({}, x)) : x); }
+  selFav() { const ids = this.selIds(); if (!ids.length) return; this.snap(); this.setState({ items: this.upd(ids, x => (x.fav = true, x)), sel: null }); this.toast(ids.length + '개를 즐겨찾기에 넣었습니다.', '되돌리기'); }
+  selTrash() { const ids = this.selIds(); if (!ids.length) return; this.setState({ items: this.upd(ids, x => (x.trashed = true, x)), sel: null }); this.toast('휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.'); }
+  selRemove() {
+    const s = this.state, ids = this.selIds(); if (!ids.length) return; const a = this.albumsAll(s).find(x => x.id === s.cat); if (!a) return; this.snap();
+    if (a.kind === 'ai') this.setState({ items: this.upd(ids, x => (x.ai = x.ai.filter(n => n !== a.t), x)), sel: null });
+    else if (a.kind === 'fav') this.setState({ items: this.upd(ids, x => (x.fav = false, x)), sel: null });
+    else this.setState({ mine: s.mine.map(m => m.id === a.id ? Object.assign({}, m, { ids: m.ids.filter(id => ids.indexOf(id) < 0) }) : m), sel: null });
+    this.toast(ids.length + '개를 앨범에서 뺐습니다. 사진·영상은 그대로 있습니다.', '되돌리기');
+  }
+  addTo(aid) { const ids = this.selIds(); this.snap(); this.setState(s => ({ mine: s.mine.map(m => m.id === aid ? Object.assign({}, m, { ids: m.ids.concat(ids.filter(id => m.ids.indexOf(id) < 0)) }) : m), sel: null, sheet: null })); this.toast(ids.length + '개를 앨범에 넣었습니다.', '되돌리기'); }
+  createAlbum() {
+    const name = (this.state.newName || '').trim().slice(0, 20); if (!name) return; const ids = this.selIds(), id = 'u' + Date.now();
+    this.setState(s => ({ mine: s.mine.concat({ id, t: name, ids, scenes: {} }), sel: null, sheet: null, newName: '' })); this.lastAlbum = id;
+    this.toast(ids.length ? ids.length + '개를 앨범에 넣었습니다.' : "'" + name + "' 앨범을 만들었습니다.", '앨범 보기');
+  }
+  saveReview() {
+    const s = this.state, r = s.search.review, ids = s.search.res.close.filter(id => !r.removed[id]); if (!ids.length) return;
+    const name = (r.name || s.search.q).trim().slice(0, 20) || s.search.q, id = 'u' + Date.now(), scenes = {};
+    ids.forEach(i => { const it = s.items.find(x => x.id === i); if (it.video) scenes[i] = it.scenes[0]; });
+    this.lastAlbum = id;
+    this.setState({ mine: s.mine.concat({ id, t: name, ids, scenes }), search: Object.assign({}, s.search, { review: null }) });
+    this.toast("'" + name + "' 앨범에 " + ids.length + '개를 담았습니다.', '앨범 보기');
+  }
+  cleanGroups(s) { const D = this.D(); return D.groups.map(g => Object.assign({}, g, { ids: g.ids.filter(id => { const x = s.items.find(i => i.id === id); return x && !x.trashed; }) })).filter(g => g.ids.length >= 2); }
+  cleanSet(p) { this.setState(s => ({ clean: Object.assign({}, s.clean, typeof p === 'function' ? p(s.clean) : p) })); }
+  cleanSelect(reset) {
+    const s = this.state, G = this.cleanGroups(s), D = this.D(); const keep = reset ? Object.fromEntries(D.groups.map(g => [g.gid, g.keep])) : s.clean.keep; const sel = {};
+    G.forEach(g => { if (s.clean.hold[g.gid]) return; g.ids.forEach(id => { if (id !== keep[g.gid]) sel[id] = true; }); });
+    const allOn = !reset && Object.keys(sel).every(id => s.clean.sel[id]) && Object.keys(sel).length;
+    this.cleanSet({ keep, sel: allOn ? {} : sel });
+  }
+  cleanTrash() { const s = this.state, ids = Object.keys(s.clean.sel).filter(id => s.clean.sel[id]); if (!ids.length) return; this.setState({ items: this.upd(ids, x => (x.trashed = true, x)), clean: Object.assign({}, s.clean, { sel: {} }) }); this.toast('휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.'); }
+  vDown = e => { this.vp = { x: e.clientX, y: e.clientY }; };
+  vUp = e => {
+    const p = this.vp; this.vp = null; if (!p) return; const v = this.state.viewer; if (!v) return;
+    const fs = v.fs, dx = fs ? e.clientY - p.y : e.clientX - p.x, dy = fs ? p.x - e.clientX : e.clientY - p.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && v.zoom === 1) return this.step(dx < 0 ? 1 : -1);
+    if (dy > 90 && !fs && v.zoom === 1 && !v.info) return this.back();
+    if (dy < -70 && !fs && !v.info) return this.setV({ info: true });
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { this.setV(o => ({ chrome: !o.chrome })); if (v.playing) { clearTimeout(this.hideT); this.hideT = setTimeout(() => { const w = this.state.viewer; if (w && w.playing) this.setV({ chrome: false }); }, 2600); } }
+  };
+  vDbl = () => { const it = this.cur(); if (it && !it.video) this.setV(o => ({ zoom: o.zoom > 1 ? 1 : 2.5, chrome: o.zoom > 1 })); };
+  seek = e => { const it = this.cur(); if (!it) return; const r = e.currentTarget.getBoundingClientRect(); const fs = this.state.viewer.fs; const ratio = fs ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width; this.setV({ t: Math.max(0, Math.min(1, ratio)) * it.secs, lastScene: null }); };
+  jump(sec) { this.setV({ t: sec, lastScene: sec, playing: true, chrome: true }); setTimeout(() => this.startPlay(), 0); }
+  viewerTrash() {
+    const v = this.state.viewer, it = this.cur(); if (!it) return; this.stopPlay();
+    const ids = v.ids.filter(id => id !== it.id);
+    this.setState(s => ({ items: s.items.map(x => x.id === it.id ? Object.assign({}, x, { trashed: true }) : x) }));
+    if (!ids.length) this.setState(s => ({ stack: s.stack.slice(0, -1), viewer: null })); else this.setV({ ids, i: Math.min(v.i, ids.length - 1), t: 0, playing: false, scenes: null, lastScene: null });
+    this.toast('휴지통으로 보냈습니다. 30일 안에 복구할 수 있습니다.');
+  }
+  fixApply(target) {
+    const s = this.state, ids = Object.keys(s.fixSel), a = this.albumsAll(s).find(x => x.id === s.cat); if (!ids.length || !a) return; this.snap();
+    this.setState({ items: this.upd(ids, x => { x.ai = x.ai.filter(n => n !== a.t); if (target && x.ai.indexOf(target) < 0) x.ai = x.ai.concat(target); return x; }), fixSel: {}, sheet: null });
+    this.toast(target ? ids.length + "개를 '" + target + "' 앨범으로 옮겼습니다. 사진·영상은 그대로 있습니다." : ids.length + '개를 앨범에서 뺐습니다. 사진·영상은 그대로 있습니다.', '되돌리기');
+  }
+  onGridScroll = e => {
+    const el = e.currentTarget; if (this.scrollRaf) return;
+    this.scrollRaf = requestAnimationFrame(() => {
+      this.scrollRaf = null; const heads = el.querySelectorAll('[data-month]'); let m = '';
+      for (let i = 0; i < heads.length; i++) { if (heads[i].offsetTop <= el.scrollTop + 60) m = heads[i].getAttribute('data-month'); else break; }
+      if (el.scrollTop < 180) m = '';
+      if (m !== this.state.scrollM) this.setState({ scrollM: m });
+    });
+  };
+  jumpMonth(key) { this.setState({ sheet: null }, () => requestAnimationFrame(() => { const el = this.gridRef.current; if (!el) return; const h = el.querySelector('[data-month="' + key + '"]'); if (h) el.scrollTop = h.offsetTop - 4; })); }
+  monthLabel(k) { return k === 'none' ? '날짜 미상' : k.slice(0, 4) + '년 ' + (+k.slice(5, 7)) + '월'; }
+  seg(opts, cur, set, accentKey) { return opts.map(o => { const on = o.k === cur, acc = on && o.k === accentKey; return { t: o.t, ic: o.ic || '', hasIc: !!o.ic, go: () => set(o.k), bg: acc ? '#8FB8FF' : on ? '#3A3A42' : 'transparent', fg: acc ? '#0B1A33' : on ? '#F2F0ED' : '#BDBAB4', fw: on ? 600 : 400 }; }); }
+
+  renderVals() {
+    const s = this.state, st = s.stack, top = st[st.length - 1], base = this.baseOf(s);
+    const M = {}; s.items.forEach(x => M[x.id] = x);
+    const vis = this.visible(s), A = this.albumsAll(s), album = s.cat ? A.find(a => a.id === s.cat) : null;
+    const isGrid = base === 'Photos' || base === 'Category', review = base === 'Search' && !!s.search.review, selOn = !!s.sel && isGrid;
+    const selIds = selOn ? s.sel.ids : {}, nSel = Object.keys(selIds).length;
+    const groups = this.cleanGroups(s), cleanN = groups.reduce((n, g) => n + g.ids.length - 1, 0);
+    const o = {};
+    o.is = { Permission: base === 'Permission', Analyzing: base === 'Analyzing', grid: isGrid, Photos: base === 'Photos', Category: base === 'Category', Albums: base === 'Albums', Search: base === 'Search' && !review, Review: review, Cleanup: base === 'Cleanup', Settings: base === 'Settings', Fix: base === 'Fix', Viewer: top === 'Viewer' };
+    const v = s.viewer, fs = !!(v && v.fs && top === 'Viewer');
+    o.showStatus = !fs; o.showHome = !fs;
+    o.back = () => this.back();
+    o.homeCol = top === 'Viewer' ? '#F2F0ED' : '#F2F0ED';
+
+    // Permission / Analyzing
+    const tones = ['sea','food','dog','doc','leaf','night','dusk','cafe','city'];
+    o.permTiles = tones.map((k, i) => ({ bg: (s.items.find(x => x.k === k) || {}).bg }));
+    o.perm = { ask: s.perm === 'ask', later: s.perm === 'later' };
+    o.allow = () => { this.setState({ stack: ['Analyzing'], ana: { p: 0, paused: null } }, () => this.startAna()); };
+    o.later = () => this.setState({ perm: 'later' });
+    const photosN = s.items.filter(x => !x.video).length, p = s.ana.p;
+    o.ana = { pct: Math.round(p * 100), dash: (p * 553).toFixed(1), ring: s.ana.paused ? '#5E5C59' : '#8FB8FF', count: '전체 ' + photosN + '장 중 ' + Math.round(p * photosN) + '장', paused: !!s.ana.paused, pausedMsg: s.ana.paused || '', running: !s.ana.paused,
+      steps: ['사진 목록 읽기', '촬영 정보·출처 정리', '장면 분류', '앨범 묶기'].map((t, i) => { const th = [0.18, 0.4, 0.86, 1][i], prev = [0, 0.18, 0.4, 0.86][i]; const done = p >= th, act = !done && p >= prev; return { t, stT: done ? '완료' : act ? (s.ana.paused ? '멈춤' : '진행 중') : '대기', done, act, wait: !done && !act, col: done ? '#6FD49A' : act ? '#F2F0ED' : '#8E8B86' }; }) };
+    o.anaResume = () => { this.setState({ ana: { p: s.ana.p, paused: null } }, () => this.startAna()); };
+
+    // Grid screens
+    const gl = isGrid ? this.gridList(s, A) : [];
+    const mk = x => { const sel = selOn && !!selIds[x.id]; return { id: x.id, bg: x.bg, video: x.video && !x.fail, fail: x.fail, dur: x.dur, scrim: (x.video || x.fav) && !x.fail, fav: x.fav && !selOn, sel, un: selOn && !sel }; };
+    o.sections = this.groupDays(gl).map(g => ({ key: g.key, month: g.month, h: g.h, meta: g.meta, cells: g.items.map(mk) }));
+    o.gridRef = this.gridRef; o.onGridScroll = this.onGridScroll; o.cellDown = this.cellDown; o.cellUp = this.cellUp; o.cellCancel = this.cellCancel; o.noCtx = this.noCtx;
+    o.topbar = { photos: base === 'Photos' && !selOn, cat: base === 'Category' && !selOn, sel: selOn };
+    const remaining = s.vprog ? s.vprog.total - s.vprog.done : 0;
+    o.photosSub = vis.length ? this.n(vis.length) + '개' + (s.vprog ? ' · AI 분류 ' + this.n(vis.length - remaining) + '개 완료' : '') : '0개';
+    o.openSearch = () => { this.tabGo('Search'); setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 50); };
+    o.openSettings = () => this.push('Settings');
+    o.photosTop = base === 'Photos'; o.catTop = base === 'Category';
+    o.pfSeg = this.seg([{ k: 'all', t: '전체' }, { k: 'photo', t: '사진' }, { k: 'video', t: '동영상' }], s.pf, k => { this.setState({ pf: k }); this.setScroll(0); }, 'video');
+    o.cfSeg = this.seg([{ k: 'all', t: '전체' }, { k: 'photo', t: '사진' }, { k: 'video', t: '동영상' }], s.cf, k => this.setState({ cf: k }), 'video');
+    o.limited = s.limited && base === 'Photos'; o.allowAll = () => { this.setState({ limited: false }); };
+    const moaW = A.find(a => a.id === 'moa:week'), moa2 = A.find(a => a.id === 'moa:2y');
+    const moaCard = a => { const its = a.ids.map(id => M[id]); return { t: a.t, m: a.id === 'moa:2y' ? '2024년 9월 30일' : this.count(its, 'all'), bg: its[0] ? its[0].bg : '#1D1D22', go: () => this.openCat(a.id) }; };
+    o.moa = [moaW, moa2].filter(a => a && a.ids.length >= 3).map(moaCard);
+    o.moaClean = groups.length > 0; o.moaCleanT = '정리할 사진·영상 ' + cleanN + '개'; o.goClean = () => this.tabGo('Cleanup');
+    o.moaShow = base === 'Photos' && s.pf === 'all' && (o.moa.length > 0 || o.moaClean);
+    o.gridEmpty = isGrid && gl.length === 0;
+    const catKind = album ? album.kind : '';
+    o.empty = s.limited && base === 'Photos' ? { t: '허용된 사진·영상이 없습니다', d: "위의 '전체 허용'으로 사진과 영상 접근을 모두 허용하면 앨범이 돌아옵니다.", ic: '#i-warn' }
+      : base === 'Category' ? (s.cf === 'video' ? { t: '이 앨범에는 동영상이 없습니다.', d: '', ic: '#i-video' } : s.cf === 'photo' ? { t: '이 앨범에는 사진이 없습니다.', d: '', ic: '#i-photo' } : { t: '이 앨범은 비어 있습니다.', d: '갤러리에서 길게 눌러 선택한 뒤 앨범에 추가하세요.', ic: '#i-album' })
+      : s.pf === 'video' ? { t: '동영상이 없습니다.', d: '', ic: '#i-video' } : { t: '아직 사진·영상이 없습니다', d: '카메라로 찍거나 저장한 사진·영상이 여기에 모입니다.', ic: '#i-photo' };
+    o.empty.hasD = !!o.empty.d;
+    o.gridFooter = base === 'Category' && gl.length ? gl.length + ' / ' + gl.length + '개 불러옴' : '';
+    o.hasFooter = !!o.gridFooter;
+    o.scrub = base === 'Photos' && !selOn && gl.length > 12 && !!s.scrollM;
+    o.scrubLabel = s.scrollM ? this.monthLabel(s.scrollM) : '월별 이동';
+    o.openMonth = () => this.setState({ sheet: 'month' });
+    const months = {}; gl.forEach(x => { const k = x.date ? x.date.slice(0, 7) : 'none'; months[k] = (months[k] || 0) + 1; });
+    o.months = Object.keys(months).map(k => ({ t: this.monthLabel(k), m: months[k] + '개', go: () => this.jumpMonth(k), cur: k === s.scrollM }));
+    o.vpShow = !!s.vprog && base === 'Photos' && !selOn && top !== 'Viewer';
+    o.vpText = s.vprog ? (s.paused ? s.paused : '영상 ' + s.vprog.done + '/' + s.vprog.total + '개 · 장면 분석 ' + s.vprog.scene + '/8') : '';
+    o.vpDash = s.vprog ? ((s.vprog.done + s.vprog.scene / 8) / s.vprog.total * 47.1).toFixed(1) : 0;
+    // category header
+    const kindL = { ai: 'AI 앨범', mine: '내 앨범', fav: '내 앨범', folder: '기기 폴더', record: '기록', moa: '모아보기' };
+    const kindIc = { ai: '#i-ai', mine: '#i-mine', fav: '#i-heart', folder: '#i-folder', record: '#i-record', moa: '#i-gallery' };
+    if (album) { const its = album.ids.map(id => M[id]).filter(Boolean); o.catT = album.t; o.catSub = kindL[album.kind] + ' · ' + this.count(its, s.cf); o.catIc = kindIc[album.kind]; }
+    else { o.catT = ''; o.catSub = ''; o.catIc = '#i-album'; }
+    o.catSelect = () => this.setState({ sel: { ids: {} } });
+    o.catMoreShow = catKind === 'ai' || catKind === 'mine';
+    o.catMore = () => this.setState({ catMenu: !s.catMenu });
+    o.catMenuShow = s.catMenu && base === 'Category';
+    o.catMenu = catKind === 'ai' ? [{ t: '분류 수정', ic: '#i-ai', fg: '#F2F0ED', go: () => this.push('Fix', { catMenu: false, fixSel: {} }) }] : [{ t: '앨범 삭제', ic: '#i-trash', fg: '#FF7B72', go: () => this.setState({ catMenu: false, dialog: 'delAlbum' }) }];
+    o.catNote = catKind === 'ai' ? 'AI 앨범은 삭제할 수 없습니다. 끄려면 설정 › 분류 항목.' : '앨범을 지워도 사진·영상은 그대로 있습니다.';
+    o.closeMenu = () => this.setState({ catMenu: false });
+    // selection
+    const selItems = Object.keys(selIds).map(id => M[id]).filter(Boolean);
+    o.selT = nSel ? nSel + '개 선택' : '사진·영상을 선택하세요';
+    o.selSub = (nSel ? this.meta(selItems) + ' · ' : '') + '화면에 불러온 ' + this.n(gl.length) + '개 중에서';
+    const allSel = nSel && nSel === gl.length;
+    o.selAllT = allSel ? '선택 해제' : '전체 선택';
+    o.selAll = () => { if (allSel) this.setState({ sel: { ids: {} } }); else { const ids = {}; gl.forEach(x => ids[x.id] = 1); this.setState({ sel: { ids } }); } };
+    o.selBar = selOn;
+    const acts = [];
+    if (catKind !== 'fav') acts.push({ t: '즐겨찾기', ic: '#i-heart', go: () => this.selFav() });
+    acts.push({ t: '공유', ic: '#i-share', go: () => {} }, { t: '앨범에 추가', ic: '#i-plus', go: () => nSel && this.setState({ sheet: 'add' }) });
+    if (base === 'Category' && (catKind === 'ai' || catKind === 'mine' || catKind === 'fav')) acts.push({ t: catKind === 'fav' ? '즐겨찾기 해제' : '앨범에서 빼기', ic: '#i-remove', go: () => this.selRemove() });
+    o.selActs = acts.map(a => Object.assign(a, { op: nSel ? 1 : 0.4 }));
+    o.doTrash = () => this.selTrash();
+    o.trashBg = nSel ? '#C8322C' : '#26262C'; o.trashFg = nSel ? '#FFFFFF' : '#8E8B86'; o.trashLabel = nSel ? nSel + '개 휴지통으로' : '휴지통으로';
+
+    // Albums
+    const view = s.af;
+    const passA = a => { const its = a.ids.map(id => M[id]).filter(Boolean); if (view === 'all') return true; return its.some(x => this.pass(x, view)); };
+    const card = a => { const its = a.ids.map(id => M[id]).filter(Boolean).sort((x, y) => x.idx - y.idx), f = its.filter(x => this.pass(x, view)); const c = f[0]; return { t: a.t, m: this.count(f, view), bg: c ? (c.video && a.scenes && a.scenes[c.id] != null ? c.bgS : c.bg) : '#1D1D22', video: !!(c && c.video), fav: a.kind === 'fav', go: () => this.openCat(a.id) }; };
+    o.afSeg = this.seg([{ k: 'all', t: '전체' }, { k: 'photo', t: '사진', ic: '#i-photo' }, { k: 'video', t: '동영상', ic: '#i-video' }], s.af, k => this.setState({ af: k }), 'video');
+    o.kindTabs = [['all', '전체'], ['mine', '내 앨범'], ['folder', '기기 폴더'], ['ai', 'AI 앨범'], ['record', '기록']].map(([k, t]) => ({ t, go: () => this.setState({ akind: k }), fg: s.akind === k ? '#F2F0ED' : '#8E8B86', fw: s.akind === k ? 600 : 400, line: s.akind === k ? 'inset 0 -2px 0 #F2F0ED' : 'none' }));
+    o.afVideo = view === 'video';
+    const vN = vis.filter(x => x.video).length;
+    o.videoBanner = '영상 ' + vN + '개를 기준으로 다시 묶었습니다. 영상이 없는 앨범은 숨겨집니다.';
+    const want = k => s.akind === 'all' || s.akind === k;
+    const secs = [];
+    if (want('mine')) { const L = A.filter(a => (a.kind === 'fav' || a.kind === 'mine') && passA(a)); secs.push({ t: '내 앨범', ic: '#i-mine', n: String(L.length), d: '직접 만든 모음. 사진·영상은 원래 자리에 그대로 있습니다.', row: true, grid: false, list: false, cards: L.map(card), axis: false }); }
+    if (want('folder')) { const L = A.filter(a => a.kind === 'folder' && passA(a)); secs.push({ t: '기기 폴더', ic: '#i-folder', n: String(L.length), d: '사진·영상이 실제로 저장된 위치입니다.', row: true, grid: false, list: false, cards: L.map(card), axis: false }); }
+    if (want('ai')) { let L = A.filter(a => a.kind === 'ai' && passA(a) && (s.axis === '전체' || a.axis === s.axis)); if (view === 'video' && s.noVideoAI) L = []; secs.push({ t: 'AI 앨범', ic: '#i-ai', n: String(L.length), d: '내용으로 묶은 분류. 하나가 여러 앨범에 들어갈 수 있습니다.', row: false, grid: true, list: false, cards: L.map(card), axis: true }); }
+    if (want('record')) { const L = A.filter(a => a.kind === 'record' && passA(a)); secs.push({ t: '기록', ic: '#i-record', n: String(L.length), d: '촬영 시각과 위치로 묶은 기록입니다.', row: false, grid: false, list: true, cards: L.map(card), axis: false }); }
+    secs.forEach(x => { x.emptyShow = !x.cards.length; x.has = x.cards.length > 0; x.emptyT = x.t === 'AI 앨범' && view === 'video' ? '분류된 동영상이 없습니다' : x.t === 'AI 앨범' && s.axis !== '전체' ? '이 분류에 해당하는 앨범이 없습니다.' : view === 'video' ? '동영상이 든 앨범이 없습니다.' : '앨범이 없습니다.'; x.emptyD = x.t === 'AI 앨범' && view === 'video' ? '영상 분석이 끝나면 장면별로 나뉘어 이곳에 생깁니다.' : ''; x.hasEmptyD = !!x.emptyD; x.axisT = '분류: ' + s.axis; x.openAxis = () => this.setState({ sheet: 'axis' }); });
+    o.albumSecs = secs;
+    o.newAlbum = () => this.setState({ sheet: 'add', sel: null });
+
+    // Viewer
+    o.vw = { show: false };
+    if (v && top === 'Viewer') {
+      const it = M[v.ids[v.i]] || {}; const fit = (ar, W, H) => { let w = W, h = W * ar[1] / ar[0]; if (h > H) { h = H; w = H * ar[0] / ar[1]; } return { w: Math.round(w), h: Math.round(h) }; };
+      const photo = !it.video, info = v.info;
+      const stTop = info ? 84 : 0, stH = info ? 316 : 891, pf = fit(it.ar, 411, stH);
+      const regTop = 84, regH = info ? 316 : 400, vf = fit(it.ar, 411, regH), ff = fit(it.ar, 891, 411);
+      const pct = it.secs ? Math.min(100, v.t / it.secs * 100) : 0;
+      const chips = it.ai.concat(it.sub).filter((n, i, a) => a.indexOf(n) === i).slice(0, 5);
+      o.vw = { show: true, photo, video: !!it.video && !it.fail, err: !!it.fail, isVid: !!it.video, bg: it.bg, w: photo ? pf.w : vf.w, h: photo ? pf.h : vf.h, fw: ff.w, fh: ff.h, stTop, stH, regTop, regH, zoom: v.zoom,
+        title: this.fullDate(it), pos: (v.i + 1) + ' / ' + v.ids.length, favIc: it.fav ? '#i-heart-f' : '#i-heart', favCol: it.fav ? '#FF7B72' : '#F2F0ED',
+        chromeOp: v.chrome ? 1 : 0, chromePe: v.chrome ? 'auto' : 'none', botOp: photo ? (v.chrome ? 1 : 0) : 1, botPe: photo ? (v.chrome ? 'auto' : 'none') : 'auto',
+        botShow: !info, info, playIc: v.playing ? '#i-pause' : '#i-play', volIc: v.muted ? '#i-mute' : '#i-vol', volT: v.muted ? '음소거 해제' : '음소거',
+        pct: pct.toFixed(2), tNow: this.fmtT(v.t), tAll: it.dur || '', seekShow: !!it.video && !it.fail && !info, seekTop: regTop + regH + 12,
+        markers: (v.scenes || []).map(sc => ({ left: (sc / it.secs * 100).toFixed(2) })),
+        scenesShow: !!(v.scenes && v.scenes.length) && !info && !it.fail, sceneTop: regTop + regH + 104,
+        scenes: (v.scenes || []).slice(0, 3).map(sc => ({ t: '약 ' + this.fmtT(sc), go: () => this.jump(sc), bg: v.lastScene === sc ? '#8FB8FF' : '#1D1D22', fg: v.lastScene === sc ? '#0B1A33' : '#F2F0ED', fw: v.lastScene === sc ? 600 : 500, act: v.lastScene === sc })),
+        badge: v.lastScene != null && v.t < v.lastScene + 5 && !!it.video, badgeT: '약 ' + this.fmtT(v.lastScene || 0) + ' 장면부터 재생 중',
+        chips: chips.map(n => ({ t: n, pinned: !!it.pinned[n], bg: it.pinned[n] ? 'rgba(143,184,255,.14)' : '#26262C', ring: it.pinned[n] ? 'inset 0 0 0 1px #8FB8FF' : 'none', fg: it.pinned[n] ? '#8FB8FF' : '#F2F0ED', go: () => this.setState(st2 => ({ items: st2.items.map(x => x.id === it.id ? Object.assign({}, x, { pinned: Object.assign({}, x.pinned, { [n]: !x.pinned[n] }) }) : x) })) })),
+        details: v.details, detRot: v.details ? 'rotate(180deg)' : 'none',
+        rows: [['장면', it.scores ? it.scores.map(t => t[0] + ' ' + t[1] + '%').join(' · ') : ''], ['출처', it.src], ['파일', it.file + ' · ' + it.size + 'MB'], ['카메라', it.cam], ['위치', it.geo], ['크기', it.dims], it.video ? ['길이', it.dur] : ['선명도', String(it.sharp)]].map(r => ({ k: r[0], v: r[1] })),
+        fs: !!v.fs, fsChrome: v.chrome ? 1 : 0 };
+      o.vBack = () => this.back(); o.vFav = () => this.setState(st2 => ({ items: st2.items.map(x => x.id === it.id ? Object.assign({}, x, { fav: !x.fav }) : x) }));
+      o.vInfo = () => this.setV(q => ({ info: !q.info, chrome: true })); o.vDetails = () => this.setV(q => ({ details: !q.details }));
+      o.vTrash = () => this.viewerTrash(); o.vShare = () => {};
+      o.vPlay = () => this.togglePlay(); o.vRw = () => this.setV(q => ({ t: Math.max(0, q.t - 5), lastScene: null })); o.vFf = () => this.setV(q => ({ t: Math.min(it.secs, q.t + 15), lastScene: null }));
+      o.vMute = () => this.setV(q => ({ muted: !q.muted })); o.vFs = () => this.setV(q => ({ fs: !q.fs, chrome: true, info: false }));
+    }
+    o.vDown = this.vDown; o.vUp = this.vUp; o.vDbl = this.vDbl; o.seek = this.seek;
+
+    // Search
+    const S = s.search, R = S.res;
+    const scap = x => { const sc = x.scenes || [5]; return '약 ' + this.fmtT(sc[0]) + (sc.length > 1 ? ' 외 ' + (sc.length - 1) + '곳' : ''); };
+    const openS = (list, x) => this.openViewer(list, x.id, x.video && !x.fail ? { playing: true, t: x.scenes[0], lastScene: x.scenes[0], scenes: x.scenes } : null);
+    const allRes = R ? R.close.concat(S.others ? R.other : []) : [];
+    const scell = x => ({ bg: x.video ? x.bgS : x.bg, video: x.video, cap: x.video ? scap(x) : '', go: () => openS(allRes, x) });
+    o.sx = { input: S.input, hasInput: !!S.input, initial: S.phase === 'initial', loading: S.phase === 'loading', none: S.phase === 'none', results: S.phase === 'results',
+      kb: S.focus && base === 'Search' && !review && top !== 'Viewer',
+      vBg: S.videoOnly ? '#8FB8FF' : 'transparent', vFg: S.videoOnly ? '#0B1A33' : '#BDBAB4', vRing: S.videoOnly ? 'none' : 'inset 0 0 0 1px rgba(255,255,255,.16)',
+      chips: R ? R.chips.map(c => ({ t: c.t, on: !S.off[c.k], ring: S.off[c.k] ? '1px dashed #3A3A42' : '1px dashed #5E5C59', fg: S.off[c.k] ? '#5E5C59' : '#BDBAB4', deco: S.off[c.k] ? 'line-through' : 'none', go: () => this.reSearch(Object.assign({}, S.off, { [c.k]: !S.off[c.k] })) })) : [],
+      hasChips: !!(R && R.chips.length), summary: R ? R.summary : '', closeN: R ? R.close.length + '개' : '', closeCells: R ? R.close.map(id => scell(M[id])) : [],
+      otherHas: !!(R && R.other.length), otherOpen: !!S.others, otherT: R ? '그 밖의 결과 ' + R.other.length + '개 · 관련이 낮을 수 있습니다' : '', otherCells: R && S.others ? R.other.map(id => scell(M[id])) : [], otherRot: S.others ? 'rotate(180deg)' : 'none' };
+    o.sOnInput = e => this.setSearch({ input: e.target.value }); o.sKey = e => { if (e.key === 'Enter') this.doSearch(e.target.value); };
+    o.sFocus = () => this.setSearch({ focus: true }); o.sBlur = () => setTimeout(() => this.setSearch({ focus: false }), 150);
+    o.sClear = () => { clearTimeout(this.searchT); this.setSearch({ input: '', q: '', phase: 'initial', res: null }); };
+    o.sGo = () => this.doSearch(S.input); o.inputRef = this.inputRef;
+    o.sVideo = () => this.setSearch({ videoOnly: !S.videoOnly }, () => { if (this.state.search.q && this.state.search.phase !== 'initial') this.reSearch(this.state.search.off); });
+    o.sSugg = ['작년 여름 바다', '밤에 찍은 사진', '강아지가 나오는 영상', '지난달 음식'].map(t => ({ t, go: () => this.doSearch(t) }));
+    o.sCats = ['음식', '반려동물', '풍경/여행', '화면캡처내용'].map(t => ({ t, go: () => this.doSearch(t) }));
+    o.sOthers = () => this.setSearch({ others: !S.others });
+    o.sCollect = () => this.setSearch({ review: { removed: {}, name: S.q } });
+    o.spinner = React.createElement('div', { style: { width: 28, height: 28, borderRadius: 14, border: '3px solid #26262C', borderTopColor: '#8FB8FF', animation: 'moaspin .8s linear infinite' } });
+    const kbRows = ['ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ', 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ'].map(r => ({ keys: r.split('').map(k => ({ t: k, w: '1' })) }));
+    kbRows.push({ keys: [{ t: '⇧', w: '1.5' }].concat('ㅋㅌㅊㅍㅠㅜㅡ'.split('').map(k => ({ t: k, w: '1' }))).concat([{ t: '⌫', w: '1.5' }]) });
+    kbRows.push({ keys: [{ t: '!#1', w: '1.5' }, { t: ',', w: '1' }, { t: '', w: '5' }, { t: '.', w: '1' }, { t: '검색', w: '1.5' }] });
+    o.kbRows = kbRows;
+    // Review
+    if (review && R) {
+      const r = S.review, n = R.close.filter(id => !r.removed[id]).length;
+      o.rv = { sub: R.close.length + '개 중 ' + n + '개 담김', name: r.name, saveT: n ? n + '개로 앨범 만들기' : '결과를 고르세요', saveBg: n ? '#8FB8FF' : '#26262C', saveFg: n ? '#0B1A33' : '#8E8B86',
+        cells: R.close.map(id => { const x = M[id]; return { bg: x.video ? x.bgS : x.bg, cap: x.video ? scap(x) : '', video: x.video, on: !r.removed[id], off: !!r.removed[id], go: () => this.setSearch({ review: Object.assign({}, r, { removed: Object.assign({}, r.removed, { [id]: !r.removed[id] }) }) }) }; }) };
+    } else o.rv = { sub: '', name: '', saveT: '', saveBg: '#26262C', saveFg: '#8E8B86', cells: [] };
+    o.rvName = e => this.setSearch({ review: Object.assign({}, S.review, { name: e.target.value.slice(0, 20) }) });
+    o.rvCancel = () => this.setSearch({ review: null }); o.rvSave = () => this.saveReview();
+
+    // Cleanup
+    const C = s.clean, D = this.D();
+    const selC = Object.keys(C.sel).filter(id => C.sel[id] && M[id] && !M[id].trashed);
+    o.cl = { sub: '겹치는 묶음 ' + groups.length + '개', empty: groups.length === 0, has: groups.length > 0, barShow: selC.length > 0 && base === 'Cleanup',
+      barT: selC.length + '개를 보내면 약 ' + Math.round(selC.reduce((a, id) => a + M[id].size, 0)) + 'MB가 빕니다.', trashT: selC.length + '개 휴지통으로',
+      allT: groups.length && groups.every(g => C.hold[g.gid] || g.ids.every(id => id === C.keep[g.gid] || C.sel[id])) ? '선택 해제' : '전체 선택',
+      groups: groups.map(g => { const held = !!C.hold[g.gid], rec = D.groups.find(x => x.gid === g.gid).keep;
+        return { title: (g.kind === 'same' ? '완전히 같은 파일 · ' : '비슷한 장면 · ') + g.ids.length + (g.kind === 'same' ? '개' : '장'), sub: g.kind === 'same' ? '내용이 바이트까지 같습니다' : '연달아 찍힌 사진입니다',
+          held, open: !held, holdT: held ? '다시 보기' : '이 묶음은 유지', hold: () => this.cleanSet(c => { const hold = Object.assign({}, c.hold, { [g.gid]: !c.hold[g.gid] }), sel = Object.assign({}, c.sel); g.ids.forEach(id => delete sel[id]); return { hold, sel }; }),
+          tiles: g.ids.map(id => { const x = M[id], keep = C.keep[g.gid] === id, sel = !keep && !!C.sel[id];
+            return { bg: x.bg, video: x.video, dur: x.dur, keep, notKeep: !keep, sel, un: !keep && !sel, ring: keep ? '0 0 0 2px #6FD49A' : 'none', dim: sel ? 1 : 0,
+              keepT: id === rec ? '보관 추천 · ' + g.why : '보관할 항목', recShow: !keep && id === rec, recT: '보관 추천 · ' + g.why, meta: x.folder + ' · ' + x.size + 'MB',
+              toggle: () => { if (!keep) this.cleanSet(c => ({ sel: Object.assign({}, c.sel, { [id]: !c.sel[id] }) })); },
+              choose: () => this.cleanSet(c => { const sel = Object.assign({}, c.sel); delete sel[id]; const prev = c.keep[g.gid]; if (Object.keys(c.sel).some(k => c.sel[k] && g.ids.indexOf(k) >= 0)) sel[prev] = true; return { keep: Object.assign({}, c.keep, { [g.gid]: id }), sel }; }),
+              view: () => this.openViewer(g.ids, id) }; }) }; }) };
+    o.clAuto = () => this.cleanSelect(true); o.clAll = () => this.cleanSelect(false); o.clTrash = () => this.cleanTrash();
+
+    // Settings
+    const failN = 2;
+    o.st = { idx: this.n(s.items.length) + '개 인덱싱 · AI 태그 ' + this.n(s.items.length - failN - remaining) + '개 · 읽기 실패 ' + failN + '개',
+      prog: !!s.vprog && !s.paused, progT: s.vprog ? '영상 분석 중 · ' + s.vprog.done + '/' + s.vprog.total + '개' : '', paused: !!s.paused, pausedT: s.paused || '', done: !s.vprog && !s.paused,
+      axes: [['인물', '사람이 찍힌 사진·영상 앨범'], ['여행', '위치와 이동 경로로 묶은 기록'], ['문서', '문서·영수증·화면 캡처'], ['음식', '음식과 식탁'], ['순간', '실내 일상, 상품, 그 밖의 장면']].map(([k, d]) => ({ t: k, d, track: s.axes[k] ? '#8FB8FF' : '#3A3A42', knob: s.axes[k] ? '22px' : '2px', kc: s.axes[k] ? '#0B1A33' : '#BDBAB4', go: () => this.setState(q => ({ axes: Object.assign({}, q.axes, { [k]: !q.axes[k] }) })) })) };
+    o.stReanalyze = () => { this.setState({ vprog: { done: 0, total: 13, scene: 1 }, paused: null }, () => this.startVp()); };
+    o.stDelAll = () => this.setState({ dialog: 'delAll' }); o.stResume = () => this.setState({ paused: null });
+
+    // Fix
+    const fixList = base === 'Fix' ? this.gridList(s, A) : [];
+    const nFix = Object.keys(s.fixSel).length;
+    o.fx = { title: '분류 수정', sub: album ? album.t + ' · ' + fixList.length + '개' : '', cells: fixList.map(x => ({ bg: x.bg, video: x.video, dur: x.dur, sel: !!s.fixSel[x.id], un: !s.fixSel[x.id], go: () => this.setState(q => { const f = Object.assign({}, q.fixSel); if (f[x.id]) delete f[x.id]; else f[x.id] = 1; return { fixSel: f }; }) })),
+      n: nFix, removeT: nFix ? nFix + '개 이 앨범에서 빼기' : '이 앨범에서 빼기', op: nFix ? 1 : 0.4, selT: nFix ? nFix + '개 선택' : '잘못 묶인 항목을 고르세요' };
+    o.fxMove = () => nFix && this.setState({ sheet: 'move' }); o.fxRemove = () => this.fixApply(null);
+    o.moveOpts = A.filter(a => a.kind === 'ai' && a.id !== s.cat).map(a => ({ t: a.t, m: this.count(a.ids.map(id => M[id]), 'all'), bg: (M[a.ids[0]] || {}).bg, go: () => this.fixApply(a.t) }));
+
+    // Tabs
+    o.showTabs = ['Photos', 'Albums', 'Search', 'Cleanup'].indexOf(base) >= 0 && top !== 'Viewer' && !selOn && !review;
+    o.tabs = [['Photos', '갤러리', '#i-gallery'], ['Albums', '앨범', '#i-album'], ['Search', '검색', '#i-search'], ['Cleanup', '정리', '#i-clean']].map(([k, t, ic]) => ({ t, ic, go: () => this.tabGo(k), pill: s.tab === k ? '#26262C' : 'transparent', fg: s.tab === k ? '#F2F0ED' : '#8E8B86', dot: k === 'Cleanup' && groups.length > 0 && s.tab !== k }));
+
+    // Sheets / dialog / toast
+    o.sheetOn = !!s.sheet; o.sheetClose = () => this.setState({ sheet: null });
+    o.sh = { add: s.sheet === 'add', month: s.sheet === 'month', axis: s.sheet === 'axis', move: s.sheet === 'move' };
+    o.addT = nSel ? nSel + '개를 넣을 앨범' : '새 앨범';
+    o.addList = nSel ? s.mine.map(m => ({ t: m.t, m: this.count(m.ids.map(id => M[id]).filter(x => x && !x.trashed), 'all'), bg: (M[m.ids[0]] || {}).bg || '#26262C', go: () => this.addTo(m.id) })) : [];
+    o.addHasList = nSel > 0;
+    o.newName = s.newName; o.onNewName = e => this.setState({ newName: e.target.value.slice(0, 20) }); o.createAlbum = () => this.createAlbum();
+    o.newBtnBg = s.newName.trim() ? '#8FB8FF' : '#26262C'; o.newBtnFg = s.newName.trim() ? '#0B1A33' : '#8E8B86';
+    o.axisOpts = ['전체', '인물', '여행', '문서', '음식', '순간'].map(k => ({ t: k, on: s.axis === k, go: () => this.setState({ axis: k, sheet: null }) }));
+    const dl = { delAlbum: { t: "'" + (album ? album.t : '') + "' 앨범을 삭제할까요?", d: '앨범만 지웁니다. 사진·영상은 그대로 있습니다.', ok: '앨범 삭제', go: () => { const id = s.cat; this.setState(q => ({ dialog: null, mine: q.mine.filter(m => m.id !== id), stack: q.stack.slice(0, -1) })); this.toast('앨범을 삭제했습니다. 사진·영상은 그대로 있습니다.'); } },
+      delAll: { t: '분류 결과를 모두 삭제할까요?', d: '사진·영상은 지우지 않습니다. 다시 분석하면 분류가 새로 만들어집니다.', ok: '분류 결과 삭제', go: () => { this.setState(q => ({ dialog: null, items: q.items.map(x => Object.assign({}, x, { ai: [], sub: [] })) })); this.toast('분류 결과를 삭제했습니다.'); } } }[s.dialog];
+    o.dlg = dl ? { show: true, t: dl.t, d: dl.d, ok: dl.ok } : { show: false, t: '', d: '', ok: '' };
+    o.dlgOk = dl ? dl.go : () => {}; o.dlgCancel = () => this.setState({ dialog: null });
+    o.toastOn = !!s.toast; o.toastMsg = s.toast ? s.toast.msg : ''; o.toastAct = s.toast && s.toast.act ? s.toast.act : ''; o.toastHasAct = !!(s.toast && s.toast.act); o.toastGo = () => this.toastAct();
+    o.toastBottom = (top === 'Viewer' ? 104 : selOn ? 112 : o.cl.barShow ? 176 : o.showTabs ? 96 : base === 'Fix' ? 112 : 24) + 'px';
+    return o;
+  }
+}
+</script>
+</body>
+</html>
