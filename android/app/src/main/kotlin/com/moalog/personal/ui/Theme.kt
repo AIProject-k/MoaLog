@@ -1,191 +1,205 @@
 package com.moalog.personal.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moalog.personal.R
 
 /**
- * 디자인 토큰. `design/AI Gallery Auto-Sort.dc.html`에서 그대로 뽑았다.
+ * 디자인 토큰. `MoaLog Round 1 디자인.zip`의 `MoaLog App.dc.html`(방향 1a "조용한 갤러리")에서 뽑았다.
  *
- * **단일 다크 테마다.** 디자인이 한 가지 시각 세계에 확정적으로 커밋해 있고
- * (radial-gradient 배경, 어두운 서피스 위 주홍 악센트), 라이트 대응이 없다.
- * 그래서 [isSystemInDarkTheme]을 보지 않고 항상 이 팔레트를 쓴다 — 빠뜨린 게
- * 아니라 선택이다. 라이트가 필요해지면 그때 [Palette]를 두 벌로 나눈다.
+ * **다크 단일 테마다.** 디자인이 "라이트는 Round 2에서 같은 역할 이름으로 값만 바꾼 쌍"이라고 남겼다.
+ * 그때 이 클래스를 두 벌로 나눈다 — 화면 코드는 역할 이름(`surface1`, `text2`)만 쓰므로 바뀌지 않는다.
  *
- * 값을 코드에 흩뿌리지 않는 이유는 config.json과 같다: 디자인이 바뀌면 한 파일만 고친다.
+ * 표면은 **톤 차이로만** 나눈다(그림자 없음). 강조색(하늘색)은 선택·주 동작에만, 붉은색은 휴지통에만 쓴다.
  */
 @Immutable
 data class Palette(
-    /** 기기 화면 바탕. 디자인의 캔버스 바깥(#08080A)은 앱에 해당 없음 */
-    val bg: Color = Color(0xFF0E0E11),
-    /** 사진 상세처럼 더 가라앉는 화면 */
-    val bgDeep: Color = Color(0xFF08080A),
-    /** 카드 — 낮은 단계 */
-    val surface: Color = Color(0xFF141418),
-    /** 카드 — 기본 (검색바, 알림 카드, 설정 항목) */
-    val surface2: Color = Color(0xFF17171B),
-    /** 칩·아이콘 버튼 */
-    val surface3: Color = Color(0xFF1A1A20),
-    /** 눌린/진행 상태 */
-    val surface4: Color = Color(0xFF1F1F25),
-    /** 아바타·비활성 트랙 */
-    val surface5: Color = Color(0xFF22222A),
-    /** hover 대응 (Compose에서는 pressed) */
-    val surfaceHi: Color = Color(0xFF26262E),
-    val text: Color = Color(0xFFF2F0ED),
-    val accent: Color = Color(0xFFE8503A),
-    val accentHi: Color = Color(0xFFF4795F),
-    val ok: Color = Color(0xFF5BD08A),
-    /** 구분선 — 디자인의 rgba(242,240,237,.07) */
-    val divider: Color = Color(0x12F2F0ED),
-    /** 입력 테두리 — rgba(242,240,237,.1) */
-    val outline: Color = Color(0x1AF2F0ED),
-) {
-    /** 본문 위 텍스트 투명도. 디자인이 20단계를 쓰는데 의미는 네 층이다. */
-    val textStrong: Color get() = text.copy(alpha = .90f)   // 값
-    val textBody: Color get() = text.copy(alpha = .72f)     // 설명문
-    val textMuted: Color get() = text.copy(alpha = .50f)    // 보조
-    val textFaint: Color get() = text.copy(alpha = .35f)    // 섹션 라벨·플레이스홀더
+    /** 화면 배경 */
+    val bg: Color = Color(0xFF0E0E10),
+    /** 카드·시트·하단 바 */
+    val surface1: Color = Color(0xFF16161A),
+    /** 입력·세그먼트 트랙·검색창 */
+    val surface2: Color = Color(0xFF1D1D22),
+    /** 칩·눌림·활성 탭·보조 버튼 */
+    val surface3: Color = Color(0xFF26262C),
+    /** 본문 ≈16.9:1 */
+    val text1: Color = Color(0xFFF2F0ED),
+    /** 보조 ≈10.3:1 */
+    val text2: Color = Color(0xFFBDBAB4),
+    /** 메타 ≈5.9:1 (AA) */
+    val text3: Color = Color(0xFF8E8B86),
+    /** 선택·주 동작 ≈9.6:1 */
+    val accent: Color = Color(0xFF8FB8FF),
+    /** 강조 위 글자 ≈8.7:1 */
+    val onAccent: Color = Color(0xFF0B1A33),
+    /** 휴지통 채움 · 흰 글씨 ≈5.3:1 */
+    val danger: Color = Color(0xFFC8322C),
+    /** 위험 문구 ≈7.6:1 */
+    val dangerText: Color = Color(0xFFFF7B72),
+    /** 보관 추천·완료 ≈10.6:1 */
+    val ok: Color = Color(0xFF6FD49A),
+    /** 일시정지·경고 아이콘 */
+    val warn: Color = Color(0xFFF2C66D),
 
-    /** 악센트 배경 틴트. 디자인이 .06~.30을 쓴다. */
-    fun accentTint(alpha: Float) = accent.copy(alpha = alpha)
-}
-
-/** 디자인의 accentColor prop — 설정에서 바꿀 수 있는 네 가지. */
-enum class AccentChoice(val color: Color, val label: String) {
-    Vermilion(Color(0xFFE8503A), "주홍"),
-    Lime(Color(0xFFB4F461), "라임"),
-    Indigo(Color(0xFF3B2FD4), "인디고"),
-    Pine(Color(0xFF1F6F5C), "청록"),
-}
-
-@Immutable
-data class Type(
-    val family: FontFamily,
-    /** 27 / 900 / -.02em — 온보딩 제목 */
-    val display: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 27.sp, fontWeight = FontWeight.Black,
-        lineHeight = 35.6.sp, letterSpacing = (-0.54).sp,
-    ),
-    /** 42 / 900 — 진행률 숫자 */
-    val progress: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 42.sp, fontWeight = FontWeight.Black,
-        letterSpacing = (-1.26).sp,
-    ),
-    /** 24 / 900 — 화면 제목 */
-    val screenTitle: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 24.sp, fontWeight = FontWeight.Black,
-        letterSpacing = (-0.48).sp,
-    ),
-    /** 19 / 700 — 히어로 카드 제목 */
-    val hero: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 19.sp, fontWeight = FontWeight.Bold,
-        letterSpacing = (-0.19).sp,
-    ),
-    /** 17 / 700 — 상세 헤더 */
-    val header: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 17.sp, fontWeight = FontWeight.Bold,
-        letterSpacing = (-0.17).sp,
-    ),
-    /** 15 / 700 — 목록 항목 제목 */
-    val itemTitle: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 15.sp, fontWeight = FontWeight.Bold,
-        letterSpacing = (-0.15).sp,
-    ),
-    /** 14 / 400 — 본문 */
-    val body: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 14.sp, lineHeight = 23.8.sp,
-    ),
-    /** 13.5 / 400 — 카드 안 본문 */
-    val bodySm: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 13.5.sp, lineHeight = 22.3.sp,
-    ),
-    /** 13 / 400 — 보조 설명 */
-    val caption: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 13.sp, lineHeight = 20.8.sp,
-    ),
-    /** 12 / 400 — 메타 */
-    val meta: TextStyle = TextStyle(fontFamily = family, fontSize = 12.sp),
-    /** 12 / 700 / .1em — 섹션 라벨 */
-    val sectionLabel: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-        letterSpacing = 1.2.sp,
-    ),
-    /** 11 / 400 / .18em — 대문자 에이브로우 */
-    val eyebrow: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 11.sp, letterSpacing = 1.98.sp,
-    ),
-    /** 12.5 / 400 — 칩 */
-    val chip: TextStyle = TextStyle(fontFamily = family, fontSize = 12.5.sp),
-    /** 10.5 / 700 — 하단 탭 라벨, 배지 */
-    val badge: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 10.5.sp, fontWeight = FontWeight.Bold,
-        letterSpacing = 0.84.sp,
-    ),
-    /** 16 / 700 — 주 버튼 */
-    val button: TextStyle = TextStyle(
-        fontFamily = family, fontSize = 16.sp, fontWeight = FontWeight.Bold,
-    ),
+    // ---- 템플릿 곳곳에서 직접 쓰는 보조 값 (역할이 하나뿐이라 이름만 붙였다)
+    /** 탐색 막대 바탕 · 세그먼트 활성 · 스위치 꺼짐 트랙 */
+    val track: Color = Color(0xFF3A3A42),
+    /** 점선 · 대기 점 · 재생 실패 아이콘 · 자리표시 선 */
+    val hint: Color = Color(0xFF5E5C59),
+    /** 하단 탭 바 배경 */
+    val tabBar: Color = Color(0xFF131316),
+    /** 토스트 배경 */
+    val toast: Color = Color(0xFF2E2E35),
+    /** 검색 결과 확인 모드 머리띠 */
+    val reviewBar: Color = Color(0xFF16233D),
+    /** 확인 모드 머리띠 위 안내 글자 */
+    val reviewText: Color = Color(0xFFDCE7FF),
+    /** 구분선 rgba(255,255,255,.07) */
+    val hair: Color = Color(0x12FFFFFF),
+    /** 카드 안쪽 1dp 테두리 rgba(255,255,255,.08) */
+    val ring: Color = Color(0x14FFFFFF),
+    /** 윤곽 버튼 테두리 rgba(255,255,255,.16) */
+    val ringStrong: Color = Color(0x29FFFFFF),
+    /** 시트 뒤 어둡게 */
+    val scrim: Color = Color(0x80000000),
+    /** 뷰어 배경 */
+    val viewer: Color = Color(0xFF000000),
 )
 
-/** 디자인이 쓰는 반지름. 값이 많아 보이지만 역할은 다섯 가지다. */
+/** 디자인의 글자 크기. `font-size/line-height/weight`를 그대로 옮겼고, 숫자는 전부 고정폭(tnum)이다. */
+@Immutable
+class Type(private val family: FontFamily) {
+    private fun ts(size: Float, weight: FontWeight, line: Float? = null, spacing: Float = 0f) = TextStyle(
+        fontFamily = family,
+        fontSize = size.sp,
+        fontWeight = weight,
+        lineHeight = (line ?: (size * 1.4f)).sp,
+        letterSpacing = spacing.sp,
+        fontFeatureSettings = "tnum",
+        platformStyle = PlatformTextStyle(includeFontPadding = false),
+        lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None),
+    )
+
+    private val r = FontWeight.Normal
+    private val m = FontWeight.Medium
+    private val sb = FontWeight.SemiBold
+    private val b = FontWeight.Bold
+
+    /** 온보딩 제목 22/30/700 */
+    val display = ts(22f, b, 30f)
+    /** 분석 진행률 42/48/700 */
+    val progress = ts(42f, b, 48f)
+    /** 화면 제목 20/26/700 */
+    val title = ts(20f, b, 26f)
+    /** 상세 머리글 18/24/700 */
+    val header = ts(18f, b, 24f)
+    /** 시트·대화상자 제목 17/24/700 */
+    val sheetTitle = ts(17f, b, 24f)
+    /** 섹션 제목·목록 제목 15/22/600 */
+    val item = ts(15f, sb, 22f)
+    /** 설정 행 제목 14.5/20/600 */
+    val itemMd = ts(14.5f, sb, 20f)
+    /** 14/20/600 — 날짜 머리글·앨범 이름 */
+    val label = ts(14f, sb, 20f)
+    /** 본문 14/22/400 */
+    val body = ts(14f, r, 22f)
+    /** 14/21 — 검색 요약 */
+    val body21 = ts(14f, r, 21f)
+    /** 카드 안 본문 13.5/21 */
+    val bodySm = ts(13.5f, r, 21f)
+    /** 13.5/20/600 — 카드 안 강조·버튼 */
+    val bodySmStrong = ts(13.5f, sb, 20f)
+    /** 보조 설명 13/20/400 */
+    val caption = ts(13f, r, 20f)
+    /** 칩·세그먼트 13/600 */
+    val chip = ts(13f, sb, 18f)
+    /** 12.5/17/600 — 모아보기 카드 제목·작은 칩 */
+    val chipSm = ts(12.5f, sb, 17f)
+    /** 칩 본문(보통 굵기) 13/18/400 */
+    val chipRegular = ts(13f, r, 18f)
+    /** 12.5/19 — 안내 문장 */
+    val note = ts(12.5f, r, 19f)
+    /** 메타 12/16/400 */
+    val meta = ts(12f, r, 16f)
+    /** 메타 강조 12/16/600 */
+    val metaStrong = ts(12f, sb, 16f)
+    /** 섹션 라벨 12/600 +0.08em */
+    val sectionLabel = ts(12f, sb, 16f, 0.96f)
+    /** 11.5/17 — 아주 작은 안내 */
+    val micro = ts(11.5f, r, 17f)
+    /** 배지·탭 라벨 11/14/600 */
+    val badge = ts(11f, sb, 14f)
+    /** 주 버튼 15/600 */
+    val button = ts(15f, sb, 20f)
+    /** 입력창 15/400 */
+    val input = ts(15f, r, 22f)
+    /** 숫자 라벨 9/700 — 되감기·빨리 감기 아이콘 안 */
+    val tiny = ts(9f, b, 12f)
+    /** 11/500 — 하단 선택 바 라벨 */
+    val barLabel = ts(11f, m, 14f)
+}
+
+/** 디자인이 쓰는 반지름. 값은 역할 이름으로만 쓴다. */
 object Radius {
-    val pill = 27.dp        // 주 버튼 (h54의 절반)
-    val field = 22.dp       // 입력·검색바 (h44의 절반)
-    val card = 16.dp        // 카드 기본
-    val cardLg = 20.dp      // 히어로 카드
-    val chip = 14.dp        // 칩
-    val thumb = 12.dp       // 목록 썸네일
-    val tile = 4.dp         // 온보딩 그리드 조각
+    /** 세그먼트 안쪽 */
+    val segInner = 9.dp
+    /** 정리 비교 타일·목록 작은 썸네일 */
+    val tile = 10.dp
+    /** 앨범 썸네일·모아보기 카드·세그먼트 트랙·입력창·토스트 */
+    val thumb = 12.dp
+    /** 메뉴 */
+    val menu = 14.dp
+    /** 카드 */
+    val card = 16.dp
+    /** 시트·대화상자 */
+    val sheet = 20.dp
 }
 
 val LocalPalette: ProvidableCompositionLocal<Palette> = staticCompositionLocalOf { Palette() }
-val LocalType: ProvidableCompositionLocal<Type> = staticCompositionLocalOf {
-    Type(FontFamily.SansSerif)
-}
+val LocalType: ProvidableCompositionLocal<Type> = staticCompositionLocalOf { Type(FontFamily.SansSerif) }
 
 /**
- * Gothic A1 (OFL, 재배포 가능) 을 앱에 넣는다. 다운로더블 폰트를 쓰지 않는 이유는
+ * IBM Plex Sans KR (OFL 1.1, 재배포 가능)을 앱에 넣는다. 다운로더블 폰트를 쓰지 않는 이유는
  * 그게 Play 서비스와 네트워크를 타기 때문이다 — 이 앱은 인터넷 권한이 없다.
- * 폰트 파일이 없으면 시스템 한글 폰트로 떨어진다(무게만 맞춘다).
+ * 라이선스 문구는 `assets/licenses/IBMPlexSansKR-OFL.txt`.
  */
-private fun gothicA1(): FontFamily = runCatching {
+private fun plexKr(): FontFamily = runCatching {
     FontFamily(
-        Font(R.font.gothic_a1_regular, FontWeight.Normal),
-        Font(R.font.gothic_a1_medium, FontWeight.Medium),
-        Font(R.font.gothic_a1_bold, FontWeight.Bold),
-        Font(R.font.gothic_a1_black, FontWeight.Black),
+        Font(R.font.ibm_plex_sans_kr_regular, FontWeight.Normal),
+        Font(R.font.ibm_plex_sans_kr_medium, FontWeight.Medium),
+        Font(R.font.ibm_plex_sans_kr_semibold, FontWeight.SemiBold),
+        Font(R.font.ibm_plex_sans_kr_bold, FontWeight.Bold),
     )
 }.getOrDefault(FontFamily.SansSerif)
 
 @Composable
-fun PhotoLogTheme(accent: AccentChoice = AccentChoice.Vermilion, content: @Composable () -> Unit) {
-    val palette = Palette(accent = accent.color)
-    val type = Type(gothicA1())
-    androidx.compose.runtime.CompositionLocalProvider(
-        LocalPalette provides palette,
-        LocalType provides type,
-    ) {
+fun PhotoLogTheme(content: @Composable () -> Unit) {
+    val palette = Palette()
+    val type = Type(plexKr())
+    CompositionLocalProvider(LocalPalette provides palette, LocalType provides type) {
         MaterialTheme(
             colorScheme = darkColorScheme(
                 primary = palette.accent,
+                onPrimary = palette.onAccent,
                 background = palette.bg,
-                surface = palette.surface,
-                onBackground = palette.text,
-                onSurface = palette.text,
+                surface = palette.surface1,
+                onBackground = palette.text1,
+                onSurface = palette.text1,
             ),
             content = content,
         )

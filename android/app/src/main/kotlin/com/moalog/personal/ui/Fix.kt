@@ -2,20 +2,24 @@ package com.moalog.personal.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 
 /**
@@ -26,73 +30,55 @@ import androidx.compose.ui.unit.dp
  * `휴지통으로` 버튼에만 있다.
  */
 @Composable
-fun FixScreen(vm: AppViewModel, ui: AppViewModel.Ui, columns: Int = 3) {
+fun FixScreen(vm: AppViewModel, ui: AppViewModel.Ui) {
     val t = theme
+    val album = ui.openAlbum
     val n = ui.selected.size
+    val hair = t.hair
+
     Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            BackButton { vm.back() }
-            Text("분류 수정", style = fonts.header, color = t.text, modifier = Modifier.weight(1f))
-            Text(if (n > 0) "${n}장 선택" else "사진을 고르세요",
-                style = fonts.meta, color = t.text.copy(alpha = .42f))
+        TopRow(height = 64.dp) {
+            IconBtn(I.Back, "뒤로", vm::back)
+            TitleBlock(
+                "분류 수정", album?.let { "${it.title} · ${it.count}개" },
+                Modifier.weight(1f).padding(start = 4.dp), titleStyle = fonts.header,
+            )
         }
-        Text(
-            "잘못 묶인 사진을 고르면 다른 앨범으로 옮기거나 이 앨범에서 뺍니다. " +
-                "어느 쪽이든 사진은 기기에 그대로 남습니다.",
-            style = fonts.chip.copy(lineHeight = TextUnit(21.25f, TextUnitType.Sp)),
-            color = t.textMuted,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        Prose(
+            "잘못 묶인 사진·영상을 고르면 다른 앨범으로 옮기거나 이 앨범에서 뺍니다. 어느 쪽이든 사진·영상은 기기에 그대로 남습니다.",
+            style = fonts.caption, color = t.text2,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp).fillMaxWidth()
+                .clip(RoundedCornerShape(Radius.thumb)).background(t.surface1).padding(horizontal = 14.dp, vertical = 12.dp),
         )
 
-        LazyColumn(Modifier.weight(1f)) {
-            items(ui.fixPhotos.chunked(columns)) { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                    for (p in row) {
-                        val on = p.id in ui.selected
-                        Box(Modifier.weight(1f).aspectRatio(1f).clickable { vm.toggleSelect(p.id) }) {
-                            Thumb(p.uri, Modifier.matchParentSize())
-                            if (on) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = .35f)))
-                            Box(
-                                Modifier.align(Alignment.TopEnd).padding(6.dp).size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(if (on) t.accent else Color.Black.copy(alpha = .25f)),
-                                contentAlignment = Alignment.Center,
-                            ) { if (on) Text("✓", style = fonts.badge, color = Color.White) }
-                        }
-                    }
-                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+        LazyColumn(Modifier.weight(1f).fillMaxWidth()) {
+            items(ui.fixPhotos.chunked(GRID_COLUMNS), key = { row -> "f:${row.first().id}" }) { row ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 3.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    for (p in row) MediaCell(
+                        p, Modifier.weight(1f).clickable { vm.toggleSelect(p.id) },
+                        mark = CellMark.Select(p.id in ui.selected),
+                    )
+                    repeat(GRID_COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
 
+        // 하단 패널: 고른 개수 + 두 동작. 아무것도 안 골랐으면 흐리게, 눌러도 아무 일 없다.
         Column(
-            Modifier.fillMaxWidth().background(t.bg).padding(horizontal = 16.dp, vertical = 16.dp),
+            Modifier.fillMaxWidth().background(t.surface1)
+                .drawBehind { drawLine(hair, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }
+                .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            SectionLabel("다른 앨범으로 옮기기")
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                items(vm.moveTargets()) { label ->
-                    Box(
-                        Modifier.clip(RoundedCornerShape(Radius.card)).background(t.surface4)
-                            .clickable { vm.moveSelected(label) }
-                            .padding(horizontal = 14.dp, vertical = 9.dp)
-                    ) { Text(label, style = fonts.chip, color = t.text.copy(alpha = .8f)) }
-                }
-            }
-            Box(
-                Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(25.dp))
-                    .background(if (n > 0) t.accent else t.surface4)
-                    .then(if (n > 0) Modifier.clickable { vm.removeSelectedFromAlbum() } else Modifier),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    if (n > 0) "${n}장 이 앨범에서 빼기" else "고른 사진 없음",
-                    style = fonts.itemTitle,
-                    color = if (n > 0) Color.White else t.textFaint,
+            Text(if (n > 0) "${n}개 선택" else "잘못 묶인 항목을 고르세요", style = fonts.caption.copy(), color = t.text2)
+            Row(Modifier.fillMaxWidth().alpha(if (n > 0) 1f else .4f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Pill(
+                    "다른 앨범으로 옮기기", { if (n > 0) vm.openSheet(Sheet.Move) }, Modifier.weight(1f),
+                    bg = t.surface3, fg = t.text1, icon = I.Ai, style = fonts.label, horizontal = 8.dp,
+                )
+                Pill(
+                    if (n > 0) "${n}개 이 앨범에서 빼기" else "이 앨범에서 빼기", { if (n > 0) vm.removeSelectedFromAlbum() }, Modifier.weight(1f),
+                    bg = t.surface3, fg = t.text1, icon = I.Remove, style = fonts.label, horizontal = 8.dp,
                 )
             }
         }

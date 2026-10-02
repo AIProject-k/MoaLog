@@ -15,7 +15,7 @@ enum class Screen(val tabLabel: String = "") {
     Analyzing,
 
     /** 전체 사진. 위에 추억·이번 주 모음이 작게 붙는다. */
-    Photos("사진"),
+    Photos("갤러리"),
     Albums("앨범"),
 
     /** 앨범 하나를 연 상태(태그·이벤트·기기 폴더·내 앨범 공통). */
@@ -56,9 +56,12 @@ enum class AlbumKind(val label: String, val chip: String) {
     Tag("AI 앨범", "AI 분류"),
 
     /** 시간·장소로 묶인 기록. */
-    Event("기록", "기록");
+    Event("기록", "기록"),
 
-    companion object { val ordered = entries }
+    /** 사진 탭 위의 모아보기(이번 주·N년 전 오늘). 앨범 목록에는 나오지 않고 앨범 상세 화면만 연다. */
+    Memory("모아보기", "모아보기");
+
+    companion object { val ordered = entries.filter { it != Memory } }
 }
 
 /** 앨범 화면 상단 필터. "전체"는 필터 없음을 뜻한다. */
@@ -75,12 +78,16 @@ enum class Axis(val label: String) {
  * 경로 정리"인데, 얼굴 신원 묶기는 3단계 기능이고(ANDROID.md §8.4) 지금은 없다.
  * 없는 일을 하고 있다고 표시하면 사용자를 속이는 것이므로, 지금 실제로 도는 단계로 적는다.
  * 기능이 들어오면 라벨을 디자인 원문으로 되돌린다.
+ *
+ * **시작 지점도 실제 진행률 곡선에 맞췄다.** 디자인(12·30·88%)은 타이머가 올리는 값이고, 실제로는
+ * 촬영 정보 정리(Pass 1)가 0~15%, 장면 분류(Pass 2)가 15~100%다([com.moalog.personal.data.Counts.progress]).
+ * 디자인 값대로 두면 장면 분류가 한창인데 "촬영 정보 정리 중"이라고 적힌다.
  */
 enum class AnalyzeStep(val label: String, val startAt: Int) {
     Scan("사진 목록 읽기", 0),
-    Meta("촬영 정보·출처 정리", 12),
-    Clip("장면 분류", 30),
-    Group("앨범 묶기", 88);
+    Meta("촬영 정보·출처 정리", 3),
+    Clip("장면 분류", 15),
+    Group("앨범 묶기", 97);
 
     companion object { val ordered = entries }
 }
@@ -96,3 +103,15 @@ fun AnalyzeStep.stateAt(progress: Int): StepState {
         else -> StepState.Waiting
     }
 }
+
+/** 화면 위에 뜨는 하단 시트. 한 번에 하나만 뜬다. */
+enum class Sheet { Add, Month, Axis, Move, Licenses }
+
+/** 되돌릴 수 없는 일을 한 번 더 묻는 대화상자. */
+enum class Dialog { DeleteAlbum, DeleteAll }
+
+/**
+ * 화면 아래 토스트 한 줄. `action`이 있으면 오른쪽에 동작 버튼("되돌리기"·"앨범 보기")이 붙고,
+ * 누르면 `run`이 돈다.
+ */
+data class ToastMsg(val text: String, val action: String? = null, val run: (() -> Unit)? = null)

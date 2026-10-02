@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- 단일 다크 테마. 디자인이 다크 하나에 확정적으로 커밋해 있다. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 단일 다크 테마. 디자인이 다크 하나에 확정적으로 커밋해 있다. 배경은 Theme.kt의 Palette.bg와 같다. -->
     <style name="Theme.PhotoLog" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">#0E0E11</item>
+        <item name="android:windowBackground">#0E0E10</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Android 12+는 시작 화면(스플래시)을 따로 그린다. 지정하지 않으면 흰 배경이 번쩍인다. -->
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">#0E0E10</item>
     </style>
 </resources>

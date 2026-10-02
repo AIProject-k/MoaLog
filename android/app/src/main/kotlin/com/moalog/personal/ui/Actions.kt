@@ -24,11 +24,13 @@ val LocalActions = staticCompositionLocalOf<AppActions> {
 }
 
 /**
- * media_id로 content URI를 만든다. DB에 저장된 `uri` 열과 **같은 값**이다 —
- * 모든 사진이 `MediaStore.Images.Media`의 외부 볼륨에서 왔기 때문이다.
+ * media_id로 content URI를 만든다. DB에 저장된 `uri` 열과 **같은 값**이다.
+ * 사진은 `MediaStore.Images`, 영상은 `MediaStore.Video` 컬렉션이고, 영상의 id는 두 컬렉션의
+ * `_ID`가 겹치지 않도록 **음수**로 저장한다(원래 `_ID`는 부호를 뗀 값).
  *
  * 뷰어가 한 장 넘길 때마다 DB를 치지 않으려고 이렇게 한다.
  */
 fun mediaUri(id: Long): String = ContentUris.withAppendedId(
-    MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), id
+    if (id < 0) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+    else MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), kotlin.math.abs(id)
 ).toString()
