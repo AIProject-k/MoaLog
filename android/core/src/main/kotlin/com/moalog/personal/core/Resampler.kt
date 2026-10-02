@@ -24,6 +24,75 @@ import kotlin.math.roundToInt
  */
 object Resampler {
 
+    /** Same pixels as [resizeRgb] followed by a center crop, without resizing discarded pixels. */
+    fun resizeRgbCenterCrop(src: ByteArray, sw: Int, sh: Int, dw: Int, dh: Int, crop: Int): ByteArray {
+        require(src.size == sw * sh * 3)
+        require(crop <= dw && crop <= dh)
+        val left = (dw - crop) / 2
+        val top = (dh - crop) / 2
+        val vertical = if (sh == dh) null else coeffs(sh, dh)
+        val minY = if (vertical == null) top else (top until top + crop).minOf { vertical.first[it * 2] }
+        val maxY = if (vertical == null) top + crop else
+            (top until top + crop).maxOf { vertical.first[it * 2] + vertical.first[it * 2 + 1] }
+        val rows = maxY - minY
+        val horizontal = ByteArray(rows * crop * 3)
+
+        if (sw == dw) {
+            for (y in minY until maxY) {
+                src.copyInto(horizontal, (y - minY) * crop * 3,
+                    (y * sw + left) * 3, (y * sw + left + crop) * 3)
+            }
+        } else {
+            val (bounds, weights, maxK) = coeffs(sw, dw)
+            for (y in minY until maxY) {
+                val rowIn = y * sw * 3
+                val rowOut = (y - minY) * crop * 3
+                for (x in 0 until crop) {
+                    val outputX = left + x
+                    val min = bounds[outputX * 2]
+                    val n = bounds[outputX * 2 + 1]
+                    var r = 0f; var g = 0f; var b = 0f
+                    for (k in 0 until n) {
+                        val w = weights[outputX * maxK + k]
+                        val p = rowIn + (min + k) * 3
+                        r += w * (src[p].toInt() and 0xFF)
+                        g += w * (src[p + 1].toInt() and 0xFF)
+                        b += w * (src[p + 2].toInt() and 0xFF)
+                    }
+                    val o = rowOut + x * 3
+                    horizontal[o] = clip8(r)
+                    horizontal[o + 1] = clip8(g)
+                    horizontal[o + 2] = clip8(b)
+                }
+            }
+        }
+        if (vertical == null) return horizontal
+
+        val (bounds, weights, maxK) = vertical
+        val out = ByteArray(crop * crop * 3)
+        for (y in 0 until crop) {
+            val outputY = top + y
+            val min = bounds[outputY * 2]
+            val n = bounds[outputY * 2 + 1]
+            val rowOut = y * crop * 3
+            for (x in 0 until crop) {
+                var r = 0f; var g = 0f; var b = 0f
+                for (k in 0 until n) {
+                    val w = weights[outputY * maxK + k]
+                    val p = (min + k - minY) * crop * 3 + x * 3
+                    r += w * (horizontal[p].toInt() and 0xFF)
+                    g += w * (horizontal[p + 1].toInt() and 0xFF)
+                    b += w * (horizontal[p + 2].toInt() and 0xFF)
+                }
+                val o = rowOut + x * 3
+                out[o] = clip8(r)
+                out[o + 1] = clip8(g)
+                out[o + 2] = clip8(b)
+            }
+        }
+        return out
+    }
+
     /**
      * @param src RGB 인터리브 바이트 (길이 = w*h*3), 채널당 0~255
      * @return 같은 형식의 dw*dh*3 바이트

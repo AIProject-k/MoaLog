@@ -44,14 +44,12 @@ class ImagePrep(
                 rgb[o++] = (p and 0xFF).toByte()
             }
         }
-        val scaled = Resampler.resizeRgb(rgb, sw, sh, dw, dh)
+        val scaled = Resampler.resizeRgbCenterCrop(rgb, sw, sh, dw, dh, px)
 
-        val left = (dw - px) / 2
-        val top = (dh - px) / 2
         val out = FloatArray(3 * px * px)
         val plane = px * px
         for (y in 0 until px) {
-            var p = ((top + y) * dw + left) * 3
+            var p = y * px * 3
             var i = y * px
             for (x in 0 until px) {
                 out[i] = (((scaled[p].toInt() and 0xFF) / 255f) - mean[0]) / std[0]
