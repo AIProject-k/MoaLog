@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "kr.slz.photolog"
+    namespace = "com.moalog.personal"
     compileSdk = 35
 
     defaultConfig {
