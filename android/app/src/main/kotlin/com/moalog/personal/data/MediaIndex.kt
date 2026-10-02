@@ -6,6 +6,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import com.moalog.personal.core.TimeSource
+import com.moalog.personal.core.VideoMeta
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -20,11 +21,17 @@ import java.time.format.DateTimeFormatter
  */
 class MediaIndex(private val ctx: Context, private val store: Store) {
 
-    data class SyncResult(val discovered: Int, val changed: Int, val removed: Int, val total: Int)
+    data class SyncResult(
+        val discovered: Int,
+        val changed: Int,
+        val removed: Int,
+        val total: Int,
+        val accessChanged: Boolean = false,
+    )
 
     private val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
-    private fun projection(): Array<String> = buildList {
+    private fun projection(video: Boolean = false): Array<String> = buildList {
         add(MediaStore.Images.Media._ID)
         add(MediaStore.Images.Media.DISPLAY_NAME)
         add(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
@@ -34,7 +41,8 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
         add(MediaStore.Images.Media.SIZE)
         add(MediaStore.Images.Media.WIDTH)
         add(MediaStore.Images.Media.HEIGHT)
-        add(MediaStore.Images.Media.ORIENTATION)
+        if (!video) add(MediaStore.Images.Media.ORIENTATION)
+        else add(MediaStore.Video.Media.DURATION)
         add(MediaStore.Images.Media.DATE_MODIFIED)
         if (Build.VERSION.SDK_INT >= 30) add(MediaStore.Images.Media.GENERATION_MODIFIED)
     }.toTypedArray()
@@ -46,13 +54,41 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
      * generation이 오른 행만 읽는다. 첫 동기화는 전부 읽는다.
      */
     fun sync(): SyncResult {
-        val lastGen = store.metaGet(KEY_GENERATION)?.toLongOrNull() ?: -1L
+        val photos = syncPhotos()
+        val videos = syncVideos()
+        return SyncResult(photos.discovered + videos.discovered, photos.changed + videos.changed,
+            photos.removed + videos.removed, photos.total + videos.total,
+            photos.accessChanged || videos.accessChanged)
+    }
+
+    fun syncPhotos(): SyncResult = sync(video = false)
+    fun syncVideos(): SyncResult = sync(video = true)
+
+    private fun sync(video: Boolean): SyncResult {
+        val known = store.generations(video)
         val present = HashSet<Long>()
         val fresh = ArrayList<MediaRow>()
         val changed = ArrayList<Long>()
 
         // IS_TRASHED/IS_PENDING은 기본 선택에서 이미 빠진다(MediaStore가 걸러 준다).
-        ctx.contentResolver.query(collection, projection(), null, null, null)?.use { c ->
+        val collection = if (video) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL) else this.collection
+        val permission = if (Build.VERSION.SDK_INT >= 33) {
+            if (video) android.Manifest.permission.READ_MEDIA_VIDEO else android.Manifest.permission.READ_MEDIA_IMAGES
+        } else android.Manifest.permission.READ_EXTERNAL_STORAGE
+        val full = androidx.core.content.ContextCompat.checkSelfPermission(ctx, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val backfillVideoDuration = video && store.metaGet(KEY_VIDEO_DURATION_BACKFILL) == "1"
+        val partial = Build.VERSION.SDK_INT >= 34 && androidx.core.content.ContextCompat.checkSelfPermission(ctx,
+            android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val scope = MediaAccessPolicy.scope(Build.VERSION.SDK_INT, full, partial)
+        if (scope == MediaAccessPolicy.Scope.NONE) {
+            val reconciliation = MediaAccessPolicy.reconcile(scope, emptySet())
+            val accessChanged = store.setAccessible(reconciliation.visibleIds, video)
+            return SyncResult(0, 0, 0, 0, accessChanged)
+        }
+        val columns = projection(video)
+        val cursor = ctx.contentResolver.query(collection, columns, null, null, null)
+            ?: error("미디어 목록을 읽지 못했습니다")
+        cursor.use { c ->
             val id = c.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             val name = c.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
             val bucket = c.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
@@ -62,78 +98,90 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
             val size = c.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
             val w = c.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
             val h = c.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
-            val ori = c.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION)
+            val ori = c.getColumnIndex(MediaStore.Images.Media.ORIENTATION)
+            val duration = if (video) c.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION) else -1
             val mod = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
             val gen = if (Build.VERSION.SDK_INT >= 30)
                 c.getColumnIndex(MediaStore.Images.Media.GENERATION_MODIFIED) else -1
 
             while (c.moveToNext()) {
-                val mid = c.getLong(id)
+                val rawId = c.getLong(id)
+                // Negative IDs reserve a distinct namespace for videos; existing photo IDs stay intact.
+                val mid = if (video) -rawId else rawId
                 present.add(mid)
                 val g = if (gen >= 0 && !c.isNull(gen)) c.getLong(gen) else c.getLong(mod)
-                if (g <= lastGen) continue          // 안 바뀐 사진은 건너뛴다
+                if (known[mid] == g && (!backfillVideoDuration || store.durationMs(mid) != null)) continue
+                if (mid in known && known[mid] != g) changed.add(mid)
                 fresh.add(MediaRow(
                     id = mid,
-                    uri = ContentUris.withAppendedId(collection, mid).toString(),
+                    uri = ContentUris.withAppendedId(collection, rawId).toString(),
                     displayName = c.getStringOrNull(name),
                     bucket = c.getStringOrNull(bucket),
                     relativePath = c.getStringOrNull(rel),
                     ownerPackage = c.getStringOrNull(owner),
                     mime = c.getStringOrNull(mime),
                     size = c.getLong(size),
-                    width = c.getInt(w), height = c.getInt(h), orientation = c.getInt(ori),
+                    width = c.getInt(w), height = c.getInt(h), orientation = if (ori >= 0) c.getInt(ori) else 0,
+                    mediaKind = if (video) MediaKind.VIDEO else MediaKind.PHOTO,
+                    durationMs = if (duration >= 0 && !c.isNull(duration)) c.getLong(duration) else if (video) 0L else null,
                     generation = g, dateModified = c.getLong(mod),
                 ))
             }
         }
-
         val added = store.upsertDiscovered(fresh)
         // 새로 들어온 게 아니면서 generation이 오른 것 = 편집된 사진 → 처음부터 다시
-        if (fresh.size > added) {
-            val addedIds = fresh.takeLast(added).map { it.id }.toSet()
-            changed.addAll(fresh.map { it.id }.filter { it !in addedIds })
-            store.invalidateChanged(changed)
-        }
-        val removed = store.deleteMissing(present)
+        store.invalidateChanged(changed)
+        if (video && full && backfillVideoDuration) store.metaPut(KEY_VIDEO_DURATION_BACKFILL, "0")
+        val reconciliation = MediaAccessPolicy.reconcile(scope, present)
+        val accessChanged = store.setAccessible(reconciliation.visibleIds, video)
+        val removed = if (reconciliation.deleteMissing) store.deleteMissing(present, video) else 0
         fresh.maxOfOrNull { it.generation }?.let { store.metaPut(KEY_GENERATION, it.toString()) }
 
-        return SyncResult(added, changed.size, removed, present.size)
+        return SyncResult(added, changed.size, removed, reconciliation.visibleIds.size, accessChanged)
     }
 
     /**
-     * EXIF 헤더만 읽는다 — 전체 디코드 없이 ~1ms.
+     * EXIF 헤더만 읽는다 — 전체 이미지는 디코드하지 않는다.
      *
      * **`DATE_TAKEN`을 믿지 않는다.** MediaStore 스캐너가 EXIF가 없을 때 무엇을 채우는지
      * 기기마다 다르고, 그 값을 촬영시각으로 쓰면 카톡 저장 사진이 여행 로그에 끼어든다.
      * 여기서 출처를 exif/file로 갈라 기록하고, 연사·이벤트는 exif만 쓴다(§4.5).
      */
     fun readMeta(p: Pending, fallbackSeconds: Long): MetaResult {
+        if (p.mediaKind == MediaKind.VIDEO) return readVideoMeta(p.uri, fallbackSeconds)
         val uri = android.net.Uri.parse(p.uri)
-        // ACCESS_MEDIA_LOCATION이 있어야 원본 EXIF의 GPS가 지워지지 않고 온다.
-        val src = runCatching { MediaStore.setRequireOriginal(uri) }.getOrDefault(uri)
+        // 위치 권한이 없으면 requireOriginal URI 자체를 열 수 없다. 일반 URI의
+        // 촬영시각·카메라 정보는 읽을 수 있으므로 그것까지 버리지 않는다.
+        val hasLocation = androidx.core.content.ContextCompat.checkSelfPermission(ctx,
+            android.Manifest.permission.ACCESS_MEDIA_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val src = if (hasLocation) runCatching { MediaStore.setRequireOriginal(uri) }.getOrDefault(uri) else uri
         var takenAt: Long? = null
         var camera: String? = null
         var lat: Double? = null
         var lon: Double? = null
 
-        runCatching {
-            ctx.contentResolver.openInputStream(src)?.use { input ->
-                val ex = ExifInterface(input)
-                val make = ex.getAttribute(ExifInterface.TAG_MAKE)?.trim()
-                val model = ex.getAttribute(ExifInterface.TAG_MODEL)?.trim()
-                camera = listOfNotNull(make, model).filter { it.isNotEmpty() }
-                    .joinToString(" ").ifBlank { null }
+        for (candidate in if (src == uri) listOf(uri) else listOf(src, uri)) {
+            val read = runCatching {
+                ctx.contentResolver.openInputStream(candidate)?.use { input ->
+                    val ex = ExifInterface(input)
+                    val make = ex.getAttribute(ExifInterface.TAG_MAKE)?.trim()
+                    val model = ex.getAttribute(ExifInterface.TAG_MODEL)?.trim()
+                    camera = listOfNotNull(make, model).filter { it.isNotEmpty() }
+                        .joinToString(" ").ifBlank { null }
 
-                val raw = ex.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
-                    ?: ex.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED)
-                    ?: ex.getAttribute(ExifInterface.TAG_DATETIME)
-                if (raw != null) takenAt = parseExifTime(raw, ex.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL))
+                    val raw = ex.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
+                        ?: ex.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED)
+                        ?: ex.getAttribute(ExifInterface.TAG_DATETIME)
+                    if (raw != null) takenAt = parseExifTime(raw, ex.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL))
 
-                ex.latLong?.let { ll ->
-                    // (0,0)은 GPS를 못 잡았을 때 흔히 채워지는 쓰레기값이다
-                    if (ll[0] != 0.0 || ll[1] != 0.0) { lat = ll[0]; lon = ll[1] }
-                }
-            }
+                    ex.latLong?.let { ll ->
+                        // (0,0)은 GPS를 못 잡았을 때 흔히 채워지는 쓰레기값이다
+                        if (ll[0] != 0.0 || ll[1] != 0.0) { lat = ll[0]; lon = ll[1] }
+                    }
+                    true
+                } ?: false
+            }.getOrDefault(false)
+            if (read) break
         }
 
         return MetaResult(
@@ -141,6 +189,24 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
             takenAtSource = if (takenAt != null) TimeSource.EXIF else TimeSource.FILE,
             cameraModel = camera, lat = lat, lon = lon,
         )
+    }
+
+    /**
+     * 영상의 촬영 시각·위치. 컨테이너 메타데이터라 사진의 EXIF와 같은 무게로 믿는다 —
+     * 카메라가 녹화하면서 적은 값이기 때문이다. 없으면 파일 시각으로 떨어지고,
+     * 그 사실을 `FILE`로 남겨 추억·기록 묶기가 이 값을 믿지 않게 한다.
+     */
+    fun readVideoMeta(uri: String, fallbackSeconds: Long): MetaResult {
+        val r = android.media.MediaMetadataRetriever()
+        return try {
+            r.setDataSource(ctx, android.net.Uri.parse(uri))
+            val taken = VideoMeta.parseDate(r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DATE))
+            val loc = VideoMeta.parseLocation(r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_LOCATION))
+            MetaResult(taken ?: fallbackSeconds, if (taken != null) TimeSource.EXIF else TimeSource.FILE,
+                null, loc?.first, loc?.second)
+        } catch (_: Exception) {
+            MetaResult(fallbackSeconds, TimeSource.FILE, null, null, null)
+        } finally { r.release() }
     }
 
     /**
@@ -169,6 +235,7 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
 
     companion object {
         const val KEY_GENERATION = "last_generation"
+        const val KEY_VIDEO_DURATION_BACKFILL = "video_duration_backfill"
         private val EXIF_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
 
         fun secondsOf(millis: Long) = millis / 1000

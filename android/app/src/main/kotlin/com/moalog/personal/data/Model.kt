@@ -4,6 +4,15 @@ import com.moalog.personal.core.PhotoMeta
 import com.moalog.personal.core.Tag
 import com.moalog.personal.core.TimeSource
 
+enum class MediaKind(val value: String) {
+    PHOTO("photo"), VIDEO("video");
+
+    companion object {
+        fun from(value: String?, id: Long) = entries.firstOrNull { it.value == value }
+            ?: if (id < 0) VIDEO else PHOTO
+    }
+}
+
 /** MediaStore에서 읽은 한 행. CLIP 이전에 알 수 있는 것 전부(§4.1). */
 data class MediaRow(
     val id: Long,
@@ -19,6 +28,8 @@ data class MediaRow(
     val orientation: Int,
     val generation: Long,
     val dateModified: Long,
+    val mediaKind: MediaKind = if (id < 0) MediaKind.VIDEO else MediaKind.PHOTO,
+    val durationMs: Long? = null,
 )
 
 /** 파이프라인이 다음에 처리할 사진. */
@@ -34,6 +45,8 @@ data class Pending(
     val height: Int,
     /** 파일 수정시각(초). EXIF 촬영시각이 없을 때의 폴백 — 데스크톱의 mtime과 같다. */
     val dateModified: Long,
+    val mediaKind: MediaKind = if (id < 0) MediaKind.VIDEO else MediaKind.PHOTO,
+    val durationMs: Long? = null,
 ) {
     /** 규칙 태그·출처 판정에 넘길 형태. `:core`는 안드로이드를 모른다. */
     fun toMeta(takenAt: Long?, source: TimeSource, cameraModel: String?, hasGps: Boolean) = PhotoMeta(
@@ -62,13 +75,17 @@ data class Counts(val total: Int, val meta: Int, val done: Int, val failed: Int)
         ((meta * 0.15 + done * 0.85) / total * 100).toInt().coerceIn(0, 100)
 }
 
-data class TagCount(val label: String, val source: String, val count: Int)
+/** @param videos 그 가운데 영상 수. 앨범 카드에 "영상 N"을 보이려고 함께 센다. */
+data class TagCount(val label: String, val source: String, val count: Int, val videos: Int = 0)
 
 data class PhotoCard(
     val id: Long,
     val uri: String,
     val takenAt: Long?,
     val takenAtSource: TimeSource,
+    val mediaKind: MediaKind = if (id < 0) MediaKind.VIDEO else MediaKind.PHOTO,
+    val durationMs: Long? = null,
+    val sceneTimeMs: Long? = null,
 )
 
 data class PhotoDetail(
@@ -89,6 +106,8 @@ data class PhotoDetail(
     val relativePath: String?,
     val ownerPackage: String?,
     val tags: List<Tag>,
+    val mediaKind: MediaKind = if (id < 0) MediaKind.VIDEO else MediaKind.PHOTO,
+    val durationMs: Long? = null,
 )
 
 data class EventRow(
@@ -99,13 +118,23 @@ data class EventRow(
     val title: String,
     val count: Int,
     val coverIds: List<Long>,
+    val videos: Int = 0,
 )
 
 /** 기기 폴더 하나. 카메라·스크린샷처럼 **실제 저장 위치**를 뜻한다. */
-data class BucketRow(val name: String, val count: Int, val coverIds: List<Long>)
+data class BucketRow(val name: String, val count: Int, val coverIds: List<Long>, val videos: Int = 0)
 
 /** 사용자가 직접 만든 앨범. */
-data class UserAlbumRow(val id: Long, val name: String, val count: Int, val coverIds: List<Long>)
+data class UserAlbumRow(val id: Long, val name: String, val count: Int, val coverIds: List<Long>, val videos: Int = 0)
+
+/** 태그 한 행(점수·출처 포함). 되돌리기가 지운 태그를 **원래 모습 그대로** 복원하려고 쓴다. */
+data class TagRow(val id: Long, val label: String, val score: Float?, val source: String)
+
+/** 파일 하나의 저장 위치(기기 폴더)와 크기. 정리 화면의 "Camera · 18MB"가 쓴다. */
+data class FileInfo(val bucket: String?, val bytes: Long)
+
+/** 개수와 그 가운데 영상 수. 즐겨찾기처럼 표가 따로인 묶음이 쓴다. */
+data class KindCount(val count: Int, val videos: Int)
 
 /** 중복 묶음에 대한 사용자의 결정. `keepId`는 보관 추천을 바꾼 것, `dismissed`는 "이 묶음은 유지". */
 data class DupeChoice(val keepId: Long?, val dismissed: Boolean)
