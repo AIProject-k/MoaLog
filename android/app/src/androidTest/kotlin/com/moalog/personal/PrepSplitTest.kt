@@ -66,7 +66,13 @@ class PrepSplitTest {
         }
         sess.close()
         report("[분리] 모델만  : 데스크톱 텐서 → 이 기기 ONNX, 최소 cos %.6f (%d장)".format(worst, n))
-        assertTrue("같은 입력에 모델이 다른 답을 낸다 (cos=$worst)", worst > 0.999f)
+        // 기준은 계약의 cos_min이다. 처음엔 0.999였는데, 그건 x86 에뮬레이터에서 1.000000이 나온 걸
+        // 보고 잡은 값이었다. 실기기(Galaxy S23, arm64)에서는 같은 텐서로도 0.9865까지 내려간다 —
+        // int8 동적 양자화 커널의 구현이 x86(AVX)과 ARM(NEON)에서 달라서이고, 전처리는 cos 1.000000이라
+        // 원인이 모델 쪽임이 확정됐다. ORT 1.20.0 → 1.22.0으로 올려도 숫자가 같았다.
+        // 이 테스트가 잡으려는 것은 "엉뚱한 모델 파일"이므로 그 정도를 가르는 계약 기준을 쓴다.
+        val minCos = manifest.getJSONObject("criteria").getDouble("cos_min").toFloat()
+        assertTrue("같은 입력에 모델이 다른 답을 낸다 (cos=$worst < $minCos)", worst >= minCos)
     }
 
     @Test fun b_전처리가_데스크톱과_얼마나_다른가() {
