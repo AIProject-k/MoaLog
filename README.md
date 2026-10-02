@@ -4,9 +4,10 @@ MoaLog는 갤러리에 쌓인 사진과 동영상을 기기 안에서 분석해 
 
 사진·영상과 검색어를 서버에 보내지 않습니다. 앱은 `INTERNET` 권한을 선언하지 않으며, 포함된 한국어 CLIP 모델로 모든 분류와 검색을 기기 안에서 처리합니다.
 
-[최신 APK 받기 (v0.2.0)](https://github.com/AIProject-k/MoaLog/releases/download/v0.2.0/MoaLog-v0.2.0.apk) · [릴리스 노트](https://github.com/AIProject-k/MoaLog/releases/tag/v0.2.0)
+[최신 APK 받기 (v0.3.1)](https://github.com/AIProject-k/MoaLog/releases/download/v0.3.1/MoaLog-v0.3.1.apk) · [릴리스 노트](https://github.com/AIProject-k/MoaLog/releases/tag/v0.3.1)
 
-> Android 11 (API 30) 이상이 필요합니다. 첫 실행 시 사진 접근 권한을 허용해야 갤러리를 분류할 수 있습니다.
+> Android 11 (API 30) 이상이 필요합니다. 첫 실행 시 사진·동영상 접근 권한을 허용해야 갤러리를 분류할 수 있습니다.
+> v0.3.1부터 앱 ID가 `com.moalog.personal`로 바뀌어 v0.2.0 이하와는 별개의 앱으로 설치됩니다(이전 앱의 색인은 옮겨지지 않습니다).
 
 ## 이렇게 씁니다
 
