@@ -83,8 +83,10 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     // content URI 썸네일 로딩 + 메모리/디스크 캐시. 직접 만들면 이보다 코드가 많다
     implementation("io.coil-kt:coil-compose:2.6.0")
-    // 데스크톱과 같은 1.20.x. 같은 .onnx를 같은 런타임 계열로 돌려야 패리티가 의미를 갖는다.
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.20.0")
+    // 1.22.0: 네이티브 라이브러리가 16KB 페이지 정렬이다. 1.20.0의 libonnxruntime4j_jni.so는 4KB 정렬이라
+    // 16KB 기기·호환 모드에서 '앱이 16KB와 호환되지 않습니다' 경고가 뜬다(ELF LOAD 세그먼트 직접 확인).
+    // 데스크톱(1.20.1)과 버전을 맞추는 대신, 기기에서 도는 패리티 테스트(ParityTest)가 계약을 지킨다.
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.22.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
