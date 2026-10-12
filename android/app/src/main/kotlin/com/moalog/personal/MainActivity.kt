@@ -148,6 +148,14 @@ private fun App() {
 
     fun uriOf(id: Long): Uri = Uri.parse(mediaUri(id))
 
+    // 백업 파일 위치는 사용자가 고른다. 앱이 저장소 경로를 정하지 않는다(시스템 파일 선택기).
+    val backupSave = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri -> if (uri != null) vm.askBackupPassword(uri, export = true) }
+    val backupOpen = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) vm.askBackupPassword(uri, export = false)
+    }
+
     /**
      * 휴지통으로. **어떤 id를 보냈는지 뷰모델에 먼저 알린다** — 시스템이 확인해 주면
      * 그 목록을 화면과 DB에서 바로 지워야 방금 정리한 사진이 계속 보이지 않는다.
@@ -244,6 +252,8 @@ private fun App() {
                                     offAxes = if (id in offAxes) offAxes - id else offAxes + id
                                     saveOffAxes(offAxes)
                                 },
+                                onBackup = { backupSave.launch("MoaLog-백업-${java.time.LocalDate.now()}.moalog") },
+                                onRestore = { backupOpen.launch(arrayOf("*/*")) },
                             )
                         }
                     }
@@ -255,6 +265,7 @@ private fun App() {
             if (ui.menuOpen && screen == Screen.Category) CategoryMenu(vm, ui)
             AlbumSheets(vm, ui, uriText)
             ui.dialog?.let { DialogHost(vm, ui, it) }
+            ui.backupPrompt?.let { BackupPasswordDialog(it, onSubmit = vm::runBackupPrompt, onCancel = vm::cancelBackupPrompt) }
             val navBottom = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
             Toast(
                 text = ui.toast?.text, action = ui.toast?.action, onAction = vm::toastAction,
@@ -272,10 +283,12 @@ private fun App() {
 
     // 위에 얹힌 것부터 닫고, 하위 화면에서는 위로, 선택 중이면 선택부터 푼다. 탭 화면에서는 시스템에 넘겨 앱을 닫는다.
     BackHandler(
-        enabled = ui.dialog != null || ui.sheet != null || ui.menuOpen || !screen.showsNav || ui.selectionMode ||
+        enabled = ui.backupPrompt != null || ui.dialog != null || ui.sheet != null || ui.menuOpen || !screen.showsNav ||
+            ui.selectionMode ||
             (screen == Screen.Map && ui.mapSelection.isNotEmpty()),
     ) {
         when {
+            ui.backupPrompt != null -> vm.cancelBackupPrompt()
             ui.dialog != null -> vm.closeDialog()
             ui.sheet != null -> vm.closeSheet()
             ui.menuOpen -> vm.setMenu(false)

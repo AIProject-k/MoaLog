@@ -1,17 +1,22 @@
 package com.moalog.personal.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.moalog.personal.AppGraph
+import com.moalog.personal.core.BackupCodec
+import com.moalog.personal.core.BackupCrypto
+import com.moalog.personal.core.BackupException
 import com.moalog.personal.core.DayGrouping
 import com.moalog.personal.core.GeoPhoto
 import com.moalog.personal.core.Grouping
 import com.moalog.personal.core.QueryParser
 import com.moalog.personal.core.Relevance
 import com.moalog.personal.core.Selection
+import com.moalog.personal.data.BackupRepository
 import com.moalog.personal.data.Counts
 import com.moalog.personal.data.EventRow
 import com.moalog.personal.data.MonthRow
@@ -44,6 +49,9 @@ import java.util.Locale
  * 거기서 끝이었다. 601번째 사진은 앱 안에 존재하지 않는 것과 같았고, `전체 선택`이
  * 무엇을 고르는지도 알 수 없었다. 이제 [PAGE]장씩 이어 붙이고 총 장수를 함께 보여 준다.
  */
+/** 백업 암호를 물을 파일. [export]면 만들기, 아니면 복원. */
+data class BackupPrompt(val uri: Uri, val export: Boolean)
+
 class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     data class Ui(
@@ -127,6 +135,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val cleanupSelected: Set<Long> = emptySet(),
         val cleanupBytes: Long = 0,
         val toast: ToastMsg? = null,
+        /** 백업 암호를 물을 차례. 파일을 고르면 채워지고, 암호를 넣거나 취소하면 비워진다. */
+        val backupPrompt: BackupPrompt? = null,
         /** 안드로이드 "일부 선택" 접근. 빈 화면의 원인을 정확히 말하려고 화면이 안다. */
         val limitedAccess: Boolean = false,
         // 지도
@@ -1235,6 +1245,51 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun clearMapSelection() = _ui.update { it.copy(mapSelection = emptyList()) }
+
+    // ---------- 백업 ----------
+
+    /** 파일을 골랐다. 이제 암호를 물어본다. [export]가 true면 저장, false면 복원이다. */
+    fun askBackupPassword(uri: Uri, export: Boolean) =
+        _ui.update { it.copy(backupPrompt = BackupPrompt(uri, export)) }
+
+    fun cancelBackupPrompt() = _ui.update { it.copy(backupPrompt = null) }
+
+    /**
+     * 암호를 받아 백업을 만들거나 복원한다. 암호 배열은 쓰고 나면 지운다.
+     * 복원은 같은 사진·라벨의 교정을 백업 쪽으로 덮는다 — 대화상자 문구에서 그렇게 말한다.
+     */
+    fun runBackupPrompt(password: CharArray) {
+        val prompt = _ui.value.backupPrompt
+        _ui.update { it.copy(backupPrompt = null) }
+        if (prompt == null) { password.fill('\u0000'); return }
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = getApplication<Application>()
+            val result = runCatching {
+                if (prompt.export) {
+                    val doc = BackupRepository(AppGraph.store).collect(System.currentTimeMillis() / 1000)
+                    val sealed = BackupCrypto.seal(BackupCodec.encode(doc), password)
+                    app.contentResolver.openOutputStream(prompt.uri, "wt")?.use { it.write(sealed) }
+                        ?: error("파일을 만들지 못했습니다")
+                    "백업을 저장했습니다. 사진 ${doc.media.size}장 · 앨범 ${doc.albums.size}개 · " +
+                        "즐겨찾기 ${doc.favorites.size}개 · 분류 교정 ${doc.feedback.size}개"
+                } else {
+                    val bytes = app.contentResolver.openInputStream(prompt.uri)?.use { it.readBytes() }
+                        ?: error("파일을 열지 못했습니다")
+                    val doc = BackupCodec.decode(BackupCrypto.open(bytes, password))
+                    val r = BackupRepository(AppGraph.store).restore(doc)
+                    refresh()
+                    "복원했습니다. 즐겨찾기 ${r.favorites}개 · 앨범 ${r.albums}개(사진 ${r.albumItems}장) · " +
+                        "분류 교정 ${r.feedback}개" +
+                        if (r.unmatched > 0) " · 이 기기에서 못 찾은 사진 ${r.unmatched}장은 건너뛰었습니다" else ""
+                }
+            }
+            password.fill('\u0000')
+            val msg = result.getOrElse {
+                (it as? BackupException)?.message ?: "백업을 처리하지 못했습니다: ${it.message ?: it.javaClass.simpleName}"
+            }
+            withContext(Dispatchers.Main) { toast(msg) }
+        }
+    }
 
     // ---------- 정리 ----------
 

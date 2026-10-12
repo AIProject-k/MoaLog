@@ -43,6 +43,8 @@ fun SettingsScreen(
     ui: AppViewModel.Ui,
     toggles: List<CategoryToggle>,
     onFlip: (String) -> Unit,
+    onBackup: () -> Unit,
+    onRestore: () -> Unit,
 ) {
     val t = theme
     val ctx = LocalContext.current
@@ -135,6 +137,10 @@ fun SettingsScreen(
             SectionTitle("데이터 관리")
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.card)).background(t.surface1).padding(vertical = 4.dp)) {
                 ActionRow(I.Refresh, "전체 다시 분석", "촬영 정보는 두고 장면 분류만 다시 합니다", t.text1, t.text2) { vm.reanalyze() }
+                Hair(Modifier.padding(horizontal = 16.dp))
+                ActionRow(I.Share, "백업 파일 만들기", "앨범·즐겨찾기·분류 교정을 암호를 걸어 저장합니다. 사진 원본은 넣지 않습니다", t.text1, t.text2) { onBackup() }
+                Hair(Modifier.padding(horizontal = 16.dp))
+                ActionRow(I.Undo, "백업에서 복원", "백업 파일을 고르고 암호를 입력합니다. 같은 사진은 이 기기의 사진에 붙입니다", t.text1, t.text2) { onRestore() }
                 Hair(Modifier.padding(horizontal = 16.dp))
                 ActionRow(I.Warn, "분류 결과 전체 삭제", "사진·영상은 지우지 않습니다", t.dangerText, t.dangerText) { vm.openDialog(Dialog.DeleteAll) }
             }

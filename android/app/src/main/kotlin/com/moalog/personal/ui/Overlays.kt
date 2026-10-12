@@ -26,15 +26,23 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -204,3 +212,55 @@ fun PopupMenu(
 }
 
 class MenuItem(val label: String, val icon: Int, val color: Color, val onClick: () -> Unit)
+
+/**
+ * 백업 암호 입력. 만들 때는 8자 이상, 복원할 때는 아무 글자나 받는다(틀리면 복호화에서 알려 준다).
+ * 암호는 복사해 두지 않고 [onSubmit]에 넘긴 뒤 바로 지운다.
+ */
+@Composable
+fun BackupPasswordDialog(prompt: BackupPrompt, onSubmit: (CharArray) -> Unit, onCancel: () -> Unit) {
+    val t = theme
+    var text by remember { mutableStateOf("") }
+    val canSubmit = if (prompt.export) text.length >= 8 else text.isNotEmpty()
+    val swallow = remember { MutableInteractionSource() }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Scrim(.6f, onCancel)
+        Column(
+            Modifier.padding(horizontal = 28.dp).fillMaxWidth()
+                .clip(RoundedCornerShape(Radius.sheet)).background(t.surface2)
+                .clickable(swallow, indication = null) { }
+                .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(if (prompt.export) "백업 암호 정하기" else "백업 암호 입력", style = fonts.sheetTitle, color = t.text1)
+            Text(
+                if (prompt.export) "이 암호가 없으면 백업을 풀 수 없습니다. 8자 이상으로 정하세요. 사진 원본은 들어가지 않습니다."
+                else "백업을 만들 때 정한 암호를 입력하세요. 같은 사진의 즐겨찾기·분류 교정은 백업 쪽 값으로 합칩니다.",
+                style = fonts.bodySm, color = t.text2,
+            )
+            BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                textStyle = fonts.input.copy(color = t.text1),
+                cursorBrush = SolidColor(t.accent),
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(t.surface3)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+            )
+            Row(
+                Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextBtn("취소", onCancel, style = fonts.itemMd, color = t.text2)
+                if (canSubmit) Pill(
+                    if (prompt.export) "백업 만들기" else "복원하기",
+                    { onSubmit(text.toCharArray()) },
+                    bg = t.accent, fg = t.onAccent, style = fonts.itemMd, horizontal = 18.dp,
+                )
+            }
+        }
+    }
+}
