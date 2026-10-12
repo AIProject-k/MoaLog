@@ -90,6 +90,11 @@ fun SettingsScreen(
                     style = fonts.bodySm.copy(lineHeight = androidx.compose.ui.unit.TextUnit(20f, androidx.compose.ui.unit.TextUnitType.Sp)), color = t.text1,
                 )
                 when {
+                    // 모델이 깨졌으면 "분석이 끝났다"고 하면 안 된다. 태그가 0개인 이유를 말해 준다.
+                    ui.modelError != null -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Ic(I.Warn, size = 16.dp, tint = t.warn)
+                        Text(ui.modelError, style = fonts.note, color = t.warn, modifier = Modifier.weight(1f))
+                    }
                     ui.paused != null -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Ic(I.Pause, size = 16.dp, tint = t.warn)
                         Text(ui.paused, style = fonts.note, color = t.warn, modifier = Modifier.weight(1f))

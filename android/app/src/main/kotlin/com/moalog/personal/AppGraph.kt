@@ -4,6 +4,7 @@ import android.content.Context
 import com.moalog.personal.core.BpeTokenizer
 import com.moalog.personal.core.Classifier
 import com.moalog.personal.core.Embeddings
+import com.moalog.personal.core.ModelIntegrity
 import com.moalog.personal.core.Personalize
 import com.moalog.personal.core.PromptMatrix
 import com.moalog.personal.core.QueryParser
@@ -50,29 +51,63 @@ object AppGraph {
      * 모델 파일. ORT는 경로가 필요하고 assets는 실제 파일이 아니라 한 번 복사한다.
      * `noBackupFilesDir`에 두는 이유: 파생 데이터이므로 백업에 넣을 이유가 없다(§9).
      */
-    private val modelDir: File by lazy {
-        val dir = File(app.noBackupFilesDir, "models").apply { mkdirs() }
-        // 앱 버전이 그대로면 이미 복사된 것으로 본다. 160MB를 매 실행 다시 쓸 이유가 없다.
-        //
-        // 크기 비교로 하지 않는 이유: `assets.openFd()`는 **압축된 asset에서 예외를 던진다**.
-        // .onnx만 noCompress로 빼 뒀으므로 작은 json에서 터졌고, 그 예외가 modelsReady를
-        // false로 만들어 Pass 2가 조용히 건너뛰어졌다. 버전 도장이 더 단순하고 정확하다.
-        val stamp = app.packageManager.getPackageInfo(app.packageName, 0).let {
-            if (android.os.Build.VERSION.SDK_INT >= 28) it.longVersionCode.toString() else it.versionName ?: "0"
-        }
-        if (store.metaGet(KEY_MODEL_STAMP) != stamp || ONNX_ASSETS.any { File(dir, it).length() == 0L }) {
-            for (name in ONNX_ASSETS) {
-                app.assets.open("models/$name").use { input ->
-                    File(dir, name).outputStream().use { input.copyTo(it, 1 shl 16) }
-                }
-            }
-            store.metaPut(KEY_MODEL_STAMP, stamp)
-        }
-        dir
+    private val modelDir: File by lazy { File(app.noBackupFilesDir, "models").apply { mkdirs() } }
+
+    /**
+     * 모델 준비 결과. null이면 정상, 아니면 사용자에게 보일 이유다.
+     * 예전에는 실패하면 `false`만 남아서 CLIP 분석이 조용히 건너뛰어졌다. 이제 이유를 남긴다 (계획서 MLG-103).
+     */
+    private val modelCheck: String? by lazy {
+        runCatching { prepareModels() }.getOrElse { "AI 모델을 준비하지 못했습니다: ${it.message ?: it.javaClass.simpleName}" }
     }
 
-    val modelsReady: Boolean
-        get() = runCatching { ONNX_ASSETS.all { File(modelDir, it).length() > 0 } }.getOrDefault(false)
+    /** 모델을 쓸 수 없는 이유. 정상이면 null. */
+    val modelError: String? get() = modelCheck
+
+    val modelsReady: Boolean get() = modelCheck == null
+
+    /**
+     * assets → noBackupFilesDir 복사. 복사하는 동안 SHA-256을 확인하고, 디스크에 쓴 뒤에도 다시 읽어 확인한다.
+     * 확인에 실패하면 불완전한 파일을 남기지 않고 이유를 돌려준다.
+     */
+    private fun prepareModels(): String? {
+        val dir = modelDir
+        val manifestText = app.assets.open("models/manifest.json").bufferedReader().use { it.readText() }
+        val expected = ModelIntegrity.parseManifest(manifestText)
+        // 앱 버전이 그대로여도 manifest가 바뀌면 다시 복사한다 — 모델을 갈아 끼운 경우다.
+        val stamp = app.packageManager.getPackageInfo(app.packageName, 0).let {
+            (if (android.os.Build.VERSION.SDK_INT >= 28) it.longVersionCode.toString() else it.versionName ?: "0") +
+                ":" + ModelIntegrity.sha256(manifestText.byteInputStream())
+        }
+        if (store.metaGet(KEY_MODEL_STAMP) == stamp && ONNX_ASSETS.all { File(dir, it).length() > 0 }) return null
+
+        for (name in ONNX_ASSETS) {
+            val want = expected[name] ?: return "모델 목록(manifest)에 $name 이(가) 없습니다. 앱을 다시 설치해 주세요."
+            val part = File(dir, "$name.part")
+            val got = try {
+                app.assets.open("models/$name").use { input ->
+                    part.outputStream().use { ModelIntegrity.copyAndHash(input, it) }
+                }
+            } catch (e: java.io.IOException) {
+                part.delete()
+                return "모델 $name 을(를) 기기에 복사하지 못했습니다. 저장 공간을 확인해 주세요."
+            }
+            if (!ModelIntegrity.same(got, want)) {
+                part.delete()
+                return "모델 $name 이(가) 손상되었습니다. 앱을 다시 설치해 주세요."
+            }
+            val target = File(dir, name)
+            java.nio.file.Files.move(part.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            // 쓰기 도중 깨졌을 수 있으니 디스크에서 다시 읽는다. 복사할 때만 치르는 한 번짜리 비용이다.
+            val onDisk = target.inputStream().use { ModelIntegrity.sha256(it) }
+            if (!ModelIntegrity.same(onDisk, want)) {
+                target.delete()
+                return "모델 $name 을(를) 저장한 뒤 확인하지 못했습니다. 저장 공간과 기기 상태를 확인해 주세요."
+            }
+        }
+        store.metaPut(KEY_MODEL_STAMP, stamp)
+        return null
+    }
 
     /** 전처리 설정은 파일로 만들 필요가 없다 — JSON으로 읽으면 끝이다. ORT만 경로를 요구한다. */
     private val preprocessorJson: JSONObject by lazy {
@@ -84,6 +119,7 @@ object AppGraph {
      * 무효화된다 — 다른 공간의 벡터를 비교하면 검색과 중복 판정이 엉킨다(§14).
      */
     val modelId: String by lazy {
+        modelCheck // 복사가 끝나야 파일 길이가 의미를 가진다. 안 그러면 0으로 찍혀 신원이 틀어진다.
         val md = MessageDigest.getInstance("SHA-256")
         for (name in ONNX_ASSETS) md.update(File(modelDir, name).length().toString().toByteArray())
         md.update(config.optString("model_variant", "ko").toByteArray())
@@ -99,6 +135,7 @@ object AppGraph {
     }
 
     val encoder: ClipEncoder by lazy {
+        modelCheck?.let { error(it) }   // 깨진 모델로 세션을 열지 않는다
         ClipEncoder(
             visionPath = File(modelDir, "vision_model_ko_int8.onnx"),
             textPath = File(modelDir, "text_model_ko_int8.onnx"),

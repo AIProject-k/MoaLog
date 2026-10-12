@@ -60,6 +60,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val phaseCounts: Counts = Counts(0, 0, 0, 0),
         /** 뜨겁거나 배터리가 낮아 분석이 잠시 멈춘 사유("기기가 뜨거워 잠시 멈췄습니다"). 멈춘 게 아니면 null. */
         val paused: String? = null,
+        /** AI 모델을 쓸 수 없는 이유. 정상이면 null. 설정의 분석 현황이 이것을 보여 준다. */
+        val modelError: String? = null,
         val indexPhase: IndexPhase = IndexPhase.PHOTOS,
         val workMessage: String = "",
         val indexing: Boolean = false,
@@ -370,6 +372,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val videoTotal = store.photoCount("video")
         val favorites = store.favoriteIds()
         val memories = buildMemories()
+        // 모델 준비는 처음 한 번 복사한다. 여기는 IO 스레드라 메인을 막지 않는다.
+        val modelError = AppGraph.modelError
         withContext(Dispatchers.Main) {
             _ui.update { state ->
                 val opened = if (accessChanged) state.openAlbum?.let { old ->
@@ -392,7 +396,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     else -> state.screen
                 }
                 state.copy(
-                    counts = counts, albums = if (state.albumMedia == media) albums else state.albums,
+                    counts = counts, modelError = modelError, albums = if (state.albumMedia == media) albums else state.albums,
                     cleanupCount = dupeExtra, videoTotal = videoTotal,
                     userAlbums = userAlbums, favorites = favorites, memories = memories,
                     openAlbum = opened,

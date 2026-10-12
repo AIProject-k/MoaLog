@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "files": {
+    "vision_model_ko_int8.onnx": "034e63aeffa13fd14122b6adfe98bd8e39a4b2ac56606e0d5a5238d03f38921c",
+    "text_model_ko_int8.onnx": "abfe78d499dd037afffb1d2175897ecbd87d2a5161fea00310ca7bed8312f14d"
+  }
+}

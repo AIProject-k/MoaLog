@@ -63,6 +63,8 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             }
 
             val withClip = AppGraph.modelsReady && inputData.getBoolean(KEY_WITH_CLIP, true)
+            // 모델이 깨졌으면 CLIP을 건너뛰는 이유를 상태에 남긴다. 조용히 건너뛰면 원인을 알 수 없다.
+            if (!AppGraph.modelsReady) AppGraph.modelError?.let { report(IndexPhase.PHOTOS, it) }
             val modelId = if (withClip) AppGraph.modelId else null
             val modelChanged = modelId != null && store.checkModel(modelId) > 0
             stageStart = android.os.SystemClock.elapsedRealtimeNanos()
