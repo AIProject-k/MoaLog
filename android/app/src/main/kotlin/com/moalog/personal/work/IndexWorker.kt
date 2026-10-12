@@ -189,12 +189,15 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         val thumbPx = AppGraph.config.optInt("thumb_px", 320)
         var processed = false
         var lastReport = android.os.SystemClock.elapsedRealtime()
+        var cursor = Long.MIN_VALUE
+        var encoderRun = 0
 
         try {
             while (true) {
                 if (pauseIfHotOrLow(IndexPhase.PHOTOS)) return null
-                val batch = store.pendingPhotos(Store.State.META, BATCH)
+                val batch = store.pendingPhotos(Store.State.META, BATCH, cursor)
                 if (batch.isEmpty()) break
+                cursor = batch.last().id
                 var thumbnailNs = 0L
                 var qualityNs = 0L
                 var encodeNs = 0L
@@ -216,7 +219,9 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                             quality = Quality.of(bmp, AppGraph.config.optInt("analysis_px", 256))
                             qualityNs += android.os.SystemClock.elapsedRealtimeNanos() - stageStart
                             stageStart = android.os.SystemClock.elapsedRealtimeNanos()
-                            v = enc.encodeImage(bmp)
+                            v = try { enc.encodeImage(bmp) }
+                                catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                                catch (e: Throwable) { throw EncoderFailure(e) }
                             encodeNs += android.os.SystemClock.elapsedRealtimeNanos() - stageStart
                         } finally { bmp.recycle() }
                         stageStart = android.os.SystemClock.elapsedRealtimeNanos()
@@ -226,10 +231,18 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                         store.saveClip(p.id, v, quality.blur, quality.brightness, tags, modelId)
                         AppGraph.searchIndex.put(p.id, v)
                         persistNs += android.os.SystemClock.elapsedRealtimeNanos() - stageStart
+                    }.onSuccess {
+                        encoderRun = 0
                     }.onFailure {
                         if (it is kotlinx.coroutines.CancellationException) throw it
                         android.util.Log.e("IndexWorker", "사진 ${p.id} 분석 실패", it)
-                        store.markFailed(p.id)
+                        if (it is EncoderFailure) {
+                            // 사진 탓이 아니다. 횟수에 넣지 않고, 연속으로 죽으면 이번 분석을 멈춘다.
+                            if (++encoderRun >= ENCODER_STOP_RUN) {
+                                report(IndexPhase.PHOTOS, "AI 분석이 연속으로 실패해 멈췄습니다. 앱을 다시 열어 주세요.")
+                                throw SystemicStop()
+                            }
+                        } else store.noteFailure(p.id, MAX_ATTEMPTS)
                     }
                     // 32장이 다 끝나길 기다리지 않고 1초마다 알린다. 느린 기기에서 분석 화면의 링이 멈춰 보이지 않게.
                     val now = android.os.SystemClock.elapsedRealtime()
@@ -262,12 +275,14 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         val battery0 = applicationContext.getSystemService(BatteryManager::class.java)
             ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val t0 = android.os.SystemClock.elapsedRealtimeNanos()
+        var cursor = Long.MIN_VALUE
 
         try {
             while (true) {
                 if (pauseIfHotOrLow(IndexPhase.VIDEOS)) return null
-                val batch = store.pendingVideos(Store.State.META, BATCH)
+                val batch = store.pendingVideos(Store.State.META, BATCH, cursor)
                 if (batch.isEmpty()) break
+                cursor = batch.last().id
                 for (p in batch) {
                     if (isStopped) return null
                     processed = true
@@ -331,7 +346,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     }.onFailure {
                         if (it is kotlinx.coroutines.CancellationException) throw it
                         android.util.Log.e("IndexWorker", "영상 ${p.id} 분석 실패", it)
-                        store.markFailed(p.id)
+                        store.noteFailure(p.id, MAX_ATTEMPTS)
                     }
                 }
                 report(IndexPhase.VIDEOS, "영상을 분류하고 있습니다")
@@ -472,11 +487,21 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         else ForegroundInfo(NOTIF_ID, n)
     }
 
+    /** 추론기(ONNX) 예외를 감싼다. 사진 탓인지 모델 탓인지 가르려고 따로 표시한다. */
+    private class EncoderFailure(cause: Throwable) : Exception(cause)
+
+    /** 추론기가 연속으로 실패해 이번 분석을 멈춘다. 다음 실행이 다시 시도한다. */
+    private class SystemicStop : Exception("AI 분석이 연속으로 실패해 멈췄습니다")
+
     companion object {
         const val NAME = "index"
         const val CHANNEL = "index"
         const val NOTIF_ID = 42
         const val BATCH = 32                 // DB 커밋 단위. 추론 배치는 1이다(§7.5)
+        /** 사진 한 장이 이만큼 실패하면 FAILED로 둔다. 그 전에는 다음 실행이 다시 시도한다 (계획서 MLG-104). */
+        const val MAX_ATTEMPTS = 3
+        /** 추론기가 이만큼 연속으로 죽으면 사진 탓이 아니라 모델·기기 탓이다. 세지 않고 이번 분석을 멈춘다. */
+        const val ENCODER_STOP_RUN = 8
         const val VIDEO_PROGRESS_FRAME_INTERVAL = 4
         const val KEY_WITH_CLIP = "with_clip"
         const val KEY_TOTAL = "total"

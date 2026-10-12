@@ -28,7 +28,7 @@ internal const val KEY_VIDEO_TAGS = "video_tags"
  * `state`는 데스크톱의 `indexed_at IS NULL` 패턴을 명시적 상태로 바꾼 것이다 —
  * 2단계 인덱싱(§5.1)에서 "메타는 됐고 CLIP은 안 됐다"를 표현해야 한다.
  */
-class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 8) {
+class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
 
     object State {
         const val NEW = 0        // MediaStore에서 막 발견
@@ -56,6 +56,7 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 8) {
               sha256 TEXT,
               embedding BLOB,
               model_id TEXT,
+              fail_count INTEGER NOT NULL DEFAULT 0,
               state INTEGER NOT NULL DEFAULT 0
             )""")
         db.execSQL("CREATE INDEX ix_state ON photos(state)")
@@ -170,6 +171,9 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 8) {
         // 예전 영상은 촬영 시각을 읽지 않고 파일 시각으로 저장했다. 분석은 그대로 두고
         // 시각·위치만 다시 읽도록 표시한다(IndexWorker.backfillVideoCapture).
         if (old < 8) metaPut(db, KEY_VIDEO_CAPTURE_BACKFILL, "1")
+        // v9: 분석 실패 횟수. 일시적 실패를 바로 영구 실패로 두지 않으려고 센다 (계획서 MLG-104).
+        if (old < 9 && !hasColumn(db, "photos", "fail_count"))
+            db.execSQL("ALTER TABLE photos ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0")
         if (old > new) rebuild(db)          // 다운그레이드는 되돌릴 방법이 없다
     }
 
@@ -447,16 +451,23 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 8) {
 
     // ---------- 파이프라인 ----------
 
-    fun pendingPhotos(state: Int, limit: Int): List<Pending> = pending(state, limit, "media_id>0")
-    fun pendingVideos(state: Int, limit: Int): List<Pending> = pending(state, limit, "media_id<0")
+    /**
+     * 처리할 항목을 id 순으로 [limit]개. [afterId]보다 큰 것만 준다. 실패해서 상태가 그대로인 항목을
+     * 같은 실행 안에서 다시 집지 않게, 호출하는 쪽이 마지막 id를 커서로 넘긴다.
+     */
+    fun pendingPhotos(state: Int, limit: Int, afterId: Long = Long.MIN_VALUE): List<Pending> =
+        pending(state, limit, "media_id>0", afterId)
+    fun pendingVideos(state: Int, limit: Int, afterId: Long = Long.MIN_VALUE): List<Pending> =
+        pending(state, limit, "media_id<0", afterId)
     fun countsPhotos(): Counts = counts("media_id>0")
     fun countsVideos(): Counts = counts("media_id<0")
 
-    private fun pending(state: Int, limit: Int, kindWhere: String): List<Pending> =
+    private fun pending(state: Int, limit: Int, kindWhere: String, afterId: Long): List<Pending> =
         readableDatabase.rawQuery(
             "SELECT media_id, uri, display_name, rel_path, owner_pkg, mime, bytes, width, height," +
-                " date_modified, media_kind, duration_ms FROM photos WHERE state=? AND is_accessible=1 AND $kindWhere ORDER BY media_id LIMIT ?",
-            arrayOf(state.toString(), limit.toString())
+                " date_modified, media_kind, duration_ms FROM photos WHERE state=? AND is_accessible=1 AND $kindWhere" +
+                " AND media_id>? ORDER BY media_id LIMIT ?",
+            arrayOf(state.toString(), afterId.toString(), limit.toString())
         ).use { c ->
             ArrayList<Pending>(c.count).apply {
                 while (c.moveToNext()) add(Pending(
@@ -512,6 +523,18 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 8) {
 
     fun markFailed(id: Long) {
         writableDatabase.execSQL("UPDATE photos SET state=${State.FAILED} WHERE media_id=?", arrayOf(id))
+    }
+
+    /**
+     * 분석 한 번이 실패했음을 센다. [maxAttempts]번째 실패부터 FAILED로 두고, 그 전에는 상태를 그대로 둬서
+     * 다음 실행이 다시 시도하게 한다. 한 번 실패로 영구히 잃지 않으려는 것이다.
+     */
+    fun noteFailure(id: Long, maxAttempts: Int) {
+        writableDatabase.execSQL(
+            "UPDATE photos SET fail_count = fail_count + 1," +
+                " state = CASE WHEN fail_count + 1 >= ? THEN ${State.FAILED} ELSE state END WHERE media_id = ?",
+            arrayOf(maxAttempts, id)
+        )
     }
 
     fun setSha(id: Long, sha: String) {

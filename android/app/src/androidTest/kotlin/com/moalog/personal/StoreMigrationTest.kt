@@ -48,7 +48,7 @@ class StoreMigrationTest {
         val store = Store(ctx)
         try {
             val db = store.readableDatabase
-            assertEquals(8, db.version)
+            assertEquals(9, db.version)
             db.rawQuery("SELECT uri,state,embedding,media_kind,is_accessible FROM photos WHERE media_id=11", null).use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals("content://old/11", c.getString(0))
@@ -64,6 +64,9 @@ class StoreMigrationTest {
             for (table in listOf("tags", "favorites", "user_albums", "user_album_photos", "user_feedback"))
                 assertEquals("Lost $table", 1, count(table))
             assertEquals(1, db.rawQuery("SELECT COUNT(*) FROM pragma_table_info('user_album_photos') WHERE name='scene_time_ms'", null).use { c -> c.moveToFirst(); c.getInt(0) })
+            // v9: 분석 실패 횟수 열이 생기고 기존 행은 0이다
+            assertEquals(1, db.rawQuery("SELECT COUNT(*) FROM pragma_table_info('photos') WHERE name='fail_count'", null).use { c -> c.moveToFirst(); c.getInt(0) })
+            assertEquals(0, db.rawQuery("SELECT fail_count FROM photos WHERE media_id=11", null).use { c -> c.moveToFirst(); c.getInt(0) })
             // 예전 영상의 촬영 시각을 한 번 다시 읽도록 표시돼 있어야 한다
             assertEquals("1", store.metaGet("video_capture_backfill"))
         } finally {
