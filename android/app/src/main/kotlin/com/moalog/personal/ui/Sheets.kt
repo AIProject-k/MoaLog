@@ -170,6 +170,8 @@ private fun ColumnScope.LicensesSheet() {
         "ONNX Runtime" to "MIT",
         "Jetpack Compose · AndroidX · WorkManager" to "Apache License 2.0",
         "Coil" to "Apache License 2.0",
+        "osmdroid" to "Apache License 2.0",
+        "지도 데이터 © OpenStreetMap contributors" to "Open Database License (ODbL) 1.0",
         "Kotlin · kotlinx.coroutines" to "Apache License 2.0",
     )
     for ((name, license) in items) Column(

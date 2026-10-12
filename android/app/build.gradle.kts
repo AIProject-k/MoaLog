@@ -88,6 +88,9 @@ dependencies {
     // 데스크톱(1.20.1)과 버전을 맞추는 대신, 기기에서 도는 패리티 테스트(ParityTest)가 계약을 지킨다.
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.22.0")
 
+    // 지도 탭. OpenStreetMap 타일을 받아 그린다(API 키·Play 서비스 없음). 앱에서 유일하게 네트워크를 쓰는 곳이다.
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test:rules:1.6.1")

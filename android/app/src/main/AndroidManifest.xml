@@ -16,13 +16,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!--
-        INTERNET 없음. 이것이 약속이다 (ANDROID.md §16).
-
-        ACCESS_NETWORK_STATE는 WorkManager 매니페스트에서 딸려 온다. 네트워크 제약
-        조건(Constraints.NetworkType)을 쓰지 않으므로 필요 없고, 남겨 두면 앱 정보에
-        네트워크 관련 권한이 뜬다 — 매니페스트가 약속의 증거인데 그 증거를 흐린다.
+        INTERNET은 지도 탭의 타일(지도 조각) 내려받기 하나를 위해서만 있다 (ANDROID.md §16).
+        사진·영상·위치·검색어는 어디로도 보내지 않는다. 다른 화면은 네트워크를 열지 않는다.
     -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:label="MoaLog"

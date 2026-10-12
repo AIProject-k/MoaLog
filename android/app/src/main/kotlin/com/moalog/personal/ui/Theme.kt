@@ -175,7 +175,7 @@ val LocalType: ProvidableCompositionLocal<Type> = staticCompositionLocalOf { Typ
 
 /**
  * IBM Plex Sans KR (OFL 1.1, 재배포 가능)을 앱에 넣는다. 다운로더블 폰트를 쓰지 않는 이유는
- * 그게 Play 서비스와 네트워크를 타기 때문이다 — 이 앱은 인터넷 권한이 없다.
+ * 그게 Play 서비스와 네트워크를 타기 때문이다 — 인터넷은 지도 탭의 지도 조각 받기에만 쓴다.
  * 라이선스 문구는 `assets/licenses/IBMPlexSansKR-OFL.txt`.
  */
 private fun plexKr(): FontFamily = runCatching {

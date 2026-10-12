@@ -31,9 +31,9 @@ import com.moalog.personal.work.IndexPhase
 /**
  * 설정. 구조(디자인): 기기 내 처리 약속 → 분석 현황 → 분류 항목 토글 → 데이터 관리 → 앱 정보.
  *
- * **디자인 문구를 한 곳 바꿨다.** 원문은 "모델 업데이트만 Wi-Fi에서 내려받습니다"인데 이 앱은 매니페스트에
- * `INTERNET` 권한이 없다(§16). 모델은 APK에 함께 설치되므로 네트워크를 아예 쓰지 않는다 — 사용자가 앱 정보에서 직접
- * 확인할 수 있는 약속이라 문구보다 강하다. 원문대로 가려면 권한을 넣어야 하고, 그러면 이 약속이 깨진다.
+ * **디자인 문구를 바꿨다.** 원문은 "모델 업데이트만 Wi-Fi에서 내려받습니다"인데 모델은 APK에 함께 설치되므로
+ * 모델은 내려받지 않는다. 네트워크는 **지도 탭이 지도 조각을 받을 때만** 쓰고(`INTERNET` 권한은 그 때문에 있다, §16)
+ * 이 화면이 그 사실을 그대로 말한다 — 약속이 "네트워크 없음"에서 "사진은 밖으로 나가지 않음, 네트워크는 지도만"으로 바뀌었다.
  *
  * 되돌릴 수 없는 "분류 결과 전체 삭제"는 눌러도 바로 지우지 않고 대화상자로 한 번 더 묻는다.
  */
@@ -72,12 +72,12 @@ fun SettingsScreen(
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Ic(I.Offline, size = 13.dp, tint = t.text3)
-                            Text("네트워크 사용 없음", style = fonts.meta, color = t.text3)
+                            Text("지도를 열 때만 네트워크 사용", style = fonts.meta, color = t.text3)
                         }
                     }
                 }
                 Prose(
-                    "사진·영상과 분석 결과는 이 휴대폰을 벗어나지 않습니다. 모델도 앱과 함께 설치되어 네트워크를 쓰지 않습니다.",
+                    "사진·영상과 분석 결과는 이 휴대폰을 벗어나지 않습니다. 모델도 앱과 함께 설치되어 내려받지 않습니다. 지도 탭을 열 때만 지도 조각을 OpenStreetMap에서 받아 오며, 이때 지도에 보이는 영역이 지도 서버에 전달됩니다. 사진 파일은 보내지 않습니다.",
                     style = fonts.caption, color = t.text2,
                 )
             }

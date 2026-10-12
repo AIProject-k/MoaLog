@@ -231,6 +231,7 @@ private fun App() {
                         // (저장된 페이지가 복원되면 다른 사진이 열린다).
                         Screen.Photos -> keepPlace("photos") { PhotosScreen(vm, visible) { ask.launch(mediaPermissions()) } }
                         Screen.Albums -> keepPlace("albums") { AlbumsScreen(vm, visible, uriText) }
+                        Screen.Map -> keepPlace("map") { MapScreen(vm, visible) }
                         Screen.Category -> keepPlace("category:${ui.openAlbum?.key}") { CategoryScreen(vm, ui) }
                         Screen.Viewer -> ViewerScreen(vm, ui)
                         Screen.Search -> keepPlace("search") { SearchScreen(vm, ui) }
@@ -266,14 +267,19 @@ private fun App() {
     // 정리 탭에 들어올 때마다 묶음을 다시 읽는다. 사진을 지운 뒤 남은 묶음이 달라진다.
     LaunchedEffect(screen) { if (screen == Screen.Cleanup) vm.loadCleanup() }
 
+    // 지도 탭에 들어올 때마다(뷰어에서 돌아올 때도) 위치 점을 다시 읽는다.
+    LaunchedEffect(screen) { if (screen == Screen.Map) vm.loadMap() }
+
     // 위에 얹힌 것부터 닫고, 하위 화면에서는 위로, 선택 중이면 선택부터 푼다. 탭 화면에서는 시스템에 넘겨 앱을 닫는다.
     BackHandler(
-        enabled = ui.dialog != null || ui.sheet != null || ui.menuOpen || !screen.showsNav || ui.selectionMode,
+        enabled = ui.dialog != null || ui.sheet != null || ui.menuOpen || !screen.showsNav || ui.selectionMode ||
+            (screen == Screen.Map && ui.mapSelection.isNotEmpty()),
     ) {
         when {
             ui.dialog != null -> vm.closeDialog()
             ui.sheet != null -> vm.closeSheet()
             ui.menuOpen -> vm.setMenu(false)
+            screen == Screen.Map && ui.mapSelection.isNotEmpty() -> vm.clearMapSelection()
             ui.selectionMode && screen != Screen.Fix -> vm.cancelSelection()
             else -> vm.back()
         }

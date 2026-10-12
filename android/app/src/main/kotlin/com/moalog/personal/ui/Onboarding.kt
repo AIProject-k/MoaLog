@@ -82,7 +82,7 @@ fun OnboardingScreen(later: Boolean, onGrant: () -> Unit, onLater: () -> Unit) {
             style = fonts.body, color = t.text2, modifier = Modifier.padding(top = 10.dp),
         )
         Column(Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Bullet(I.Offline, "기기 내 처리 · 네트워크 사용 없음")
+            Bullet(I.Offline, "기기 내 처리 · 네트워크는 지도를 열 때만 사용")
             Bullet(I.Undo, "분류가 틀리면 바로 고칠 수 있고, 다음부터 반영됩니다")
         }
 

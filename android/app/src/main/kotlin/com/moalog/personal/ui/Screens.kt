@@ -3,7 +3,9 @@ package com.moalog.personal.ui
 /**
  * 화면 상태 기계. 내비게이션 라이브러리 없이 이 enum 하나로 돈다.
  *
- * **하단 탭이 사진 / 앨범 / 검색 / 정리로 바뀌었다.** 이전에는 홈·앨범·검색·설정이었는데
+ * **하단 탭이 사진 / 앨범 / 지도 / 검색 / 정리다.** (지도는 나중에 붙었다.)
+ *
+ * 처음에는 사진 / 앨범 / 검색 / 정리로 바뀌었다: 이전에는 홈·앨범·검색·설정이었는데
  * 두 가지가 문제였다:
  *  - 설정은 하루에 한 번도 안 누르는 화면인데 탭 하나를 차지했다. 정리는 매번 쓰는데
  *    설정 안에 숨어 있었다. 자리를 맞바꾼다.
@@ -18,6 +20,9 @@ enum class Screen(val tabLabel: String = "") {
     Photos("갤러리"),
     Albums("앨범"),
 
+    /** 위치가 있는 사진·영상을 지도에 모아 본다. 지도 조각을 받아 오는 유일한 화면이다. */
+    Map("지도"),
+
     /** 앨범 하나를 연 상태(태그·이벤트·기기 폴더·내 앨범 공통). */
     Category,
 
@@ -31,7 +36,7 @@ enum class Screen(val tabLabel: String = "") {
     val showsNav get() = this in tabs
 
     companion object {
-        val tabs = listOf(Photos, Albums, Search, Cleanup)
+        val tabs = listOf(Photos, Albums, Map, Search, Cleanup)
     }
 }
 

@@ -7,6 +7,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.moalog.personal.AppGraph
 import com.moalog.personal.core.DayGrouping
+import com.moalog.personal.core.GeoPhoto
 import com.moalog.personal.core.Grouping
 import com.moalog.personal.core.QueryParser
 import com.moalog.personal.core.Relevance
@@ -128,6 +129,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val toast: ToastMsg? = null,
         /** 안드로이드 "일부 선택" 접근. 빈 화면의 원인을 정확히 말하려고 화면이 안다. */
         val limitedAccess: Boolean = false,
+        // 지도
+        val mapPoints: List<GeoPhoto> = emptyList(),
+        /** 지도 탭에 한 번이라도 들어와 읽었는가. 읽기 전의 빈 목록과 "위치가 있는 사진이 없음"을 가른다. */
+        val mapLoaded: Boolean = false,
+        /** 지도에서 눌러 연 덩어리의 사진들(최신순). 비어 있으면 아래 띠가 닫혀 있다. */
+        val mapSelection: List<PhotoCard> = emptyList(),
     ) {
         /** 지금 화면에 깔린 사진 전부. `전체 선택`이 무엇을 고르는지가 여기서 정해진다. */
         val visibleIds: List<Long> get() = when (screen) {
@@ -1201,6 +1208,33 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun moveTargets(): List<String> =
         _ui.value.albums.filter { it.kind == AlbumKind.Tag && it.key != _ui.value.openAlbum?.key }
             .take(6).map { it.title }
+
+    // ---------- 지도 ----------
+
+    /** 지도 탭에 들어올 때마다 읽는다. 점 몇천 개라 싸고, 사진을 지웠거나 접근이 줄었으면 바로 반영된다. */
+    fun loadMap() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val store = AppGraph.store
+            val points = store.geoPhotos()
+            val alive = points.mapTo(HashSet(points.size)) { it.id }
+            // 열어 둔 덩어리에서 사라진 사진을 뺀다. 뷰어에서 지우고 돌아온 경우.
+            val kept = _ui.value.mapSelection.map { it.id }.filter { it in alive }
+            val cards = if (kept.isEmpty()) emptyList() else store.photosByIds(kept).values.sortedByDescending { it.takenAt ?: Long.MIN_VALUE }
+            withContext(Dispatchers.Main) {
+                _ui.update { it.copy(mapPoints = points, mapLoaded = true, mapSelection = cards) }
+            }
+        }
+    }
+
+    /** 덩어리를 눌러 그 사진들을 아래 띠에 올린다. 최신순. */
+    fun selectMapPhotos(ids: List<Long>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val cards = AppGraph.store.photosByIds(ids).values.sortedByDescending { it.takenAt ?: Long.MIN_VALUE }
+            withContext(Dispatchers.Main) { _ui.update { it.copy(mapSelection = cards) } }
+        }
+    }
+
+    fun clearMapSelection() = _ui.update { it.copy(mapSelection = emptyList()) }
 
     // ---------- 정리 ----------
 

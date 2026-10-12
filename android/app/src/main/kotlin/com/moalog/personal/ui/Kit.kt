@@ -227,6 +227,7 @@ fun TabBar(current: Screen, cleanupDot: Boolean, onGo: (Screen) -> Unit, modifie
 private fun tabIcon(s: Screen): Int = when (s) {
     Screen.Photos -> I.Gallery
     Screen.Albums -> I.Album
+    Screen.Map -> I.Pin
     Screen.Search -> I.Search
     else -> I.Clean
 }

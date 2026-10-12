@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.moalog.personal.core.Embeddings
 import com.moalog.personal.core.Events
+import com.moalog.personal.core.GeoPhoto
 import com.moalog.personal.core.Grouping
 import com.moalog.personal.core.Tag
 import com.moalog.personal.core.TimeSource
@@ -613,6 +614,16 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
         "SELECT media_id, uri, taken_at, taken_at_source, media_kind, duration_ms FROM photos WHERE is_accessible=1 AND state>=${State.META}" +
             " ORDER BY taken_at IS NULL, taken_at DESC LIMIT ?", arrayOf(limit.toString())
     ).use { it.toCards() }
+
+    /** 지도에 찍을 점. 위치가 있고 지금 읽을 수 있는 사진·영상 전부. */
+    fun geoPhotos(): List<GeoPhoto> = readableDatabase.rawQuery(
+        "SELECT media_id, gps_lat, gps_lon FROM photos" +
+            " WHERE is_accessible=1 AND gps_lat IS NOT NULL AND gps_lon IS NOT NULL", null
+    ).use { c ->
+        ArrayList<GeoPhoto>(c.count).apply {
+            while (c.moveToNext()) add(GeoPhoto(c.getLong(0), c.getDouble(1), c.getDouble(2)))
+        }
+    }
 
     fun photo(id: Long): PhotoDetail? = readableDatabase.rawQuery(
         "SELECT media_id, uri, display_name, taken_at, taken_at_source, gps_lat, gps_lon," +
