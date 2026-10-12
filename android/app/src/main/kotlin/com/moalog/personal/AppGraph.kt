@@ -4,6 +4,7 @@ import android.content.Context
 import com.moalog.personal.core.BpeTokenizer
 import com.moalog.personal.core.Classifier
 import com.moalog.personal.core.Embeddings
+import com.moalog.personal.core.ModelIdentity
 import com.moalog.personal.core.ModelIntegrity
 import com.moalog.personal.core.Personalize
 import com.moalog.personal.core.PromptMatrix
@@ -123,7 +124,15 @@ object AppGraph {
         val md = MessageDigest.getInstance("SHA-256")
         for (name in ONNX_ASSETS) md.update(File(modelDir, name).length().toString().toByteArray())
         md.update(config.optString("model_variant", "ko").toByteArray())
-        "ko-b32-int8@" + md.digest().take(4).joinToString("") { "%02x".format(it) }
+        val legacy = "ko-b32-int8@" + md.digest().take(4).joinToString("") { "%02x".format(it) }
+        // 배포본이면 예전 신원을 그대로 쓴다(재분석 방지). 다른 모델이면 manifest 해시로 가른다.
+        val files = runCatching { manifestFiles }.getOrDefault(emptyMap())
+        ModelIdentity.of(legacy, files, SHIPPED_MANIFEST_FILES)
+    }
+
+    /** assets/models/manifest.json의 파일별 SHA-256. 모델 준비가 끝난 뒤에만 읽는다. */
+    private val manifestFiles: Map<String, String> by lazy {
+        ModelIntegrity.parseManifest(app.assets.open("models/manifest.json").bufferedReader().use { it.readText() })
     }
 
     val tokenizer: BpeTokenizer by lazy {
@@ -229,6 +238,12 @@ object AppGraph {
 
     /** ORT가 경로를 요구하는 파일만. 나머지는 assets에서 바로 읽는다. */
     val ONNX_ASSETS = listOf("vision_model_ko_int8.onnx", "text_model_ko_int8.onnx")
+
+    /** 지금 배포본의 manifest. 여기와 같으면 예전 모델 신원을 쓴다. 모델을 바꾸면 이 값은 그대로 두고 manifest만 바뀐다. */
+    private val SHIPPED_MANIFEST_FILES = mapOf(
+        "vision_model_ko_int8.onnx" to "034e63aeffa13fd14122b6adfe98bd8e39a4b2ac56606e0d5a5238d03f38921c",
+        "text_model_ko_int8.onnx" to "abfe78d499dd037afffb1d2175897ecbd87d2a5161fea00310ca7bed8312f14d",
+    )
 
     private const val KEY_MODEL_STAMP = "model_asset_stamp"
 }
