@@ -220,18 +220,24 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
     }.getOrNull()
 
     /** 시스템 썸네일. 원본을 디코드하지 않는 이유는 §6.1. */
-    fun thumbnail(uri: String, px: Int): android.graphics.Bitmap? = runCatching {
-        ctx.contentResolver.loadThumbnail(android.net.Uri.parse(uri), android.util.Size(px, px), null)
-    }.recoverCatching {
-        // 일부 포맷·손상 파일은 loadThumbnail이 실패한다. 축소 디코드로 폴백.
-        ctx.contentResolver.openInputStream(android.net.Uri.parse(uri))?.use { input ->
-            val opts = android.graphics.BitmapFactory.Options().apply {
-                inPremultiplied = false
-                inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888
-            }
-            android.graphics.BitmapFactory.decodeStream(input, null, opts)
+    /**
+     * 썸네일. **열지 못하면 IOException**(일시적일 수 있다), **열었지만 디코드할 수 없으면 null**(영구)이다.
+     * 예전에는 둘 다 null로 뭉쳐서, 일시적인 접근 실패가 영구히 깨진 사진으로 남았다(외부 검토 문제 5).
+     */
+    @Throws(java.io.IOException::class)
+    fun thumbnail(uri: String, px: Int): android.graphics.Bitmap? {
+        val u = android.net.Uri.parse(uri)
+        // 시스템 썸네일이 있으면 그것을 쓴다. 실패 이유는 여기서 따지지 않고 아래 원본 읽기로 넘어간다.
+        runCatching { ctx.contentResolver.loadThumbnail(u, android.util.Size(px, px), null) }
+            .getOrNull()?.let { return it }
+        // 원본을 축소 디코드한다. 스트림을 못 열면 접근 문제이므로 IOException을 그대로 올린다.
+        val input = ctx.contentResolver.openInputStream(u) ?: throw java.io.IOException("열 수 없음: $uri")
+        val opts = android.graphics.BitmapFactory.Options().apply {
+            inPremultiplied = false
+            inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888
         }
-    }.getOrNull()
+        return input.use { android.graphics.BitmapFactory.decodeStream(it, null, opts) }
+    }
 
     companion object {
         const val KEY_GENERATION = "last_generation"

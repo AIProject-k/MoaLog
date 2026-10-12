@@ -209,7 +209,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     processed = true
                     runCatching {
                         var stageStart = android.os.SystemClock.elapsedRealtimeNanos()
-                        val bmp = media.thumbnail(p.uri, thumbPx) ?: error("썸네일 실패")
+                        val bmp = media.thumbnail(p.uri, thumbPx) ?: throw Undecodable(p.uri)
                         thumbnailNs += android.os.SystemClock.elapsedRealtimeNanos() - stageStart
                         // 흐림·밝기는 CLIP과 같은 비트맵에서 뽑는다 — 디코드를 두 번 하지 않는다
                         val quality: Quality.Result
@@ -242,6 +242,9 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                                 report(IndexPhase.PHOTOS, "AI 분석이 연속으로 실패해 멈췄습니다. 앱을 다시 열어 주세요.")
                                 throw SystemicStop()
                             }
+                        } else if (it is Undecodable) {
+                            // 열었지만 디코드할 수 없다. 다시 해도 같으니 바로 영구 실패로 둔다.
+                            store.markFailed(p.id)
                         } else store.noteFailure(p.id, MAX_ATTEMPTS)
                     }
                     // 32장이 다 끝나길 기다리지 않고 1초마다 알린다. 느린 기기에서 분석 화면의 링이 멈춰 보이지 않게.
@@ -486,6 +489,9 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             ForegroundInfo(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         else ForegroundInfo(NOTIF_ID, n)
     }
+
+    /** 열었지만 디코드할 수 없는 사진. 재시도해도 결과가 같다. */
+    private class Undecodable(uri: String) : Exception("디코드할 수 없는 사진: $uri")
 
     /** 추론기(ONNX) 예외를 감싼다. 사진 탓인지 모델 탓인지 가르려고 따로 표시한다. */
     private class EncoderFailure(cause: Throwable) : Exception(cause)
