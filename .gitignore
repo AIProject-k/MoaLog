@@ -17,3 +17,10 @@ android/**/build/
 # Local signing material
 android/testkey.jks
 android/local.properties
+
+# 외부 조언자가 보낸 참고용 결과물 (코드는 가져오지 않는다)
+MoaLog-main*/
+MoaLog-main*.zip
+
+# 평가 캐시
+eval/xm3600_cache/
