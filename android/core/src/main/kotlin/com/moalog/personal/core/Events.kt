@@ -54,6 +54,8 @@ object Events {
         gapHours: Int,
         splitKm: Double,
         zone: ZoneId = ZoneId.systemDefault(),
+        /** 이벤트의 평균 좌표 → 장소 이름. 장소 표가 없으면 null을 돌려주고, 그때 이벤트에는 이름이 없다. */
+        placeOf: (lat: Double, lon: Double) -> String? = { _, _ -> null },
     ): List<Event> {
         val rows = photos.filter { it.takenAtSource == TimeSource.EXIF }.sortedBy { it.takenAt }
         if (rows.isEmpty()) return emptyList()
@@ -79,7 +81,10 @@ object Events {
                 lat = pts.takeIf { it.isNotEmpty() }?.map { it.first }?.average(),
                 lon = pts.takeIf { it.isNotEmpty() }?.map { it.second }?.average(),
                 coverIds = covers(g),
-            ).also { it.title = title(it, g, zone) }
+            ).also { e ->
+                e.placeName = e.lat?.let { la -> e.lon?.let { lo -> placeOf(la, lo) } }
+                e.title = title(e, g, zone)
+            }
         }
     }
 

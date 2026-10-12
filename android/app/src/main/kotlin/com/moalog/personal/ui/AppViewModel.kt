@@ -875,6 +875,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     .mapTo(HashSet()) { it.first }
                 base = base.intersect(inRange)
             }
+            // 장소 조건: 검색어의 장소 이름을 좌표 반경으로 바꿔서, 그 안에서 찍은 것만 남긴다. 여럿이면 합친다.
+            val places = parsed.places.mapNotNull { AppGraph.placeIndex.find(it) }
+            if (places.isNotEmpty()) {
+                val index = AppGraph.placeIndex
+                val inPlace = store.geoPhotos()
+                    .filter { g -> places.any { index.within(it, g.lat, g.lon) } }
+                    .mapTo(HashSet()) { it.id }
+                base = base.intersect(inPlace)
+            }
             val wantVideo = videosOnly || parsed.media == "video"
             if (wantVideo) base = base.filterTo(HashSet()) { it < 0 }
             else if (parsed.media == "image") base = base.filterTo(HashSet()) { it > 0 }

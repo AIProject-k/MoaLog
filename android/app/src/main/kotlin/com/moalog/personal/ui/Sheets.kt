@@ -172,6 +172,7 @@ private fun ColumnScope.LicensesSheet() {
         "Coil" to "Apache License 2.0",
         "osmdroid" to "Apache License 2.0",
         "지도 데이터 © OpenStreetMap contributors" to "Open Database License (ODbL) 1.0",
+        "장소 이름 데이터 © GeoNames" to "Creative Commons Attribution 4.0 (CC BY 4.0)",
         "Kotlin · kotlinx.coroutines" to "Apache License 2.0",
     )
     for ((name, license) in items) Column(

@@ -397,6 +397,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             store.eventItems(),
             gapHours = cfg.getInt("event_gap_hours"),
             splitKm = cfg.optDouble("location_split_km", 30.0),
+            placeOf = { la, lo -> AppGraph.placeIndex.nearest(la, lo)?.name },
         ))
     }
 

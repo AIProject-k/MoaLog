@@ -7,6 +7,7 @@ import com.moalog.personal.core.Embeddings
 import com.moalog.personal.core.ModelIdentity
 import com.moalog.personal.core.ModelIntegrity
 import com.moalog.personal.core.Personalize
+import com.moalog.personal.core.PlaceIndex
 import com.moalog.personal.core.PromptMatrix
 import com.moalog.personal.core.QueryParser
 import com.moalog.personal.core.RuleTagger
@@ -224,9 +225,15 @@ object AppGraph {
         SearchIndex.of(store.allEmbeddings())
     }
 
+    /** 장소 표(assets/places.tsv). 파일이 없으면 빈 표다 — 장소 이름과 장소 검색이 꺼진 것과 같다. */
+    val placeIndex: PlaceIndex by lazy {
+        runCatching { PlaceIndex.parse(app.assets.open("places.tsv").bufferedReader().use { it.readText() }) }
+            .getOrDefault(PlaceIndex.EMPTY)
+    }
+
     fun queryParser(): QueryParser = QueryParser(
         knownTags = store.tagCounts().map { it.label }.toSet(),
-        knownPlaces = store.events(500).mapNotNull { it.placeName }.toSet(),
+        knownPlaces = placeIndex.names,
     )
 
     /**

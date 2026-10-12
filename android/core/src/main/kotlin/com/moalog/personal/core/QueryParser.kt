@@ -73,7 +73,10 @@ class QueryParser(
                 if (chip in disabled) left.add(w) else tags.add(tag)
                 continue
             }
-            val place = knownPlaces.firstOrNull { it == w || it == bare || w.startsWith(it) }
+            // 여러 개가 맞으면 가장 긴 것을 고른다. "강릉시"가 별칭 "강릉"으로 잘리면 안 된다(집합 순서에 기대지 않는다).
+            // 장소는 이름 그대로이거나 장소 조사("에서", "에", "으로"…)가 붙은 것만 본다.
+            // "이"·"가"·"은" 같은 조사까지 떼면 "고양이"가 고양시가 된다. 여러 개면 가장 긴 것.
+            val place = knownPlaces.filter { k -> w == k || PLACE_TAILS.any { t -> w == k + t } }.maxByOrNull { it.length }
             if (place != null) {
                 val chip = "장소: $place"
                 chips.add(chip)
@@ -200,6 +203,9 @@ class QueryParser(
     private fun minOfNullable(a: LocalDate?, b: LocalDate) = if (a == null || b.isBefore(a)) b else a
 
     private companion object {
+        /** 장소 이름 뒤에 붙어도 장소를 뜻하는 조사. "이"·"가"·"은"은 일부러 뺐다(명사 끝과 겹친다). */
+        val PLACE_TAILS = listOf("에서는", "에서의", "에서", "으로", "까지", "부터", "근처", "쪽", "에", "의", "로")
+
         val VIDEO_WORDS = setOf("영상", "동영상", "비디오")
         val PHOTO_WORDS = setOf("사진")
 
