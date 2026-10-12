@@ -853,11 +853,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             val from = parsed.from
             val until = parsed.until
             if (from != null || until != null || parsed.hours != null) {
-                val inRange = store.recent(20000).filter { c ->
-                    val t = c.takenAt ?: return@filter false
-                    (from == null || t >= from) && (until == null || t <= until) &&
-                        parser.matchesHour(parsed, t)
-                }.map { it.id }.toSet()
+                val inRange = store.takenBetween(from, until)
+                    .filter { (_, t) -> parser.matchesHour(parsed, t) }
+                    .mapTo(HashSet()) { it.first }
                 base = base.intersect(inRange)
             }
             val wantVideo = videosOnly || parsed.media == "video"
@@ -866,7 +864,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
             // "가까운 결과"의 범위. 태그 칩이 있으면 그 태그가 붙은 것이고, 없으면 CLIP 점수로 가른다.
             val tagSet: Set<Long>? = if (parsed.tags.isEmpty()) null
-                else parsed.tags.map { t -> store.photosByTag(t, 5000).map { it.id }.toSet() }.reduce { x, y -> x intersect y }
+                else parsed.tags.map { t -> store.idsByTag(t) }.reduce { x, y -> x intersect y }
             val closeAllow = tagSet?.let { base intersect it } ?: base
 
             val close = rank(parsed.text, closeAllow, 120)
@@ -876,6 +874,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 rank(words, base - closeAllow, 60)
             } else Ranked(emptyList(), emptyMap(), emptyMap())
 
+            val failed = close.failed || other.failed
             val closeCount = when {
                 tagSet != null || parsed.text.isBlank() -> close.ids.size
                 else -> Relevance.closeCount(close.scores)
@@ -890,22 +889,24 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(
                     parsed = parsed, results = cards, closeCount = closeCount.coerceAtMost(cards.size), searching = false,
                     sceneTimes = sceneTimes, sceneHits = sceneHits, selectionMode = false, selected = emptySet(),
-                    resultSummary = summarize(parsed, cards.take(closeCount), off),
+                    resultSummary = if (failed) "검색 중 오류가 났습니다. 다시 검색해 주세요."
+                        else summarize(parsed, cards.take(closeCount), off),
                 ) }
             }
         }
     }
 
     /** 점수순으로 정렬된 id와 점수, 영상의 맞은 장면들. */
+    /** [failed]는 CLIP·영상 검색이 예외로 멈춘 것이다. 빈 결과와 구분해서 화면에 알린다(계획서 MLG-101). */
     private class Ranked(val ids: List<Long>, val sceneTimes: Map<Long, Long>, val sceneHits: Map<Long, List<Long>>,
-                         val scores: List<Float> = emptyList())
+                         val scores: List<Float> = emptyList(), val failed: Boolean = false)
 
     /** [text]가 비면 시간순(필터만으로 찾기), 있으면 CLIP 점수순. 사진은 색인에서, 영상은 프레임 단위로 따로 찾는다. */
     private fun rank(text: String, allow: Set<Long>, limit: Int): Ranked {
         val store = AppGraph.store
         if (allow.isEmpty()) return Ranked(emptyList(), emptyMap(), emptyMap())
         if (text.isBlank()) {
-            val ids = store.recent(20000).filter { it.id in allow }.map { it.id }.take(limit)
+            val ids = store.idsNewestFirst().asSequence().filter { it in allow }.take(limit).toList()
             return Ranked(ids, emptyMap(), emptyMap())
         }
         return runCatching {
@@ -926,7 +927,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }.onFailure {
             // 조용히 빈 결과를 내면 "찾을 게 없다"와 "검색이 고장났다"가 똑같아 보인다.
             android.util.Log.e("Search", "장면 검색 실패", it)
-        }.getOrDefault(Ranked(emptyList(), emptyMap(), emptyMap()))
+        }.getOrElse { Ranked(emptyList(), emptyMap(), emptyMap(), failed = true) }
     }
 
     fun toggleVideoSearch() {

@@ -574,6 +574,33 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
             arrayOf(label, limit.toString(), offset.toString())
         ).use { it.toCards() }
 
+    /**
+     * 기간 조건의 후보: 촬영 시각이 [from]·[until] 안인 (id, 촬영 시각). 상한이 없다.
+     * 예전에는 `recent(20000)`으로 최신 2만 장만 훑어서, 그보다 오래된 사진은 날짜 검색에서 빠졌다.
+     */
+    fun takenBetween(from: Long?, until: Long?): List<Pair<Long, Long>> {
+        val where = StringBuilder(" WHERE is_accessible=1 AND state>=${State.META} AND taken_at IS NOT NULL")
+        val args = ArrayList<String>(2)
+        if (from != null) { where.append(" AND taken_at>=?"); args.add(from.toString()) }
+        if (until != null) { where.append(" AND taken_at<=?"); args.add(until.toString()) }
+        return readableDatabase.rawQuery("SELECT media_id, taken_at FROM photos$where", args.toTypedArray()).use { c ->
+            ArrayList<Pair<Long, Long>>(c.count).apply { while (c.moveToNext()) add(c.getLong(0) to c.getLong(1)) }
+        }
+    }
+
+    /** 태그가 붙은 사진·영상의 id 전부. 상한이 없다 — 예전 `photosByTag(t, 5000)`은 5천 장에서 잘랐다. */
+    fun idsByTag(label: String): Set<Long> = readableDatabase.rawQuery(
+        "SELECT DISTINCT p.media_id FROM photos p JOIN tags t ON t.media_id=p.media_id" +
+            " WHERE t.label=? AND p.state>=${State.META} AND p.is_accessible=1",
+        arrayOf(label)
+    ).use { c -> HashSet<Long>(c.count).apply { while (c.moveToNext()) add(c.getLong(0)) } }
+
+    /** 접근 가능한 사진·영상을 최신순으로 전부. 시간만으로 찾을 때 허용 목록과 맞춰 자른다. */
+    fun idsNewestFirst(): List<Long> = readableDatabase.rawQuery(
+        "SELECT media_id FROM photos WHERE is_accessible=1 AND state>=${State.META}" +
+            " ORDER BY taken_at IS NULL, taken_at DESC", null
+    ).use { c -> ArrayList<Long>(c.count).apply { while (c.moveToNext()) add(c.getLong(0)) } }
+
     fun photosByIds(ids: List<Long>): Map<Long, PhotoCard> {
         if (ids.isEmpty()) return emptyMap()
         return readableDatabase.rawQuery(
