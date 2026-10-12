@@ -1,5 +1,8 @@
 package com.moalog.personal.core
 
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,5 +58,38 @@ class PersonalizeTest {
         assertEquals(m.labels, out.labels)
         assertTrue(out.rows[1] === m.rows[1], "확정이 없는 '인물'은 그대로여야 한다")
         assertTrue(out.rows[0] !== m.rows[0], "'음식'은 바뀌어야 한다")
+    }
+
+    /**
+     * 실제 픽스처 64장으로 본 회귀 방지. 한 라벨에서 확정 사진을 모아 개인화를 적용해도
+     * 다른 라벨 사진의 1순위는 그대로여야 한다. α=0.5였을 때는 이게 깨졌다
+     * (음식 5장 확정 → 비음식 사진까지 '음식' — 글/사진 벡터의 모달리티 갭 때문).
+     */
+    @Test fun `확정을 쌓아도 다른 라벨 사진의 1순위는 바뀌지 않는다`() {
+        val fixtures = File("../../eval/fixtures").canonicalFile
+        val config = JSONObject(File("../../config.json").canonicalFile.readText())
+        val manifest = JSONObject(File(fixtures, "manifest.json").readText())
+        val meta = manifest.getJSONObject("prompts")
+        fun matrix(kind: String) = PromptMatrix(
+            meta.getJSONObject(kind).getJSONArray("labels").let { a -> List(a.length()) { a.getString(it) } },
+            Embeddings.read(File(fixtures, "prompts_$kind.bin")))
+
+        val vecs = Embeddings.read(File(fixtures, "images_ko.bin"))
+        val arr = JSONArray(File(fixtures, "images_ko.json").readText())
+        val top1 = List(arr.length()) { arr.getJSONObject(it).getString("top1") }
+        val cats = matrix("categories")
+        val alpha = config.optDouble("personalize_alpha", 0.5).toFloat()
+        val minN = config.optInt("personalize_min_confirmed", 5)
+
+        // 확정이 가장 많이 쌓일 수 있는 라벨 = 1순위가 가장 흔한 라벨
+        val label = top1.groupingBy { it }.eachCount().maxByOrNull { it.value }!!.key
+        val confirmed = vecs.filterIndexed { i, _ -> top1[i] == label }
+        assertTrue(confirmed.size >= minN, "'$label' 확정 후보가 ${confirmed.size}장뿐이라 시험이 안 된다 — 픽스처가 바뀌었나")
+
+        val tuned = Personalize.apply(cats, { if (it == label) confirmed else emptyList() }, alpha, minN)
+        fun top(m: PromptMatrix, v: FloatArray) = m.labels[m.scores(v).withIndex().maxByOrNull { it.value }!!.index]
+        val flipped = vecs.indices.filter { top1[it] != label && top(tuned, vecs[it]) == label }
+        assertTrue(flipped.isEmpty(),
+            "'$label' ${confirmed.size}장 확정 뒤 다른 라벨 사진 ${flipped.size}장이 '$label'로 쏠렸다 (α=$alpha)")
     }
 }
