@@ -30,7 +30,19 @@ data class MediaRow(
     val dateModified: Long,
     val mediaKind: MediaKind = if (id < 0) MediaKind.VIDEO else MediaKind.PHOTO,
     val durationMs: Long? = null,
+    /** MediaStore가 이 사진을 처음 본 시각(초). 추가일순 정렬에 쓴다. */
+    val dateAdded: Long? = null,
 )
+
+/**
+ * 사진 탭 정렬. 촬영일순만 날짜 머리글과 월 이동을 쓴다. 추가일·용량순은 날짜와 무관하게 한 덩어리로 보인다.
+ * 어느 순서든 같은 값끼리는 `media_id`로 고정해, 쪽을 넘길 때 사진이 두 번 나오거나 빠지지 않게 한다.
+ */
+enum class PhotoSort(val label: String, val orderSql: String) {
+    DATE("촬영일순", "taken_at IS NULL, taken_at DESC, media_id DESC"),
+    ADDED("추가일순", "date_added IS NULL, date_added DESC, media_id DESC"),
+    SIZE("용량순", "bytes IS NULL, bytes DESC, media_id DESC"),
+}
 
 /** 파이프라인이 다음에 처리할 사진. */
 data class Pending(

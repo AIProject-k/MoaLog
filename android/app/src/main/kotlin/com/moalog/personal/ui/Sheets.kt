@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moalog.personal.data.PhotoSort
 
 /*
  * 화면 위에 뜨는 하단 시트 네 가지. 어느 것이 뜰지는 [AppViewModel.Ui.sheet]가 정하고 여기서는 그리기만 한다.
@@ -39,6 +40,7 @@ fun AlbumSheets(vm: AppViewModel, ui: AppViewModel.Ui, uriOf: (Long) -> String?)
         Sheet.Add -> BottomSheet(onClose = vm::closeSheet) { AddToAlbumSheet(vm, ui, uriOf) }
         Sheet.Month -> BottomSheet(onClose = vm::closeSheet) { MonthSheet(vm, ui) }
         Sheet.Axis -> BottomSheet(onClose = vm::closeSheet) { AxisSheet(vm, ui) }
+        Sheet.View -> BottomSheet(onClose = vm::closeSheet) { ViewSheet(vm, ui) }
         Sheet.Move -> BottomSheet(onClose = vm::closeSheet) { MoveSheet(vm, ui, uriOf) }
         Sheet.Licenses -> BottomSheet(onClose = vm::closeSheet) { LicensesSheet() }
         null -> Unit
@@ -130,6 +132,33 @@ private fun ColumnScope.AxisSheet(vm: AppViewModel, ui: AppViewModel.Ui) {
         ) {
             Text(a.label, style = fonts.input, color = t.text1, modifier = Modifier.weight(1f))
             if (a == ui.axis) Ic(I.Check, size = 22.dp, tint = t.accent)
+        }
+    }
+}
+
+/** 사진 탭 보기 설정: 정렬 기준과 한 줄에 보이는 칸 수. 고르면 바로 적용하고 닫는다. */
+@Composable
+private fun ColumnScope.ViewSheet(vm: AppViewModel, ui: AppViewModel.Ui) {
+    val t = theme
+    Text("보기", style = fonts.sheetTitle, color = t.text1, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+    Text("정렬", style = fonts.metaStrong, color = t.text3, modifier = Modifier.padding(top = 4.dp))
+    Column {
+        for (sort in PhotoSort.entries) Row(
+            Modifier.fillMaxWidth().height(52.dp).clickable { vm.setPhotoSort(sort); vm.closeSheet() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(sort.label, style = fonts.input, color = t.text1, modifier = Modifier.weight(1f))
+            if (sort == ui.photoSort) Ic(I.Check, size = 22.dp, tint = t.accent)
+        }
+    }
+    Text("한 줄에 보이는 칸", style = fonts.metaStrong, color = t.text3, modifier = Modifier.padding(top = 12.dp))
+    Column {
+        for (n in GRID_CHOICES) Row(
+            Modifier.fillMaxWidth().height(52.dp).clickable { vm.setGridColumns(n); vm.closeSheet() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("${n}칸", style = fonts.input, color = t.text1, modifier = Modifier.weight(1f))
+            if (n == ui.gridColumns) Ic(I.Check, size = 22.dp, tint = t.accent)
         }
     }
 }

@@ -21,6 +21,13 @@ internal const val KEY_VIDEO_TAGS = "video_tags"
 internal const val KEY_PLACE_STAMP = "place_index_stamp"
 
 /**
+ * 추가일(`date_added`)을 아직 못 채운 사진이 남았는지. v10으로 올라온 기존 DB는 "1"로 시작하고, 동기화가 MediaStore에서
+ * 한 번 읽어 채운 뒤 "0"으로 내린다. 종류별로 나눈 이유: 사진 동기화가 영상 쪽 표시를 먼저 내리면 영상은 영영 못 채운다.
+ */
+internal const val KEY_ADDED_BACKFILL_PHOTOS = "date_added_backfill_photos"
+internal const val KEY_ADDED_BACKFILL_VIDEOS = "date_added_backfill_videos"
+
+/**
  * SQLite 저장소. `store.py`의 스키마와 쿼리를 그대로 옮겼다.
  *
  * **Room을 쓰지 않는다.** Room의 값은 컴파일 타임 SQL 검증과 마이그레이션인데, 이 스키마는
@@ -31,7 +38,7 @@ internal const val KEY_PLACE_STAMP = "place_index_stamp"
  * `state`는 데스크톱의 `indexed_at IS NULL` 패턴을 명시적 상태로 바꾼 것이다 —
  * 2단계 인덱싱(§5.1)에서 "메타는 됐고 CLIP은 안 됐다"를 표현해야 한다.
  */
-class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
+class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 10) {
 
     object State {
         const val NEW = 0        // MediaStore에서 막 발견
@@ -53,6 +60,7 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
               is_accessible INTEGER NOT NULL DEFAULT 0,
               generation INTEGER,
               date_modified INTEGER,
+              date_added INTEGER,
               taken_at INTEGER, taken_at_source TEXT,
               gps_lat REAL, gps_lon REAL, camera_model TEXT,
               blur_score REAL, brightness REAL,
@@ -177,6 +185,12 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
         // v9: 분석 실패 횟수. 일시적 실패를 바로 영구 실패로 두지 않으려고 센다 (계획서 MLG-104).
         if (old < 9 && !hasColumn(db, "photos", "fail_count"))
             db.execSQL("ALTER TABLE photos ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0")
+        // v10: 추가일. 기존 사진은 NULL로 두고, 다음 동기화가 MediaStore에서 한 번 읽어 채운다.
+        if (old < 10 && !hasColumn(db, "photos", "date_added")) {
+            db.execSQL("ALTER TABLE photos ADD COLUMN date_added INTEGER")
+            metaPut(db, KEY_ADDED_BACKFILL_PHOTOS, "1")
+            metaPut(db, KEY_ADDED_BACKFILL_VIDEOS, "1")
+        }
         if (old > new) rebuild(db)          // 다운그레이드는 되돌릴 방법이 없다
     }
 
@@ -402,6 +416,8 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
                     put("media_kind", r.mediaKind.value); put("duration_ms", r.durationMs)
                     put("is_accessible", 1)
                     put("generation", r.generation); put("date_modified", r.dateModified)
+                    // 값이 없으면 건드리지 않는다. 이미 채운 추가일을 빈 값으로 지우면 안 된다.
+                    r.dateAdded?.let { put("date_added", it) }
                 }
                 // 이미 있으면 메타만 갱신하고 state는 건드리지 않는다 — 사진이 실제로
                 // 바뀌었으면 generation이 오르므로 아래에서 되돌린다.
@@ -415,6 +431,21 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
             db.setTransactionSuccessful()
         } finally { db.endTransaction() }
         return added
+    }
+
+    /** 추가일을 아직 모르는 사진에만 채운다. 이미 채운 값은 MediaStore가 다시 말해도 건드리지 않는다. */
+    fun fillDateAdded(values: Map<Long, Long>) {
+        if (values.isEmpty()) return
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            db.compileStatement("UPDATE photos SET date_added=? WHERE media_id=? AND date_added IS NULL").use { s ->
+                for ((id, added) in values) {
+                    s.bindLong(1, added); s.bindLong(2, id); s.executeUpdateDelete()
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally { db.endTransaction() }
     }
 
     /** 편집된 사진은 처음부터 다시. generation이 올랐다는 것은 내용이 바뀌었다는 뜻이다. */
@@ -956,9 +987,9 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
         else -> ""
     }
 
-    fun photos(limit: Int, offset: Int, kind: String = "all"): List<PhotoCard> = readableDatabase.rawQuery(
+    fun photos(limit: Int, offset: Int, kind: String = "all", sort: PhotoSort = PhotoSort.DATE): List<PhotoCard> = readableDatabase.rawQuery(
         "SELECT media_id, uri, taken_at, taken_at_source, media_kind, duration_ms FROM photos WHERE is_accessible=1 AND state>=${State.META}" + kindSql(kind) +
-            " ORDER BY taken_at IS NULL, taken_at DESC, media_id DESC LIMIT ? OFFSET ?",
+            " ORDER BY ${sort.orderSql} LIMIT ? OFFSET ?",
         arrayOf(limit.toString(), offset.toString())
     ).use { it.toCards() }
 

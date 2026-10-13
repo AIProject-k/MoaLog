@@ -3,6 +3,7 @@ package com.moalog.personal.ui
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.media.MediaPlayer
+import android.media.PlaybackParams
 import android.net.Uri
 import android.widget.VideoView
 import androidx.compose.foundation.background
@@ -86,6 +87,20 @@ class PlayerHandle(val view: VideoView) {
 
     /** 되감기·빨리 감기. 디자인의 −5초 / +15초. */
     fun skip(deltaMs: Long) = seekTo(positionMs + deltaMs)
+
+    /**
+     * 재생 속도. `setPlaybackParams`는 멈춘 플레이어에 불리면 그 자리에서 재생을 시작하므로, 원래 멈춰 있었으면 다시 멈춘다.
+     * 기기가 그 속도를 지원하지 않으면 예외가 나는데, 그때는 조용히 1배로 둔다.
+     */
+    internal fun applySpeed(speed: Float) {
+        val mp = player ?: return
+        runCatching {
+            val wasPlaying = mp.isPlaying
+            runCatching { mp.playbackParams = PlaybackParams().setSpeed(speed) }
+                .onFailure { mp.playbackParams = PlaybackParams().setSpeed(1f) }
+            if (!wasPlaying && mp.isPlaying) mp.pause()
+        }
+    }
 }
 
 @Composable
@@ -138,6 +153,10 @@ fun rememberPlayer(
     }
     LaunchedEffect(controls.muted, handle.prepared) {
         handle.player?.setVolume(if (controls.muted) 0f else 1f, if (controls.muted) 0f else 1f)
+    }
+    // 준비가 끝난 뒤에도 속도를 맞춘다. 영상을 넘기면 플레이어가 새로 만들어지므로 여기서 다시 건다.
+    LaunchedEffect(controls.speed, handle.prepared) {
+        if (handle.prepared) handle.applySpeed(controls.speed)
     }
     DisposableEffect(handle, owner) {
         val observer = LifecycleEventObserver { _, event ->

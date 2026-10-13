@@ -48,7 +48,7 @@ class StoreMigrationTest {
         val store = Store(ctx)
         try {
             val db = store.readableDatabase
-            assertEquals(9, db.version)
+            assertEquals(10, db.version)
             db.rawQuery("SELECT uri,state,embedding,media_kind,is_accessible FROM photos WHERE media_id=11", null).use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals("content://old/11", c.getString(0))
@@ -69,6 +69,11 @@ class StoreMigrationTest {
             assertEquals(0, db.rawQuery("SELECT fail_count FROM photos WHERE media_id=11", null).use { c -> c.moveToFirst(); c.getInt(0) })
             // 예전 영상의 촬영 시각을 한 번 다시 읽도록 표시돼 있어야 한다
             assertEquals("1", store.metaGet("video_capture_backfill"))
+            // v10: 추가일 열이 생기고, 기존 사진은 비어 있다가 다음 동기화가 채운다
+            assertEquals(1, db.rawQuery("SELECT COUNT(*) FROM pragma_table_info('photos') WHERE name='date_added'", null).use { c -> c.moveToFirst(); c.getInt(0) })
+            assertEquals(null, db.rawQuery("SELECT date_added FROM photos WHERE media_id=11", null).use { c -> c.moveToFirst(); if (c.isNull(0)) null else c.getLong(0) })
+            assertEquals("1", store.metaGet("date_added_backfill_photos"))
+            assertEquals("1", store.metaGet("date_added_backfill_videos"))
         } finally {
             store.close()
             SQLiteDatabase.deleteDatabase(dbFile)

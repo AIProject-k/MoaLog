@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moalog.personal.data.PhotoCard
+import com.moalog.personal.data.PhotoSort
 
 /*
  * 사진 탭. **분류를 몰라도 사진에 닿을 수 있어야 한다** — 앱을 열면 바로 사진이 보이는 갤러리다.
@@ -54,7 +55,7 @@ import com.moalog.personal.data.PhotoCard
 fun PhotosScreen(vm: AppViewModel, ui: AppViewModel.Ui, onAllowAll: () -> Unit) {
     val actions = LocalActions.current
     val state = rememberLazyListState()
-    val rows = remember(ui.photoDays) { buildRows(ui.photoDays) }
+    val rows = remember(ui.photoDays, ui.gridColumns) { buildRows(ui.photoDays, ui.gridColumns) }
     val ids = remember(ui.photoDays) { ui.photoDays.flatMap { it.photos }.map(PhotoCard::id) }
     val selecting = ui.selectionMode
 
@@ -88,6 +89,8 @@ fun PhotosScreen(vm: AppViewModel, ui: AppViewModel.Ui, onAllowAll: () -> Unit) 
                 item(key = "segment") {
                     Row(Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         MediaSegment(ui.mediaFilter, vm::setMediaFilter)
+                        Spacer(Modifier.weight(1f))
+                        TextBtn("${ui.photoSort.label} · ${ui.gridColumns}열", { vm.openSheet(Sheet.View) }, color = theme.text2, style = fonts.label, horizontal = 8.dp)
                     }
                 }
                 // 영상만 보는 중에는 모아보기를 접는다(디자인) — 영상만 남기는 필터에 사진 모음이 섞이면 안 된다.
@@ -99,6 +102,7 @@ fun PhotosScreen(vm: AppViewModel, ui: AppViewModel.Ui, onAllowAll: () -> Unit) 
                     onOpen = { vm.openViewer(ids, it) },
                     onToggle = vm::toggleSelect,
                     onLongPress = { if (selecting) vm.toggleSelect(it) else vm.startSelection(it) },
+                    columns = ui.gridColumns,
                 )
                 if (ui.photoDays.isEmpty() && !ui.loadingMore) item(key = "empty") { PhotosEmpty(ui) }
                 item(key = "end") { Spacer(Modifier.height(120.dp)) }
@@ -108,7 +112,7 @@ fun PhotosScreen(vm: AppViewModel, ui: AppViewModel.Ui, onAllowAll: () -> Unit) 
             // 스크러버: 한참 내려가면 지금 어느 달인지 알려 주고, 누르면 월별 이동 시트가 열린다.
             val month = monthAtTop(state, rows)
             val scrolled = state.firstVisibleItemIndex >= 3
-            if (!selecting && scrolled && month != null && ui.photoTotal > 12) MonthScrubber(
+            if (!selecting && scrolled && month != null && ui.photoTotal > 12 && ui.photoSort == PhotoSort.DATE) MonthScrubber(
                 monthLabel(month), Modifier.align(Alignment.TopEnd),
             ) { vm.openSheet(Sheet.Month) }
 

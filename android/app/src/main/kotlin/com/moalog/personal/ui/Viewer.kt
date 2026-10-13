@@ -143,7 +143,7 @@ fun ViewerScreen(vm: AppViewModel, ui: AppViewModel.Ui) {
     Box(Modifier.fillMaxSize().background(t.viewer)) {
         if (fullscreen && isVideo && player != null) {
             FullscreenVideo(player, ui.openPhoto?.let { dateLine(it, zone) }.orEmpty(), chrome, { chrome = !chrome },
-                controls.muted, vm::toggleVideoMute) { vm.setVideoFullscreen(false) }
+                controls.muted, vm::toggleVideoMute, controls.speed, vm::cycleVideoSpeed) { vm.setVideoFullscreen(false) }
             return@Box
         }
 
@@ -191,9 +191,9 @@ fun ViewerScreen(vm: AppViewModel, ui: AppViewModel.Ui) {
 
         // ---- 영상 아래의 탐색 막대 · 시간 · 음소거 · 전체 화면 · 찾은 장면
         if (isVideo && player != null && !info && !(player.failed)) VideoDock(
-            player = player, top = bandTop + bandH + 12.dp, muted = controls.muted,
+            player = player, top = bandTop + bandH + 12.dp, muted = controls.muted, speed = controls.speed,
             scenes = ui.sceneHits[id].orEmpty(), lastScene = lastScene,
-            onMute = vm::toggleVideoMute, onFullscreen = { vm.setVideoFullscreen(true) },
+            onMute = vm::toggleVideoMute, onSpeed = vm::cycleVideoSpeed, onFullscreen = { vm.setVideoFullscreen(true) },
             onSeek = { lastScene = null; player.seekTo(it) },
             onScene = { ms -> lastScene = ms; vm.seekVideo(ms) },
         )
@@ -439,15 +439,28 @@ private fun SkipButton(icon: Int, label: String, description: String, onClick: (
     }
 }
 
+/** 재생 속도 버튼. 누를 때마다 1× → 1.5× → 2× → 0.5× → 1×로 바뀐다. */
+@Composable
+private fun SpeedBtn(speed: Float, onClick: () -> Unit, color: Color) {
+    Box(
+        Modifier.height(40.dp).clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick).padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(VideoPlayerControls.speedLabel(speed), style = fonts.caption.copy(fontWeight = FontWeight.SemiBold), color = color)
+    }
+}
+
 /** 영상 아래: 탐색 막대 + 시간 + 음소거·전체 화면 + (검색에서 열었으면) 찾은 장면 칩. */
 @Composable
 private fun VideoDock(
     player: PlayerHandle,
     top: Dp,
     muted: Boolean,
+    speed: Float,
     scenes: List<Long>,
     lastScene: Long?,
     onMute: () -> Unit,
+    onSpeed: () -> Unit,
     onFullscreen: () -> Unit,
     onSeek: (Long) -> Unit,
     onScene: (Long) -> Unit,
@@ -465,6 +478,7 @@ private fun VideoDock(
                 VideoSampling.time(player.positionMs), style = fonts.caption.copy(fontWeight = FontWeight.Medium), color = t.text1,
             )
             Text(" / ${VideoSampling.time(player.durationMs)}", style = fonts.caption.copy(fontWeight = FontWeight.Medium), color = t.text3, modifier = Modifier.weight(1f))
+            SpeedBtn(speed, onSpeed, t.text1)
             IconBtn(if (muted) I.Mute else I.Volume, if (muted) "음소거 해제" else "음소거", onMute)
             IconBtn(I.Fullscreen, "전체 화면", onFullscreen, modifier = Modifier.offset(x = 12.dp))
         }
@@ -503,6 +517,8 @@ private fun FullscreenVideo(
     onTap: () -> Unit,
     muted: Boolean,
     onMute: () -> Unit,
+    speed: Float,
+    onSpeed: () -> Unit,
     onExit: () -> Unit,
 ) {
     val t = theme
@@ -534,6 +550,7 @@ private fun FullscreenVideo(
                         onSeek = { player.seekTo((it * duration).toLong()) },
                         modifier = Modifier.weight(1f), trackColor = Color(0x4DFFFFFF),
                     )
+                    SpeedBtn(speed, onSpeed, Color.White)
                     IconBtn(if (muted) I.Mute else I.Volume, if (muted) "음소거 해제" else "음소거", onMute)
                     IconBtn(I.FullscreenExit, "화면 복귀", onExit)
                 }

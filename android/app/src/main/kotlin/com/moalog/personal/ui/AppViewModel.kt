@@ -1,6 +1,7 @@
 package com.moalog.personal.ui
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ import com.moalog.personal.data.EventRow
 import com.moalog.personal.data.MonthRow
 import com.moalog.personal.data.PhotoCard
 import com.moalog.personal.data.PhotoDetail
+import com.moalog.personal.data.PhotoSort
 import com.moalog.personal.data.TagCount
 import com.moalog.personal.data.UserAlbumRow
 import com.moalog.personal.work.IndexWorker
@@ -78,6 +80,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val photoDays: List<DayGroup> = emptyList(),
         val photoTotal: Int = 0,
         val mediaFilter: String = "all",
+        /** 사진 탭 한 줄의 칸 수. [GRID_CHOICES] 중 하나. */
+        val gridColumns: Int = GRID_COLUMNS,
+        /** 사진 탭 정렬. 날짜순만 날짜 머리글과 월 이동을 쓴다. */
+        val photoSort: PhotoSort = PhotoSort.DATE,
         val months: List<MonthRow> = emptyList(),
         /** 월 이동으로 목록을 갈아 끼울 때마다 오른다. 화면이 그때 맨 위(그 달의 머리글)로 스크롤한다. */
         val jumpToken: Int = 0,
@@ -193,7 +199,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             else "보관 추천 · 가장 선명함"
     }
 
-    private val _ui = MutableStateFlow(Ui())
+    // 보기 설정(칸 수·정렬)은 기기에 남긴다. 앱을 껐다 켜도 같은 모양으로 연다.
+    private val prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private val _ui = MutableStateFlow(Ui(
+        gridColumns = prefs.getInt(KEY_GRID_COLUMNS, GRID_COLUMNS).takeIf { it in GRID_CHOICES } ?: GRID_COLUMNS,
+        photoSort = PhotoSort.entries.firstOrNull { it.name == prefs.getString(KEY_PHOTO_SORT, null) } ?: PhotoSort.DATE,
+    ))
     val ui: StateFlow<Ui> = _ui.asStateFlow()
     private var lastAccessibleIds: Set<Long>? = null
 
@@ -412,7 +423,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     userAlbums = userAlbums, favorites = favorites, memories = memories,
                     openAlbum = opened,
                     screen = nextScreen,
-                    photoDays = if (accessChanged) visibleDays(state.photoDays, accessibleIds) else state.photoDays,
+                    photoDays = if (accessChanged) visibleDays(state.photoDays, accessibleIds, state.photoSort) else state.photoDays,
                     albumDays = if (accessChanged) visibleDays(state.albumDays, accessibleIds) else state.albumDays,
                     albumLoaded = if (accessChanged) visibleDays(state.albumDays, accessibleIds).sumOf { d -> d.photos.size } else state.albumLoaded,
                     results = if (accessChanged) state.results.filter { it.id in accessibleIds } else state.results,
@@ -441,8 +452,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun visibleDays(days: List<DayGroup>, accessibleIds: Set<Long>): List<DayGroup> =
-        toDays(days.flatMap { it.photos }.filter { it.id in accessibleIds })
+    private fun visibleDays(days: List<DayGroup>, accessibleIds: Set<Long>, sort: PhotoSort = PhotoSort.DATE): List<DayGroup> =
+        groupPhotos(days.flatMap { it.photos }.filter { it.id in accessibleIds }, sort)
 
     /**
      * 네 종류를 한 목록에 담되 종류를 잃지 않는다: 내 앨범 → 기기 폴더 → AI 분류 → 기록.
@@ -552,15 +563,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         _ui.update { it.copy(loadingMore = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val store = AppGraph.store
-            val page = store.photos(PAGE, start, s.mediaFilter)
+            val page = store.photos(PAGE, start, s.mediaFilter, s.photoSort)
             val total = store.photoCount(s.mediaFilter)
             // 월 목록은 전체를 훑어야 나온다. 스크롤로 한 장 더 읽을 때마다 다시 셀 이유가
-            // 없으므로 목록을 갈아 끼울 때만 센다.
-            val months = if (replace) withUndated(store.months(s.mediaFilter), total) else _ui.value.months
+            // 없으므로 목록을 갈아 끼울 때만 센다. 날짜순이 아니면 월 이동 자체가 없다.
+            val months = when {
+                s.photoSort != PhotoSort.DATE -> emptyList()
+                replace -> withUndated(store.months(s.mediaFilter), total)
+                else -> _ui.value.months
+            }
             withContext(Dispatchers.Main) {
                 _ui.update {
                     it.copy(
-                        photoDays = if (replace) toDays(page) else mergeDays(it.photoDays, page),
+                        photoDays = if (replace) groupPhotos(page, s.photoSort) else mergeDays(it.photoDays, page, s.photoSort),
                         photoTotal = total, months = months, loadingMore = false,
                         jumpToken = if (offset != null) it.jumpToken + 1 else it.jumpToken,
                     )
@@ -583,6 +598,21 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun setMediaFilter(kind: String) {
         if (_ui.value.loadingMore) return
         _ui.update { it.copy(mediaFilter = kind, selected = emptySet(), selectionMode = false) }
+        loadPhotos(reset = true)
+    }
+
+    /** 사진 탭의 한 줄 칸 수. 고른 값은 기기에 남긴다. */
+    fun setGridColumns(n: Int) {
+        if (n !in GRID_CHOICES) return
+        prefs.edit().putInt(KEY_GRID_COLUMNS, n).apply()
+        _ui.update { it.copy(gridColumns = n) }
+    }
+
+    /** 사진 탭 정렬을 바꾼다. 목록을 처음부터 다시 읽는다. 고른 값은 기기에 남긴다. */
+    fun setPhotoSort(sort: PhotoSort) {
+        if (_ui.value.loadingMore || sort == _ui.value.photoSort) return
+        prefs.edit().putString(KEY_PHOTO_SORT, sort.name).apply()
+        _ui.update { it.copy(photoSort = sort, selected = emptySet(), selectionMode = false) }
         loadPhotos(reset = true)
     }
 
@@ -774,6 +804,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun seekVideo(ms: Long) = _ui.update { it.copy(videoControls = it.videoControls.seek(ms)) }
 
     fun toggleVideoMute() = _ui.update { it.copy(videoControls = it.videoControls.toggleMute()) }
+
+    fun cycleVideoSpeed() = _ui.update { it.copy(videoControls = it.videoControls.cycleSpeed()) }
 
     fun saveVideoPlayback(mediaId: Long, positionMs: Long, resumePlayback: Boolean) = _ui.update { state ->
         if (state.viewerIds.getOrNull(state.viewerIndex) == mediaId)
@@ -1390,7 +1422,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (gone.isEmpty()) return
         _ui.update { s ->
             s.copy(
-                photoDays = dropFrom(s.photoDays, gone),
+                photoDays = dropFrom(s.photoDays, gone, s.photoSort),
                 albumDays = dropFrom(s.albumDays, gone),
                 photoTotal = (s.photoTotal - gone.size).coerceAtLeast(0),
                 albumLoaded = (s.albumLoaded - gone.size).coerceAtLeast(0),
@@ -1456,9 +1488,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** 다음 쪽을 붙인다. 합쳐진 머리글이 쪽 경계에서 갈라지지 않게 전체를 다시 묶는다. */
-    private fun mergeDays(existing: List<DayGroup>, more: List<PhotoCard>): List<DayGroup> {
+    private fun mergeDays(existing: List<DayGroup>, more: List<PhotoCard>, sort: PhotoSort = PhotoSort.DATE): List<DayGroup> {
         if (more.isEmpty()) return existing
-        return toDays(existing.flatMap { it.photos } + more)
+        return groupPhotos(existing.flatMap { it.photos } + more, sort)
+    }
+
+    /**
+     * 사진 탭 묶음. 날짜순은 날짜 머리글로 묶고, 나머지 정렬은 머리글 없이 한 덩어리로 둔다 — 추가일·용량은
+     * 촬영일과 무관하게 흩어져 있어서 날짜 머리글을 달면 같은 날이 여러 번 나온다.
+     */
+    private fun groupPhotos(photos: List<PhotoCard>, sort: PhotoSort): List<DayGroup> = when {
+        sort == PhotoSort.DATE -> toDays(photos)
+        photos.isEmpty() -> emptyList()
+        else -> listOf(DayGroup(day = "", note = countNote(photos), photos = photos, month = "none"))
     }
 
     /** 사진은 "장", 영상은 "개"로 센다. 영상 3개를 "3장"이라고 적으면 사진으로 읽힌다. */
@@ -1472,8 +1514,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun dropFrom(days: List<DayGroup>, ids: Set<Long>): List<DayGroup> =
-        toDays(days.flatMap { it.photos }.filterNot { it.id in ids })
+    private fun dropFrom(days: List<DayGroup>, ids: Set<Long>, sort: PhotoSort = PhotoSort.DATE): List<DayGroup> =
+        groupPhotos(days.flatMap { it.photos }.filterNot { it.id in ids }, sort)
 
     private fun dayLabel(epoch: Long): String =
         dayLabel(LocalDate.ofInstant(Instant.ofEpochSecond(epoch), zone), LocalDate.now(zone))
@@ -1487,6 +1529,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     private companion object {
         const val WORKER_REFRESH_INTERVAL_MS = 2_000L
+
+        const val PREFS = "view"
+        const val KEY_GRID_COLUMNS = "grid_columns"
+        const val KEY_PHOTO_SORT = "photo_sort"
 
         /** 한 번에 읽는 장수. 화면 한 폭이 30장 안팎이라 열 폭쯤 앞서 읽는 셈이다. */
         const val PAGE = 300

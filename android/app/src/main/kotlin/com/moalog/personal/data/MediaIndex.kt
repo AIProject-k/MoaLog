@@ -44,6 +44,7 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
         if (!video) add(MediaStore.Images.Media.ORIENTATION)
         else add(MediaStore.Video.Media.DURATION)
         add(MediaStore.Images.Media.DATE_MODIFIED)
+        add(MediaStore.Images.Media.DATE_ADDED)
         if (Build.VERSION.SDK_INT >= 30) add(MediaStore.Images.Media.GENERATION_MODIFIED)
     }.toTypedArray()
 
@@ -77,6 +78,9 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
         } else android.Manifest.permission.READ_EXTERNAL_STORAGE
         val full = androidx.core.content.ContextCompat.checkSelfPermission(ctx, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val backfillVideoDuration = video && store.metaGet(KEY_VIDEO_DURATION_BACKFILL) == "1"
+        val addedKey = if (video) KEY_ADDED_BACKFILL_VIDEOS else KEY_ADDED_BACKFILL_PHOTOS
+        val backfillAdded = store.metaGet(addedKey) == "1"
+        val addedBackfill = HashMap<Long, Long>()
         val partial = Build.VERSION.SDK_INT >= 34 && androidx.core.content.ContextCompat.checkSelfPermission(ctx,
             android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val scope = MediaAccessPolicy.scope(Build.VERSION.SDK_INT, full, partial)
@@ -103,6 +107,7 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
             val mod = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
             val gen = if (Build.VERSION.SDK_INT >= 30)
                 c.getColumnIndex(MediaStore.Images.Media.GENERATION_MODIFIED) else -1
+            val addedCol = c.getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
 
             while (c.moveToNext()) {
                 val rawId = c.getLong(id)
@@ -110,7 +115,11 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
                 val mid = if (video) -rawId else rawId
                 present.add(mid)
                 val g = if (gen >= 0 && !c.isNull(gen)) c.getLong(gen) else c.getLong(mod)
-                if (known[mid] == g && (!backfillVideoDuration || store.durationMs(mid) != null)) continue
+                val dateAdded = if (addedCol >= 0 && !c.isNull(addedCol)) c.getLong(addedCol) else null
+                if (known[mid] == g && (!backfillVideoDuration || store.durationMs(mid) != null)) {
+                    if (backfillAdded && dateAdded != null) addedBackfill[mid] = dateAdded
+                    continue
+                }
                 if (mid in known && known[mid] != g) changed.add(mid)
                 fresh.add(MediaRow(
                     id = mid,
@@ -124,7 +133,7 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
                     width = c.getInt(w), height = c.getInt(h), orientation = if (ori >= 0) c.getInt(ori) else 0,
                     mediaKind = if (video) MediaKind.VIDEO else MediaKind.PHOTO,
                     durationMs = if (duration >= 0 && !c.isNull(duration)) c.getLong(duration) else if (video) 0L else null,
-                    generation = g, dateModified = c.getLong(mod),
+                    generation = g, dateModified = c.getLong(mod), dateAdded = dateAdded,
                 ))
             }
         }
@@ -132,6 +141,11 @@ class MediaIndex(private val ctx: Context, private val store: Store) {
         // 새로 들어온 게 아니면서 generation이 오른 것 = 편집된 사진 → 처음부터 다시
         store.invalidateChanged(changed)
         if (video && full && backfillVideoDuration) store.metaPut(KEY_VIDEO_DURATION_BACKFILL, "0")
+        // 추가일 채우기. 전체 권한일 때만 끝난 것으로 내린다 — 일부만 보이면 나머지 사진은 다음에 다시 봐야 한다.
+        if (backfillAdded && full) {
+            store.fillDateAdded(addedBackfill)
+            store.metaPut(addedKey, "0")
+        }
         val reconciliation = MediaAccessPolicy.reconcile(scope, present)
         val accessChanged = store.setAccessible(reconciliation.visibleIds, video)
         val removed = if (reconciliation.deleteMissing) store.deleteMissing(present, video) else 0

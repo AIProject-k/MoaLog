@@ -110,7 +110,7 @@ fun AnalyzeStep.stateAt(progress: Int): StepState {
 }
 
 /** 화면 위에 뜨는 하단 시트. 한 번에 하나만 뜬다. */
-enum class Sheet { Add, Month, Axis, Move, Licenses }
+enum class Sheet { Add, Month, Axis, Move, Licenses, View }
 
 /** 되돌릴 수 없는 일을 한 번 더 묻는 대화상자. */
 enum class Dialog { DeleteAlbum, DeleteAll }

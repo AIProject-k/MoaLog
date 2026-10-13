@@ -37,6 +37,9 @@ import com.moalog.personal.data.PhotoCard
 
 const val GRID_COLUMNS = 3
 
+/** 보기 설정에서 고를 수 있는 한 줄 칸 수. */
+val GRID_CHOICES = listOf(2, 3, 4)
+
 /** 격자를 한 줄씩 쪼갠 목록. 머리글 한 줄 + 사진 3칸 줄들. `month`는 스크러버가 지금 어느 달인지 알려 주는 데 쓴다. */
 sealed interface GridRow {
     val key: String
@@ -52,11 +55,12 @@ class CellsRow(val photos: List<PhotoCard>, override val month: String, val firs
     override val key = "r:${photos.first().id}"
 }
 
-fun buildRows(days: List<AppViewModel.DayGroup>): List<GridRow> = buildList {
+/** [columns]칸짜리 줄로 나눈다. 머리글이 없는 묶음(날짜순이 아닌 정렬)은 머리글 줄을 만들지 않는다. */
+fun buildRows(days: List<AppViewModel.DayGroup>, columns: Int = GRID_COLUMNS): List<GridRow> = buildList {
     for (g in days) {
         if (g.photos.isEmpty()) continue
-        add(HeaderRow(g))
-        g.photos.chunked(GRID_COLUMNS).forEachIndexed { i, chunk -> add(CellsRow(chunk, g.month, i == 0)) }
+        if (g.day.isNotEmpty()) add(HeaderRow(g))
+        g.photos.chunked(columns).forEachIndexed { i, chunk -> add(CellsRow(chunk, g.month, i == 0)) }
     }
 }
 
@@ -73,6 +77,7 @@ fun LazyListScope.gridRows(
     onOpen: (Long) -> Unit,
     onToggle: (Long) -> Unit,
     onLongPress: (Long) -> Unit,
+    columns: Int = GRID_COLUMNS,
 ) {
     items(rows, key = { it.key }, contentType = { if (it is HeaderRow) 0 else 1 }) { row ->
         when (row) {
@@ -91,7 +96,7 @@ fun LazyListScope.gridRows(
                     favorite = p.id in favorites,
                     scene = true,
                 )
-                repeat(GRID_COLUMNS - row.photos.size) { Spacer(Modifier.weight(1f)) }
+                repeat(columns - row.photos.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
