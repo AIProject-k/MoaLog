@@ -2,13 +2,6 @@ package com.moalog.personal.core
 
 import org.json.JSONArray
 import org.json.JSONObject
-import java.security.SecureRandom
-import javax.crypto.AEADBadTagException
-import javax.crypto.Cipher
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.PBEKeySpec
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * 백업 (계획서 MLG-105). 사용자가 넣은 정보만 담는다 — 앨범·즐겨찾기·분류 교정.
@@ -100,54 +93,6 @@ object BackupCodec {
         List(length()) { map(getJSONObject(it)) }
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (has(key)) getString(key) else null
-}
-
-/**
- * 암호화. 비밀번호에서 PBKDF2로 키를 만들고 AES-256-GCM으로 감싼다. GCM이라 틀린 암호와 변조를 같은 방식으로 잡는다.
- * 파일 모양: `MAGIC(8) · salt(16) · iv(12) · 암호문+태그`.
- */
-object BackupCrypto {
-    private val MAGIC = "MOALOGB1".toByteArray(Charsets.US_ASCII)
-    private const val SALT = 16
-    private const val IV = 12
-    private const val ITERATIONS = 210_000
-    private const val KEY_BITS = 256
-    private const val TAG_BITS = 128
-
-    fun seal(plain: ByteArray, password: CharArray): ByteArray {
-        val rnd = SecureRandom()
-        val salt = ByteArray(SALT).also(rnd::nextBytes)
-        val iv = ByteArray(IV).also(rnd::nextBytes)
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply {
-            init(Cipher.ENCRYPT_MODE, SecretKeySpec(key(password, salt), "AES"), GCMParameterSpec(TAG_BITS, iv))
-        }
-        return MAGIC + salt + iv + cipher.doFinal(plain)
-    }
-
-    /** 비밀번호가 틀리거나 파일이 바뀌었으면 [BackupException]을 던진다. */
-    fun open(sealed: ByteArray, password: CharArray): ByteArray {
-        val header = MAGIC.size + SALT + IV
-        if (sealed.size <= header || !sealed.copyOfRange(0, MAGIC.size).contentEquals(MAGIC)) {
-            throw BackupException("암호화된 MoaLog 백업 파일이 아닙니다")
-        }
-        val salt = sealed.copyOfRange(MAGIC.size, MAGIC.size + SALT)
-        val iv = sealed.copyOfRange(MAGIC.size + SALT, header)
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply {
-            init(Cipher.DECRYPT_MODE, SecretKeySpec(key(password, salt), "AES"), GCMParameterSpec(TAG_BITS, iv))
-        }
-        return try { cipher.doFinal(sealed, header, sealed.size - header) } catch (e: AEADBadTagException) {
-            throw BackupException("암호가 맞지 않거나 백업 파일이 손상되었습니다")
-        }
-    }
-
-    private fun key(password: CharArray, salt: ByteArray): ByteArray {
-        val spec = PBEKeySpec(password, salt, ITERATIONS, KEY_BITS)
-        try {
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
-        } finally {
-            spec.clearPassword()
-        }
-    }
 }
 
 /**

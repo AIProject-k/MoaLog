@@ -46,42 +46,6 @@ class BackupTest {
         assertFailsWith<BackupException> { BackupCodec.decode("그냥 글자".toByteArray()) }
     }
 
-    // ---------- 암호화
-
-    @Test fun `같은 암호로 풀면 평문이 그대로 나온다`() {
-        val plain = BackupCodec.encode(doc)
-        val sealed = BackupCrypto.seal(plain, "correct horse".toCharArray())
-        assertTrue(plain.contentEquals(BackupCrypto.open(sealed, "correct horse".toCharArray())))
-    }
-
-    @Test fun `암호가 틀리면 풀리지 않는다`() {
-        val sealed = BackupCrypto.seal(BackupCodec.encode(doc), "correct horse".toCharArray())
-        assertFailsWith<BackupException> { BackupCrypto.open(sealed, "wrong horse".toCharArray()) }
-    }
-
-    @Test fun `파일이 한 바이트라도 바뀌면 풀리지 않는다`() {
-        val sealed = BackupCrypto.seal(BackupCodec.encode(doc), "pw-pw-pw".toCharArray())
-        val tampered = sealed.copyOf().also { it[it.size - 5] = (it[it.size - 5] + 1).toByte() }
-        assertFailsWith<BackupException> { BackupCrypto.open(tampered, "pw-pw-pw".toCharArray()) }
-    }
-
-    @Test fun `암호화된 파일 앞에는 MoaLog 표시가 있고 평문 글자가 보이지 않는다`() {
-        val sealed = BackupCrypto.seal(BackupCodec.encode(doc), "pw-pw-pw".toCharArray())
-        assertEquals("MOALOGB1", String(sealed.copyOfRange(0, 8), Charsets.US_ASCII))
-        assertTrue(!String(sealed, Charsets.ISO_8859_1).contains("내 여행"), "앨범 이름이 평문으로 보이면 안 된다")
-    }
-
-    @Test fun `같은 내용을 두 번 암호화하면 결과가 다르다`() {
-        val plain = BackupCodec.encode(doc)
-        val a = BackupCrypto.seal(plain, "pw-pw-pw".toCharArray())
-        val b = BackupCrypto.seal(plain, "pw-pw-pw".toCharArray())
-        assertTrue(!a.contentEquals(b), "salt와 iv가 매번 달라야 한다")
-    }
-
-    @Test fun `MoaLog 암호화 파일이 아니면 거절한다`() {
-        assertFailsWith<BackupException> { BackupCrypto.open(ByteArray(64), "pw".toCharArray()) }
-    }
-
     // ---------- 사진 짝짓기
 
     private fun cand(id: Long, name: String?, bytes: Long, taken: Long?, path: String? = "DCIM/Camera/") =
