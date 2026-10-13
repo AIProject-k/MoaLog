@@ -17,6 +17,8 @@ internal const val GROUPING_COMPLETE = "grouping_complete"
 internal const val KEY_VIDEO_CAPTURE_BACKFILL = "video_capture_backfill"
 internal const val KEY_VIDEO_SAMPLING = "video_sampling"
 internal const val KEY_VIDEO_TAGS = "video_tags"
+/** 이벤트의 장소 이름을 만들 때 쓴 장소 표의 도장. 표가 바뀌면 이벤트를 다시 만든다. */
+internal const val KEY_PLACE_STAMP = "place_index_stamp"
 
 /**
  * SQLite 저장소. `store.py`의 스키마와 쿼리를 그대로 옮겼다.
@@ -542,12 +544,28 @@ class Store(ctx: Context) : SQLiteOpenHelper(ctx, "photolog.db", null, 9) {
         writableDatabase.execSQL("UPDATE photos SET sha256=? WHERE media_id=?", arrayOf(sha, id))
     }
 
+    /**
+     * 분석이 만든 태그를 갈아 끼운다. 사용자가 직접 한 편집은 지킨다:
+     *  - 사용자가 뺀 라벨(`user_feedback` verdict 0)은 다시 붙이지 않는다.
+     *  - 사용자가 고정한 태그(source `user`)는 같은 라벨의 분석 태그로 덮지 않는다.
+     * 이게 없으면 재분석이나 백업 복원 뒤에 뺀 분류가 돌아오고 고정이 풀린다.
+     */
     private fun replaceTags(db: SQLiteDatabase, id: Long, tags: List<Tag>, source: String) {
         db.delete("tags", "media_id=? AND source=?", arrayOf(id.toString(), source))
-        for (t in tags) db.insertWithOnConflict("tags", null, ContentValues().apply {
-            put("media_id", id); put("label", t.label); put("score", t.score?.toDouble()); put("source", t.source)
-        }, SQLiteDatabase.CONFLICT_REPLACE)
+        val removed = labelsOf(db, "SELECT label FROM user_feedback WHERE media_id=? AND verdict=0", id)
+        val pinned = labelsOf(db, "SELECT label FROM tags WHERE media_id=? AND source='user'", id)
+        for (t in tags) {
+            if (t.label in removed || t.label in pinned) continue
+            db.insertWithOnConflict("tags", null, ContentValues().apply {
+                put("media_id", id); put("label", t.label); put("score", t.score?.toDouble()); put("source", t.source)
+            }, SQLiteDatabase.CONFLICT_REPLACE)
+        }
     }
+
+    private fun labelsOf(db: SQLiteDatabase, sql: String, id: Long): Set<String> =
+        db.rawQuery(sql, arrayOf(id.toString())).use { c ->
+            HashSet<String>().apply { while (c.moveToNext()) add(c.getString(0)) }
+        }
 
     // ---------- 조회 ----------
 

@@ -23,6 +23,7 @@ import com.moalog.personal.core.Events
 import com.moalog.personal.core.Grouping
 import com.moalog.personal.data.Store
 import com.moalog.personal.data.GROUPING_COMPLETE
+import com.moalog.personal.data.KEY_PLACE_STAMP
 import com.moalog.personal.data.KEY_VIDEO_CAPTURE_BACKFILL
 import com.moalog.personal.data.KEY_VIDEO_SAMPLING
 import com.moalog.personal.data.KEY_VIDEO_TAGS
@@ -70,11 +71,18 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             stageStart = android.os.SystemClock.elapsedRealtimeNanos()
             val photoClipChanged = if (modelId != null) pass2Photos(modelId) ?: return@runCatching Result.retry() else false
             logPerf("photo_clip", stageStart)
-            if (photoSync.discovered > 0 || photoSync.changed > 0 || photoSync.removed > 0 || photoSync.accessChanged ||
-                photoMetaChanged || photoClipChanged || modelChanged || !groupingWasComplete) {
+            val photoRegrouped = photoSync.discovered > 0 || photoSync.changed > 0 || photoSync.removed > 0 ||
+                photoSync.accessChanged || photoMetaChanged || photoClipChanged || modelChanged || !groupingWasComplete
+            if (photoRegrouped) {
                 stageStart = android.os.SystemClock.elapsedRealtimeNanos()
                 regroup(withEmbeddings = true, phase = IndexPhase.PHOTOS)
                 logPerf("photo_grouping_clip", stageStart)
+            }
+            // 장소 표가 새로 생겼거나 바뀌었으면 이벤트의 장소 이름만 다시 만든다. 임베딩은 건드리지 않는다.
+            // 이게 없으면 업데이트한 기존 사용자는 새 사진이 들어오기 전까지 예전 이벤트에 장소 이름이 안 붙는다.
+            if (store.metaGet(KEY_PLACE_STAMP) != AppGraph.placeStamp) {
+                if (!photoRegrouped) rebuildEvents()
+                store.metaPut(KEY_PLACE_STAMP, AppGraph.placeStamp)
             }
             report(IndexPhase.PHOTOS, "사진 처리 완료")
             if (isStopped) return@runCatching Result.retry()
@@ -119,10 +127,12 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
     private suspend fun pass1(phase: IndexPhase): Boolean {
         val tagger = AppGraph.ruleTagger
         var processed = false
+        var cursor = Long.MIN_VALUE
         while (true) {
-            val batch = if (phase == IndexPhase.PHOTOS) store.pendingPhotos(Store.State.NEW, BATCH)
-                else store.pendingVideos(Store.State.NEW, BATCH)
+            val batch = if (phase == IndexPhase.PHOTOS) store.pendingPhotos(Store.State.NEW, BATCH, cursor)
+                else store.pendingVideos(Store.State.NEW, BATCH, cursor)
             if (batch.isEmpty()) break
+            cursor = batch.last().id
             for (p in batch) {
                 processed = true
                 runCatching {
@@ -131,7 +141,13 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     val meta = media.readMeta(p, fallbackSeconds = p.dateModified)
                     val pm = p.toMeta(meta.takenAt, meta.takenAtSource, meta.cameraModel, meta.lat != null)
                     store.saveMeta(p.id, meta, tagger.tags(pm))
-                }.onFailure { store.markFailed(p.id) }
+                }.onFailure {
+                    if (it is kotlinx.coroutines.CancellationException) throw it
+                    android.util.Log.w("IndexWorker", "촬영 정보 읽기 실패 ${p.id}", it)
+                    // 접근 권한 문제는 사진 탓이 아니다. 세지 않고 넘어간다(접근이 줄었으면 동기화가 숨긴다).
+                    // 그 밖의 실패는 총 MAX_ATTEMPTS번 시도한 뒤에야 영구 실패로 둔다.
+                    if (it !is SecurityException) store.noteFailure(p.id, MAX_ATTEMPTS)
+                }
             }
             report(phase, "촬영 정보를 정리하고 있습니다")
             if (isStopped) return processed
@@ -182,9 +198,22 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
     // ---------- 사진 Pass 2 ----------
 
+    /**
+     * 추론기를 여는 것이 실패하면(모델 파일이 깨졌거나 ONNX가 읽지 못함) 모델 도장을 지운다.
+     * 다음 실행이 모델을 assets에서 다시 복사하고 SHA-256을 확인한다. 같은 크기로 깨진 파일도 이 경로로 고쳐진다.
+     */
+    private suspend fun openEncoder(): com.moalog.personal.ml.ClipEncoder? = try {
+        AppGraph.encoder
+    } catch (e: Throwable) {
+        android.util.Log.e("IndexWorker", "AI 모델을 열지 못했다", e)
+        AppGraph.invalidateModels()
+        report(IndexPhase.PHOTOS, "AI 모델을 열지 못했습니다. 다음 실행에서 모델을 다시 확인합니다.")
+        null
+    }
+
     private suspend fun pass2Photos(modelId: String): Boolean? {
         if (store.pendingPhotos(Store.State.META, 1).isEmpty()) return false
-        val enc = AppGraph.encoder
+        val enc = openEncoder() ?: return null
         val clf = AppGraph.classifier()
         val thumbPx = AppGraph.config.optInt("thumb_px", 320)
         var processed = false
@@ -239,6 +268,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                         if (it is EncoderFailure) {
                             // 사진 탓이 아니다. 횟수에 넣지 않고, 연속으로 죽으면 이번 분석을 멈춘다.
                             if (++encoderRun >= ENCODER_STOP_RUN) {
+                                AppGraph.invalidateModels()
                                 report(IndexPhase.PHOTOS, "AI 분석이 연속으로 실패해 멈췄습니다. 앱을 다시 열어 주세요.")
                                 throw SystemicStop()
                             }
@@ -269,7 +299,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
     private suspend fun pass2Videos(modelId: String): Boolean? {
         if (store.pendingVideos(Store.State.META, 1).isEmpty()) return false
-        val enc = AppGraph.encoder
+        val enc = openEncoder() ?: return null
         val clf = AppGraph.classifier()
         var processed = false
         // 실측용(디버그 로그). 프레임 수·디코드·인코딩 시간과 열·배터리 변화를 남긴다.
@@ -279,6 +309,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val t0 = android.os.SystemClock.elapsedRealtimeNanos()
         var cursor = Long.MIN_VALUE
+        var encoderRun = 0
 
         try {
             while (true) {
@@ -320,10 +351,17 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                                         val encodeStart = android.os.SystemClock.elapsedRealtimeNanos()
                                         val vector = try { enc.encodeImage(frame) }
                                             catch (e: kotlinx.coroutines.CancellationException) { throw e }
-                                            catch (_: Exception) { null }
+                                            catch (_: Exception) { encoderRun++; null }
                                             finally { frame.recycle() }
                                         encodeNs += android.os.SystemClock.elapsedRealtimeNanos() - encodeStart
+                                        // 추론기가 연속으로 죽는 것은 영상 탓이 아니다. 영상마다 실패로 세지 않고 이번 분석을 멈춘다.
+                                        if (encoderRun >= ENCODER_STOP_RUN) {
+                                            AppGraph.invalidateModels()
+                                            report(IndexPhase.VIDEOS, "AI 분석이 연속으로 실패해 멈췄습니다. 앱을 다시 열어 주세요.")
+                                            throw SystemicStop()
+                                        }
                                         if (vector == null) { failedFrames++; frameFail++ } else {
+                                            encoderRun = 0
                                             store.saveFrame(p.id, time, vector)
                                             cached[time] = vector
                                             unreportedFrames++; frameCount++
@@ -347,7 +385,7 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                             videos++
                         } finally { retriever.release() }
                     }.onFailure {
-                        if (it is kotlinx.coroutines.CancellationException) throw it
+                        if (it is kotlinx.coroutines.CancellationException || it is SystemicStop) throw it
                         android.util.Log.e("IndexWorker", "영상 ${p.id} 분석 실패", it)
                         store.noteFailure(p.id, MAX_ATTEMPTS)
                     }
@@ -393,6 +431,12 @@ class IndexWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         }
         store.replaceDupes(groups)
 
+        rebuildEvents()
+    }
+
+    /** 이벤트만 다시 만든다(중복 묶음·해시는 건드리지 않는다). 장소 이름은 장소 표에서 붙는다. */
+    private fun rebuildEvents() {
+        val cfg = AppGraph.config
         store.replaceEvents(Events.build(
             store.eventItems(),
             gapHours = cfg.getInt("event_gap_hours"),

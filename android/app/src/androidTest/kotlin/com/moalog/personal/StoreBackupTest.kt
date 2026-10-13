@@ -10,6 +10,8 @@ import com.moalog.personal.core.BackupDoc
 import com.moalog.personal.core.BackupFavorite
 import com.moalog.personal.core.BackupFeedback
 import com.moalog.personal.core.BackupMedia
+import com.moalog.personal.core.Embeddings
+import com.moalog.personal.core.Tag
 import com.moalog.personal.data.BackupRepository
 import com.moalog.personal.data.Store
 import org.junit.Assert.assertEquals
@@ -121,5 +123,50 @@ class StoreBackupTest {
         assertEquals(1, r.albumItems)
         assertEquals(0, r.feedback)
         assertEquals(listOf(101L), store.longs("SELECT media_id FROM user_album_photos"))
+    }
+
+    private fun Store.tagSources(id: Long): Map<String, String> = readableDatabase.rawQuery(
+        "SELECT label, source FROM tags WHERE media_id=?", arrayOf(id.toString())
+    ).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) } }
+
+    /** 교정은 태그에도 돌아와야 한다. 맞음은 사용자 태그로 고정, 틀림은 태그를 지운다. 분석이 나중에 와도 유지된다. */
+    @Test fun 복원은_고정하거나_뺀_분류를_태그에_다시_적용한다() = withStore("tags") { store ->
+        store.addPhoto(101, "IMG_1.jpg", 1234, 1_690_000_000L)
+        // 이 기기에는 분석이 만든 풍경 태그가 이미 있다
+        store.writableDatabase.execSQL("INSERT INTO tags (media_id, label, score, source) VALUES (101, '풍경', 0.5, 'clip')")
+        val tagDoc = doc.copy(
+            media = listOf(BackupMedia(0, "IMG_1.jpg", 1234, 1_690_000_000L, "DCIM/Camera/")),
+            favorites = emptyList(), albums = emptyList(),
+            feedback = listOf(BackupFeedback(0, "음식", 1, 70L), BackupFeedback(0, "풍경", 0, 71L)),
+        )
+        BackupRepository(store).restore(tagDoc)
+        assertEquals(mapOf("음식" to "user"), store.tagSources(101))
+
+        // 뒤늦게 분석이 와도 고정은 풀리지 않고 뺀 분류는 돌아오지 않는다
+        store.saveClip(101, FloatArray(Embeddings.DIM), null, null,
+            listOf(Tag("풍경", .5f, "clip"), Tag("음식", .6f, "clip"), Tag("실내", .4f, "clip")), "m")
+        assertEquals(mapOf("음식" to "user", "실내" to "clip"), store.tagSources(101))
+    }
+
+    /** 이름이 같은 앨범 둘이 한 앨범으로 합쳐지면 서로 다른 모음이 섞인다. 이름과 만든 시각이 모두 같아야 같은 앨범이다. */
+    @Test fun 이름이_같아도_만든_시각이_다른_앨범은_따로_복원한다() = withStore("samename") { store ->
+        store.addPhoto(101, "IMG_1.jpg", 1234, 1_690_000_000L)
+        store.addPhoto(102, "IMG_2.jpg", 555, 1_690_000_100L)
+        val twoAlbums = doc.copy(
+            favorites = emptyList(), feedback = emptyList(),
+            albums = listOf(
+                BackupAlbum("여행", 50L, listOf(BackupAlbumItem(0, 60L, null))),
+                BackupAlbum("여행", 99L, listOf(BackupAlbumItem(1, 61L, null))),
+            ),
+        )
+        val r = BackupRepository(store).restore(twoAlbums)
+        assertEquals(2, r.albums)
+        assertEquals(listOf(2L), store.longs("SELECT COUNT(*) FROM user_albums"))
+        // 각 앨범에는 자기 사진만 들어 있다
+        assertEquals(listOf(101L), store.longs("SELECT media_id FROM user_album_photos WHERE album_id=(SELECT id FROM user_albums WHERE created_at=50)"))
+        assertEquals(listOf(102L), store.longs("SELECT media_id FROM user_album_photos WHERE album_id=(SELECT id FROM user_albums WHERE created_at=99)"))
+        // 같은 백업을 다시 복원해도 늘지 않는다
+        BackupRepository(store).restore(twoAlbums)
+        assertEquals(listOf(2L), store.longs("SELECT COUNT(*) FROM user_albums"))
     }
 }

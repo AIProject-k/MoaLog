@@ -69,6 +69,12 @@ object AppGraph {
     val modelsReady: Boolean get() = modelCheck == null
 
     /**
+     * 추론기가 연속으로 죽으면 복사해 둔 모델을 의심한다. 도장을 지워 두면 다음 실행이 다시 복사하고 해시를 확인한다.
+     * 지금 실행의 [modelCheck]는 바꾸지 않는다 — 한 실행에서 모델을 바꿔 끼우지 않는다.
+     */
+    fun invalidateModels() { store.metaPut(KEY_MODEL_STAMP, "") }
+
+    /**
      * assets → noBackupFilesDir 복사. 복사하는 동안 SHA-256을 확인하고, 디스크에 쓴 뒤에도 다시 읽어 확인한다.
      * 확인에 실패하면 불완전한 파일을 남기지 않고 이유를 돌려준다.
      */
@@ -76,12 +82,15 @@ object AppGraph {
         val dir = modelDir
         val manifestText = app.assets.open("models/manifest.json").bufferedReader().use { it.readText() }
         val expected = ModelIntegrity.parseManifest(manifestText)
+        val sizes = ModelIntegrity.parseSizes(manifestText)
         // 앱 버전이 그대로여도 manifest가 바뀌면 다시 복사한다 — 모델을 갈아 끼운 경우다.
         val stamp = app.packageManager.getPackageInfo(app.packageName, 0).let {
             (if (android.os.Build.VERSION.SDK_INT >= 28) it.longVersionCode.toString() else it.versionName ?: "0") +
                 ":" + ModelIntegrity.sha256(manifestText.byteInputStream())
         }
-        if (store.metaGet(KEY_MODEL_STAMP) == stamp && ONNX_ASSETS.all { File(dir, it).length() > 0 }) return null
+        // 도장이 같아도 파일이 잘렸거나 지워졌으면 다시 복사한다. 해시 전체를 매번 읽지는 않고 크기만 본다.
+        val intact = ONNX_ASSETS.all { n -> File(dir, n).length().let { it > 0 && (sizes[n]?.let { want -> it == want } ?: true) } }
+        if (store.metaGet(KEY_MODEL_STAMP) == stamp && intact) return null
 
         for (name in ONNX_ASSETS) {
             val want = expected[name] ?: return "모델 목록(manifest)에 $name 이(가) 없습니다. 앱을 다시 설치해 주세요."
@@ -226,10 +235,14 @@ object AppGraph {
     }
 
     /** 장소 표(assets/places.tsv). 파일이 없으면 빈 표다 — 장소 이름과 장소 검색이 꺼진 것과 같다. */
-    val placeIndex: PlaceIndex by lazy {
-        runCatching { PlaceIndex.parse(app.assets.open("places.tsv").bufferedReader().use { it.readText() }) }
-            .getOrDefault(PlaceIndex.EMPTY)
+    val placeIndex: PlaceIndex by lazy { placeText?.let(PlaceIndex::parse) ?: PlaceIndex.EMPTY }
+
+    private val placeText: String? by lazy {
+        runCatching { app.assets.open("places.tsv").bufferedReader().use { it.readText() } }.getOrNull()
     }
+
+    /** 장소 표의 내용 도장. 표가 처음 생기거나 바뀌면 이벤트의 장소 이름을 다시 만든다(IndexWorker). 표가 없으면 "none". */
+    val placeStamp: String by lazy { placeText?.let { ModelIntegrity.sha256(it.byteInputStream()).take(12) } ?: "none" }
 
     fun queryParser(): QueryParser = QueryParser(
         knownTags = store.tagCounts().map { it.label }.toSet(),

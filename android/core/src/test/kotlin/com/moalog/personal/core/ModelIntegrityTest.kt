@@ -60,4 +60,10 @@ class ModelIntegrityTest {
         assertFalse(ModelIntegrity.same(null, "abcdef"))
         assertFalse(ModelIntegrity.same("abcdef", null))
     }
+
+    @Test fun `manifest의 sizes를 읽고 없으면 빈 맵이다`() {
+        val json = """{"files":{"a.onnx":"aa"},"sizes":{"a.onnx":123,"b.onnx":4567890123}}"""
+        assertEquals(mapOf("a.onnx" to 123L, "b.onnx" to 4_567_890_123L), ModelIntegrity.parseSizes(json))
+        assertTrue(ModelIntegrity.parseSizes("""{"files":{}}""").isEmpty())
+    }
 }

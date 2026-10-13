@@ -63,7 +63,8 @@ class BackupRepository(private val store: Store) {
     }
 
     /**
-     * 백업을 DB에 합친다. 같은 앨범 이름은 기존 것에 붙이고, 교정은 같은 사진·라벨이면 백업 쪽이 이긴다.
+     * 백업을 DB에 합친다. 이름과 만든 시각이 같은 앨범은 기존 것에 붙인다(이름만 같은 앨범은 합치지 않는다).
+     * 교정은 같은 사진·라벨이면 백업 쪽이 이기고, 태그에도 반영한다: 맞음은 사용자 태그로 고정, 틀림은 태그를 지운다.
      * 한 트랜잭션이라 중간에 실패하면 아무것도 바뀌지 않는다.
      */
     fun restore(doc: BackupDoc): Restored {
@@ -92,7 +93,10 @@ class BackupRepository(private val store: Store) {
                 }
             }
             for (a in doc.albums) {
-                val albumId = db.rawQuery("SELECT id FROM user_albums WHERE name=? ORDER BY id LIMIT 1", arrayOf(a.name)).use { c ->
+                val albumId = db.rawQuery(
+                    "SELECT id FROM user_albums WHERE name=? AND created_at=? ORDER BY id LIMIT 1",
+                    arrayOf(a.name, a.created.toString()),
+                ).use { c ->
                     if (c.moveToFirst()) c.getLong(0) else -1L
                 }.let { existing ->
                     if (existing >= 0) existing else db.compileStatement("INSERT INTO user_albums (name, created_at) VALUES (?, ?)").use { s ->
@@ -112,6 +116,12 @@ class BackupRepository(private val store: Store) {
                     s.bindLong(1, id); s.bindString(2, f.label); s.bindLong(3, f.verdict.toLong()); s.bindLong(4, f.ts)
                     s.executeInsert()
                 }
+                // 교정은 이 기기에서 `moveTag`·`pinTag`·`removeTag`가 만든 것과 같은 모양으로 태그에도 남긴다.
+                // 아직 분석이 안 된 사진이어도 괜찮다 — 분석이 나중에 와도 `replaceTags`가 이 선택을 지킨다.
+                if (f.verdict == 1) db.execSQL(
+                    "INSERT OR REPLACE INTO tags (media_id, label, score, source) VALUES (?, ?, NULL, 'user')",
+                    arrayOf(id, f.label),
+                ) else db.execSQL("DELETE FROM tags WHERE media_id=? AND label=?", arrayOf(id, f.label))
                 feedback++
             }
             db.setTransactionSuccessful()

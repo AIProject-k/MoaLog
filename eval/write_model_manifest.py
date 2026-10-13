@@ -24,7 +24,12 @@ def sha256(path: pathlib.Path) -> str:
 
 
 def main() -> None:
-    manifest = {"schema_version": 1, "files": {name: sha256(MODELS / name) for name in FILES}}
+    manifest = {
+        "schema_version": 1,
+        "files": {name: sha256(MODELS / name) for name in FILES},
+        # 앱이 시작할 때 크기만 값싸게 확인한다. 잘리거나 지워진 모델을 잡으려는 것이다.
+        "sizes": {name: (MODELS / name).stat().st_size for name in FILES},
+    }
     out = MODELS / "manifest.json"
     out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(out)

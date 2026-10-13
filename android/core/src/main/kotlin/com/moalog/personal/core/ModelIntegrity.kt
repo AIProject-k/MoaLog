@@ -22,6 +22,12 @@ object ModelIntegrity {
         return files.keys().asSequence().associateWith { files.getString(it).lowercase() }
     }
 
+    /** manifest.json의 `sizes`: 파일 이름 → 바이트 수. 시작할 때 값싸게 확인하려는 것이다. 없으면 빈 맵. */
+    fun parseSizes(json: String): Map<String, Long> {
+        val sizes = JSONObject(json).optJSONObject("sizes") ?: return emptyMap()
+        return sizes.keys().asSequence().associateWith { sizes.getLong(it) }
+    }
+
     /** [input]을 [output]으로 복사하면서 SHA-256을 계산한다. [output]이 null이면 읽기만 한다. */
     fun copyAndHash(input: InputStream, output: OutputStream?, bufferSize: Int = 1 shl 16): String {
         val md = MessageDigest.getInstance("SHA-256")
