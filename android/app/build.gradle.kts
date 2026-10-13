@@ -11,8 +11,8 @@ android {
         applicationId = "com.moalog.personal"
         minSdk = 30                     // createTrashRequest · GENERATION_* · setRequireOriginal
         targetSdk = 35
-        versionCode = 8
-        versionName = "0.3.1"
+        versionCode = 9
+        versionName = "0.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
